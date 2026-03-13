@@ -1,0 +1,54 @@
+[
+  {
+    "id": "",
+    "slug": "",
+    "name": "3M Reflective Zip up 'Black'",
+    "price": 250,
+    "image": "",
+    "category": "remera",
+    "marca": "corteiz",
+    "stock": 1,
+    "specs": {
+      "talle": []
+    }
+  },
+    {
+    "id": "",
+    "slug": "",
+    "name": "test",
+    "price": 50,
+    "image": "",
+    "category": "remera",
+    "marca": "nike",
+    "stock": 2,
+    "specs": {
+      "talle": ["XL"]
+    }
+  },
+    {
+    "id": "",
+    "slug": "",
+    "name": "test",
+    "price": 50,
+    "image": "",
+    "category": "remera",
+    "marca": "nike",
+    "stock": 2,
+    "specs": {
+      "talle": ["L"]
+    }
+  },
+    {
+    "id": "",
+    "slug": "",
+    "name": "test",
+    "price": 50,
+    "image": "",
+    "category": "remera",
+    "marca": "nike",
+    "stock": 2,
+    "specs": {
+      "talle": ["S"]
+    }
+  }
+]
