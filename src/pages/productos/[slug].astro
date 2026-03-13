@@ -1,0 +1,40 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ProductoDetalle from '@/components/ProductoDetalle.astro';
+import productos from '@/data/productos.json';
+
+export function getStaticPaths() {
+  function getSlug(name: string) {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  }
+
+  const map = new Map();
+  for (const p of productos) {
+    const key = p.name.toLowerCase();
+    if (map.has(key)) {
+      const ex = map.get(key);
+      for (const t of (p.specs?.talle ?? [])) {
+        if (t && !ex.specs.talle.includes(t)) ex.specs.talle.push(t);
+      }
+      ex.stock += p.stock;
+    } else {
+      map.set(key, {
+        ...p,
+        slug: p.slug || getSlug(p.name),
+        specs: { ...p.specs, talle: [...(p.specs?.talle ?? [])].filter(Boolean) },
+      });
+    }
+  }
+
+  return Array.from(map.values()).map((producto) => ({
+    params: { slug: producto.slug },
+    props: { producto },
+  }));
+}
+
+const { producto } = Astro.props;
+---
+
+<Layout>
+  <ProductoDetalle producto={producto} />
+</Layout>
