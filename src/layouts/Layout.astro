@@ -1,5 +1,12 @@
 ---
 import '@/styles/global.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+const pageTitle = title ? `${title} - 24/7 Sneakers BA` : '24/7 Sneakers BA';
 ---
 
 <!doctype html>
@@ -10,21 +17,21 @@ import '@/styles/global.css';
 
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<meta name="description" content="247 Sneakers BA" />
-		<meta name="author" content="247 Sneakers BA" />
-		<meta name="keywords" content="247 Sneakers BA, sneakers, zapatos, tienda" />
+		<meta name="description" content="24/7 Sneakers BA" />
+		<meta name="author" content="24/7 Sneakers BA" />
+		<meta name="keywords" content="24/7 Sneakers BA, sneakers, zapatos, tienda" />
 
 		<meta property="og:type" content="website" />
-		<meta property="og:title" content="247 Sneakers BA" />
-		<meta property="og:description" content="247 Sneakers BA, la mejor tienda de sneakers." />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content="24/7 Sneakers BA, la mejor tienda de sneakers." />
 		
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="247 Sneakers BA" />
-		<meta name="twitter:description" content="247 Sneakers BA, la mejor tienda de sneakers." />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content="24/7 Sneakers BA, la mejor tienda de sneakers." />
 
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		
-		<title>24/7 Sneakers BA</title>
+		<title>{pageTitle}</title>
 
 	</head>
 

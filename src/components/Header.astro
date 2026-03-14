@@ -1,13 +1,19 @@
-
 ---
-import Logotipo from '../assets/Logotipo.svg';
+import Logotipo from '@/assets/Logotipo.svg';
+import Carrito from '@/components/ui/Carrito.jsx';
+import TextoLoop from '@/components/ui/TextoLoop.jsx';
 ---
 
-<header class="bg-black py-4 flex justify-center">
+
+
+<TextoLoop/>
+
+<header class="bg-black py-4 px-70 flex justify-between items-center">
 
     <a href="/">
         <img src={Logotipo.src} alt="Logo 24/7 Sneakers BA" class="w-48 hover:scale-102 transition-all duration-300" />  
     </a>
-    
+
+    <Carrito client:load />
     
 </header>
