@@ -19,4 +19,35 @@
       "talle": ["S", "L", "L", "XL", "XL"]
     }
   }
+  ,
+  {
+    "name": "asd",
+    "price": 50,
+    "images": ["/productos/imagen2.jpg"],
+    "category": "remera",
+    "marca": "nike",
+    "specs": {
+      "talle": ["S", "L", "L", "XL", "XL"]
+    }
+  },
+  {
+    "name": "aa",
+    "price": 50,
+    "images": ["/productos/imagen2.jpg"],
+    "category": "remera",
+    "marca": "nike",
+    "specs": {
+      "talle": ["S", "L", "L", "XL", "XL"]
+    }
+  },
+  {
+    "name": "ddd",
+    "price": 50,
+    "images": ["/productos/imagen2.jpg"],
+    "category": "remera",
+    "marca": "nike",
+    "specs": {
+      "talle": ["S", "L", "L", "XL", "XL"]
+    }
+  }
 ]
