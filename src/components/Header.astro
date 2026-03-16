@@ -1,19 +1,27 @@
 ---
-import Logotipo from '@/assets/Logotipo.svg';
 import Carrito from '@/components/ui/Carrito.jsx';
 import TextoLoop from '@/components/ui/TextoLoop.jsx';
+import BuscadorHeader from '@/components/ui/BuscadorHeader.jsx';
+import { getProductosAgrupados } from '@/utils/productos.js';
+const productos = getProductosAgrupados();
 ---
 
+<header class="sticky top-0 z-50">
+    <TextoLoop/>
 
+    <div class="bg-black py-4">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
 
-<TextoLoop/>
+            <a href="/">
+                <img src="/Logotipo.svg" alt="Logo 24/7 Sneakers BA" class="w-48 hover:scale-102 transition-all duration-300" />  
+            </a>
 
-<header class="bg-black py-4 px-70 flex justify-between items-center">
-
-    <a href="/">
-        <img src={Logotipo.src} alt="Logo 24/7 Sneakers BA" class="w-48 hover:scale-102 transition-all duration-300" />  
-    </a>
-
-    <Carrito client:load />
+            <div class="flex items-center gap-4">
+                <BuscadorHeader productos={productos} client:load />
+                <Carrito client:load />
+            </div>
+        
+        </div>        
+    </div>
     
 </header>

@@ -2,56 +2,61 @@
 import Layout from '@/layouts/Layout.astro';
 import Header from '@/components/Header.astro';
 import ProductoDetalle from '@/components/ProductoDetalle.astro';
+import ProductosSimilares from '@/components/ui/ProductosSimilares.jsx';
+import { getProductosAgrupados } from '@/utils/productos.js';
 import productos from '@/data/productos.json';
 
 export function getStaticPaths() {
-  function getSlug(name: string) {
-    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  }
-
-  function contarTalles(strings: string[]) {
-    const counts: Record<string, number> = {};
-    for (const t of strings) {
-      if (t) counts[t] = (counts[t] ?? 0) + 1;
+    function getSlug(name: string) {
+        return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }
-    return Object.entries(counts).map(([nombre, stock]) => ({ nombre, stock }));
-  }
 
-  const map = new Map();
-  for (const p of productos) {
+    function contarTalles(strings: string[]) {
+        const counts: Record<string, number> = {};
+        for (const t of strings) {
+        if (t) counts[t] = (counts[t] ?? 0) + 1;
+        }
+        return Object.entries(counts).map(([nombre, stock]) => ({ nombre, stock }));
+    }
+
+    const map = new Map();
+    for (const p of productos) {
     const key = p.name.toLowerCase();
     const talles = contarTalles(p.specs?.talle ?? []);
     if (map.has(key)) {
-      const ex = map.get(key);
-      for (const t of talles) {
-        const found = ex.specs.talle.find((e: any) => e.nombre === t.nombre);
-        if (found) {
-          found.stock += t.stock;
-        } else {
-          ex.specs.talle.push({ ...t });
+        const ex = map.get(key);
+        for (const t of talles) {
+            const found = ex.specs.talle.find((e: any) => e.nombre === t.nombre);
+            if (found) {
+                found.stock += t.stock;
+            } else {
+            ex.specs.talle.push({ ...t });
+            }
         }
-      }
-      ex.stock = ex.specs.talle.reduce((sum: number, t: any) => sum + t.stock, 0);
-    } else {
-      map.set(key, {
-        ...p,
-        slug: getSlug(p.name),
-        stock: talles.reduce((sum: number, t: any) => sum + t.stock, 0),
-        specs: { ...p.specs, talle: talles },
-      });
+        ex.stock = ex.specs.talle.reduce((sum: number, t: any) => sum + t.stock, 0);
+    }   
+    else {
+        map.set(key, {
+            ...p,
+            slug: getSlug(p.name),
+            stock: talles.reduce((sum: number, t: any) => sum + t.stock, 0),
+            specs: { ...p.specs, talle: talles },
+        });
     }
-  }
+    }
 
-  return Array.from(map.values()).map((producto) => ({
-    params: { slug: producto.slug },
-    props: { producto },
-  }));
+    return Array.from(map.values()).map((producto) => ({
+        params: { slug: producto.slug },
+        props: { producto },
+    }));
 }
 
 const { producto } = Astro.props;
+const todosLosProductos = getProductosAgrupados();
 ---
 
 <Layout title={producto.name}>
     <Header />
     <ProductoDetalle producto={producto} />
+    <ProductosSimilares producto={producto} productos={todosLosProductos} client:load />
 </Layout>

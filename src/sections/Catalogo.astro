@@ -10,8 +10,8 @@ const productos = getProductosAgrupados();
 
         <h1 class="text-3xl font-bold text-primary">Nuevos ingresos</h1>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
-            {productos.filter(p => p.stock > 0).map((producto) => (
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-20">
+            {productos.filter(p => p.stock > 0).reverse().slice(0, 12).map((producto) => (
                 <Card producto={producto} client:load />
             ))}
         </div>

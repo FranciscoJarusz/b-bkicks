@@ -1,0 +1,14 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import ResultadosBusqueda from '@/components/ui/ResultadosBusqueda.jsx';
+import { getProductosAgrupados } from '@/utils/productos.js';
+
+const productos = getProductosAgrupados();
+---
+
+<Layout title="Búsqueda">
+    <Header />
+
+    <ResultadosBusqueda productos={productos} client:load />
+</Layout>

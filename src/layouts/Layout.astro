@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import Footer from '@/components/Footer.astro';
 
 interface Props {
   title?: string;
@@ -35,8 +36,11 @@ const pageTitle = title ? `${title} - 24/7 Sneakers BA` : '24/7 Sneakers BA';
 
 	</head>
 
-	<body class="h-dvh"> 
-		<slot />
+	<body class="min-h-dvh flex flex-col"> 
+		<div class="flex-1">
+			<slot />
+		</div>
+		<Footer />
 	</body>
 	
 	<link/>
