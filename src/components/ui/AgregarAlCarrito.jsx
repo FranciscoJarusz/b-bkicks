@@ -78,25 +78,25 @@ export default function AgregarAlCarrito({ producto }) {
     }
 
     if (talles.length === 0) {
-        return <p class="text-sm font-semibold text-gray/50 uppercase">Sin stock</p>;
+        return <p className="text-sm font-semibold text-gray/50 uppercase">Sin stock</p>;
     }
 
     return (
-        <div class="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
 
         {talles.length > 0 && (
-            <div class="flex flex-col gap-2 justify-center">
+            <div className="flex flex-col gap-2 justify-center">
 
-                <p class="text-xs font-semibold uppercase text-gray/50">
+                <p className="text-xs font-semibold uppercase text-gray/50">
                     {talleSeleccionado ? `Talle: ${talleSeleccionado}` : 'Talle'}
                 </p>
 
-                <div class="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                     {talles.map((t) => (
                         <button
                             key={t.nombre}
                             onClick={() => setTalleSeleccionado(t.nombre)}
-                            class={`border text-sm px-3 py-1 rounded-full transition-colors cursor-pointer
+                            className={`border text-sm px-3 py-1 rounded-full transition-colors cursor-pointer
                             ${talleSeleccionado === t.nombre
                             ? 'border-primary bg-primary text-white'
                             : 'border-gray/30 text-gray hover:border-primary hover:text-primary'
@@ -111,35 +111,35 @@ export default function AgregarAlCarrito({ producto }) {
         )}
 
             <>
-                <p class="text-xs font-semibold text-primary uppercase min-h-4">
+                <p className="text-xs font-semibold text-primary uppercase min-h-4">
                     {!sinStock && cantidad >= disponible ? (disponible === 1 ? '¡Es el último!' : '¡Son los últimos!') : ''}
                 </p>
 
-                <div class="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                     
-                    <div class="flex items-center gap-2 border border-gray/30 rounded-xl px-3 py-2">
+                    <div className="flex items-center gap-2 border border-gray/30 rounded-xl px-3 py-2">
                         <button
                             onClick={restar}
                             disabled={sinStock || cantidad <= 1}
-                            class={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad > 1 ? 'hover:text-primary' : ''}`}
+                            className={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad > 1 ? 'hover:text-primary' : ''}`}
                             aria-label="Restar uno"
                         >
 
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
                             </svg>
 
                         </button>
 
-                        <span class="text-sm font-semibold w-5 text-center">{cantidad}</span>
+                        <span className="text-sm font-semibold w-5 text-center">{cantidad}</span>
                         
                         <button
                             onClick={sumar}
                             disabled={sinStock || cantidad >= disponible}
-                            class={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad < disponible ? 'hover:text-primary' : ''}`}
+                            className={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad < disponible ? 'hover:text-primary' : ''}`}
                             aria-label="Sumar uno"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
@@ -148,7 +148,7 @@ export default function AgregarAlCarrito({ producto }) {
                     <button
                         onClick={!sinStock ? handleAgregar : undefined}
                         disabled={sinStock}
-                        class={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-gray/10 text-gray cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-white cursor-pointer'}`}
+                        className={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-gray/10 text-gray cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-white cursor-pointer'}`}
                         >
                         {sinStock ? 'Sin stock para este talle' : (agregado ? '¡Agregado!' : 'Agregar al carrito')}
                     </button>
