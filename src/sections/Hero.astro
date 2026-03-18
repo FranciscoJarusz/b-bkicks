@@ -1,27 +1,33 @@
-<section class="relative w-full h-100 overflow-hidden">
+<section class="relative w-full min-h-[480px] sm:h-100 overflow-hidden">
 
     <img
         src="/hero.png"
-        alt="Hero"
-        class="w-full h-auto block"
+        alt="Imágen Hero"
+        class="w-full h-full object-cover absolute inset-0"
     />
 
-    <div class="absolute inset-0 bg-black/80"></div>
+    <div class="absolute inset-0 bg-black/85"></div>
 
-    <div class="absolute inset-0 z-10 flex flex-col items-start justify-center text-start px-6 max-w-7xl mx-auto gap-6">
-        <h1 class="text-5xl md:text-8xl font-semibold text-white uppercase font-accent italic">
+    <div class="absolute inset-0 z-10 flex flex-col items-start justify-center text-start px-6 py-16 sm:py-0 max-w-7xl mx-auto gap-4">
+        <h1 class="text-5xl sm:text-6xl md:text-8xl font-semibold text-white uppercase font-accent italic leading-tight">
             SNEAKERS Y STREETWEAR
         </h1>
-        <p class="text-lg md:text-xl text-white">
+
+        <p class="text-sm sm:text-base text-white/80">
             Expertos en reventa de piezas exclusivas.<br>
             Desde 2020 brindando seguridad y autenticidad en cada par.
         </p>
-        <a
-            href="/busqueda"
-            class="bg-primary text-secondary font-semibold px-6 py-3 rounded-full hover:bg-primary-accent transition-colors duration-300"
-        >
-            <p>Conocé todos nuestros productos</p>
-        </a>
+
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto mt-2">
+            <a href="/busqueda" class="bg-primary text-secondary font-semibold px-5 py-2 rounded-full text-sm hover:bg-primary-accent transition-all duration-300 text-center">
+                Conocé todos nuestros productos
+            </a>      
+
+            <a href="#encargos" class="ring-2 ring-primary ring-inset text-secondary font-semibold px-5 py-2 rounded-full text-sm hover:bg-primary transition-colors duration-300 text-center">
+                Cómo encargar
+            </a>                  
+        </div>
+        
     </div>
 
 </section>
