@@ -7,7 +7,11 @@ import { getProductosAgrupados } from '@/utils/productos.js';
 const productos = getProductosAgrupados();
 ---
 
-<Layout title="Búsqueda">
+<Layout
+    title="Búsqueda de Productos"
+    description="Buscá sneakers y streetwear en 24/7 Sneakers BA. Encontrá zapatillas de las mejores marcas con envíos a todo el país."
+    noindex={true}
+>
     <Header />
 
     <ResultadosBusqueda productos={productos} client:load />

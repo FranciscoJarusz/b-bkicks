@@ -41,7 +41,7 @@ const { producto } = Astro.props;
                 </a>
 
                 {(producto.category || producto.marca) && (
-                    <span class="text-xs font-semibold uppercase tracking-wide text-gray/70">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-accent">
                     {[producto.category, producto.marca].filter(Boolean).join(" ")}
                     </span>
                 )}

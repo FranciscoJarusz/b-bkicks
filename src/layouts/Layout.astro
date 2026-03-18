@@ -4,10 +4,21 @@ import Footer from '@/components/Footer.astro';
 
 interface Props {
   title?: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title } = Astro.props;
-const pageTitle = title ? `${title} - 24/7 Sneakers BA` : '24/7 Sneakers BA';
+const { title, description, ogImage, noindex = false } = Astro.props;
+
+const pageTitle = title
+  ? `${title} | 24/7 Sneakers BA`
+  : '24/7 Sneakers BA | Sneakers y Streetwear en Buenos Aires';
+
+const pageDescription = description
+  ?? '24/7 Sneakers BA — Tienda online de sneakers y ropa streetwear en Buenos Aires. Las mejores marcas con envíos a todo el país.';
+
+const pageImage = ogImage ?? '/og-image.jpg';
 ---
 
 <!doctype html>
@@ -17,18 +28,24 @@ const pageTitle = title ? `${title} - 24/7 Sneakers BA` : '24/7 Sneakers BA';
 	<head>
 
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="description" content="24/7 Sneakers BA" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+		<meta name="description" content={pageDescription} />
 		<meta name="author" content="24/7 Sneakers BA" />
-		<meta name="keywords" content="24/7 Sneakers BA, sneakers, zapatos, tienda" />
+		<meta name="keywords" content="sneakers, zapatillas, streetwear, ropa, Buenos Aires, tienda online" />
 
 		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="24/7 Sneakers BA" />
 		<meta property="og:title" content={pageTitle} />
-		<meta property="og:description" content="24/7 Sneakers BA, la mejor tienda de sneakers." />
-		
+		<meta property="og:description" content={pageDescription} />
+		<meta property="og:image" content={pageImage} />
+
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={pageTitle} />
-		<meta name="twitter:description" content="24/7 Sneakers BA, la mejor tienda de sneakers." />
+		<meta name="twitter:description" content={pageDescription} />
+		<meta name="twitter:image" content={pageImage} />
 
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		
@@ -44,5 +61,7 @@ const pageTitle = title ? `${title} - 24/7 Sneakers BA` : '24/7 Sneakers BA';
 	</body>
 	
 	<link/>
-
+	<script>
+		import '@/scripts/lenis.ts';
+	</script>
 </html>

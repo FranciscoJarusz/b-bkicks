@@ -83,7 +83,7 @@ export default function AgregarAlCarrito({ producto }) {
     }
 
     if (talles.length === 0) {
-        return <p className="text-sm font-semibold text-gray/70 uppercase">Sin stock</p>;
+        return <p className="text-sm font-semibold text-gray-accent uppercase">Sin stock</p>;
     }
 
     return (
@@ -92,7 +92,7 @@ export default function AgregarAlCarrito({ producto }) {
         {talles.length > 0 && (
             <div className="flex flex-col gap-2 justify-center">
 
-                <p className="text-xs font-semibold uppercase text-gray/70">
+                <p className="text-xs font-semibold uppercase text-gray-accent">
                     {talleSeleccionado ? `Talle: ${talleSeleccionado}` : 'Talle'}
                 </p>
 

@@ -53,9 +53,16 @@ export function getStaticPaths() {
 
 const { producto } = Astro.props;
 const todosLosProductos = getProductosAgrupados();
+
+const productDescription = `Comprá ${producto.name} de ${producto.marca} en 24/7 Sneakers BA. Precio: $${producto.price}. Envíos a todo el país.`;
+const productImage = producto.images?.[0];
 ---
 
-<Layout title={producto.name}>
+<Layout
+    title={producto.name}
+    description={productDescription}
+    ogImage={productImage}
+>
     <Header />
     <ProductoDetalle producto={producto} />
     <ProductosSimilares producto={producto} productos={todosLosProductos} client:load />

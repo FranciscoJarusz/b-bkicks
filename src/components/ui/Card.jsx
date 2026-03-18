@@ -23,7 +23,7 @@ export default function Card({ producto }) {
         <div className="flex flex-col flex-1 gap-2 p-4 justify-between">
 
             {(producto.category || producto.marca) && (
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray/70">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-accent">
                     {[producto.category, producto.marca].filter(Boolean).join(" ")}
                 </span>
             )}

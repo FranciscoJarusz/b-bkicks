@@ -92,7 +92,7 @@ export default function Carrito() {
                 
                 {items.length === 0 ? (
                     
-                    <div className="flex items-center justify-center h-full gap-3 text-gray/50">
+                    <div className="flex items-center justify-center h-full gap-3 text-gray-accent">
                         
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
