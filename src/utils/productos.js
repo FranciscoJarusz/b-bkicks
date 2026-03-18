@@ -1,4 +1,4 @@
-import productos from '../data/productos.json';
+import productos from '@/data/productos.json';
 
 export function getSlug(nombre) {
     return nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
