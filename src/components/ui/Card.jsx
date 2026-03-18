@@ -1,10 +1,10 @@
-import BotonComprar from "./BotonComprar.jsx";
+import BotonComprar from "@/BotonComprar.jsx";
 
 export default function Card({ producto }) {
   const href = `/productos/${producto.slug}`;
 
   return (
-    <article className="overflow-hidden flex flex-col">
+    <article className="shadow-xl rounded-xl overflow-hidden flex flex-col">
 
         <a href={href} className="bg-gray/10 h-60 flex items-center justify-center overflow-hidden">
 
@@ -20,10 +20,10 @@ export default function Card({ producto }) {
 
         </a>
 
-        <div className="flex flex-col flex-1 gap-2 py-4 justify-between">
+        <div className="flex flex-col flex-1 gap-2 p-4 justify-between">
 
             {(producto.category || producto.marca) && (
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray/50">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray/70">
                     {[producto.category, producto.marca].filter(Boolean).join(" ")}
                 </span>
             )}

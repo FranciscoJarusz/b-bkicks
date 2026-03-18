@@ -26,6 +26,7 @@ export default function AgregarAlCarrito({ producto }) {
     const [talleSeleccionado, setTalleSeleccionado] = useState(talles[0]?.nombre ?? null);
     const [cantidad, setCantidad] = useState(1);
     const [cantidadEnCarrito, setCantidadEnCarrito] = useState(0);
+    const [agregando, setAgregando] = useState(false);
     const [agregado, setAgregado] = useState(false);
 
     const stockDelTalle = talles.find(t => t.nombre === talleSeleccionado)?.stock ?? 0;
@@ -61,33 +62,37 @@ export default function AgregarAlCarrito({ producto }) {
     }
 
     function handleAgregar() {
-        if (sinStock || (talles.length > 0 && !talleSeleccionado)) return;
-        agregarAlCarrito({
-            slug: producto.slug,
-            name: producto.name,
-            marca: producto.marca,
-            category: producto.category,
-            image: producto.images?.[0] ?? producto.image ?? null,
-            price: producto.price,
-            talle: talleSeleccionado,
-            stock: stockDelTalle,
-        }, cantidad);
-        setCantidad(1);
-        setAgregado(true);
-        setTimeout(() => setAgregado(false), 2000);
+        if (sinStock || agregando || (talles.length > 0 && !talleSeleccionado)) return;
+        setAgregando(true);
+        setTimeout(() => {
+            agregarAlCarrito({
+                slug: producto.slug,
+                name: producto.name,
+                marca: producto.marca,
+                category: producto.category,
+                image: producto.images?.[0] ?? producto.image ?? null,
+                price: producto.price,
+                talle: talleSeleccionado,
+                stock: stockDelTalle,
+            }, cantidad);
+            setCantidad(1);
+            setAgregando(false);
+            setAgregado(true);
+            setTimeout(() => setAgregado(false), 4000);
+        }, 1500);
     }
 
     if (talles.length === 0) {
-        return <p className="text-sm font-semibold text-gray/50 uppercase">Sin stock</p>;
+        return <p className="text-sm font-semibold text-gray/70 uppercase">Sin stock</p>;
     }
 
     return (
-        <div className="flex flex-col gap-4">
+        <>
 
         {talles.length > 0 && (
             <div className="flex flex-col gap-2 justify-center">
 
-                <p className="text-xs font-semibold uppercase text-gray/50">
+                <p className="text-xs font-semibold uppercase text-gray/70">
                     {talleSeleccionado ? `Talle: ${talleSeleccionado}` : 'Talle'}
                 </p>
 
@@ -150,12 +155,48 @@ export default function AgregarAlCarrito({ producto }) {
                         disabled={sinStock}
                         className={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-gray/10 text-gray cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-white cursor-pointer'}`}
                         >
-                        {sinStock ? 'Sin stock para este talle' : (agregado ? '¡Agregado!' : 'Agregar al carrito')}
+                        {sinStock ? 'Sin stock para este talle' : agregando ? 'Agregando al carrito...' : agregado ? '¡Agregado!' : 'Agregar al carrito'}
                     </button>
 
                 </div>
             </>
 
+        <div
+            style={{
+                position: 'fixed',
+                bottom: '1.5rem',
+                left: '1rem',
+                right: '1rem',
+                display: 'flex',
+                justifyContent: 'center',
+                transform: agregado ? 'translateY(0)' : 'translateY(120%)',
+                opacity: agregado ? 1 : 0,
+                transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease',
+                zIndex: 9999,
+                pointerEvents: 'none',
+            }}
+        >
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                background: 'var(--color-black)',
+                color: 'var(--color-white)',
+                borderRadius: '1rem',
+                padding: '0.75rem 1.25rem',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                maxWidth: '100%',
+                wordBreak: 'break-word',
+            }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#4ade80" strokeWidth={2.5} style={{ flexShrink: 0 }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{producto.name} agregado al carrito</span>
+            </div>
         </div>
+
+    </>
     );
 }

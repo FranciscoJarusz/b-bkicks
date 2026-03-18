@@ -1,11 +1,20 @@
-import Card from "./Card.jsx";
+import { useState, useEffect } from "react";
+import Card from "@/components/ui/Card.jsx";
 
 /** @param {{ producto: object, productos: object[] }} props */
 export default function ProductosSimilares({ producto, productos = [] }) {
-    const similares = productos
-        .filter(p => p.slug !== producto.slug && p.marca === producto.marca)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 4);
+    const filtrados = productos.filter(
+        (p) => p.slug !== producto.slug && p.marca === producto.marca
+    );
+
+    const [similares, setSimilares] = useState(filtrados.slice(0, 4));
+
+    useEffect(() => {
+        const mezclados = [...filtrados]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 4);
+        setSimilares(mezclados);
+    }, [producto.slug]);
 
     if (similares.length === 0) return null;
 

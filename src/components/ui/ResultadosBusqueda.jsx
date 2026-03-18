@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Card from "./Card.jsx";
+import Card from "@/components/ui/Card.jsx";
 
 /** @param {{ productos: object[] }} props */
 export default function ResultadosBusqueda({ productos = [] }) {
@@ -49,9 +49,9 @@ export default function ResultadosBusqueda({ productos = [] }) {
     return (
         <div className="flex flex-col gap-10 max-w-7xl mx-auto px-6 py-16">
             <div className="flex flex-col gap-2">
-                <a href="/" class="flex items-center gap-1.5 text-sm text-gray/80 hover:text-primary w-fit transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                <a href="/" className="flex items-center gap-1.5 text-sm text-gray/80 hover:text-primary w-fit transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                     </svg>
                     Volver al inicio
                 </a>

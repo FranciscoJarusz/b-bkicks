@@ -7,6 +7,8 @@ import {
     vaciarCarrito,
 } from "@/utils/carrito.js";
 
+const WHATSAPP_NUMERO = "5491154595247";
+
 export default function Carrito() {
     const [abierto, setAbierto] = useState(false);
     const [items, setItems] = useState([]);
@@ -25,6 +27,20 @@ export default function Carrito() {
 
     const total = items.reduce((acc, i) => acc + i.price * i.cantidad, 0);
     const cantidad = items.reduce((acc, i) => acc + i.cantidad, 0);
+
+    function finalizarCompra() {
+        const lineas = items.map(
+            (i) =>
+                `- *${i.name}*${i.talle ? ` (Talle: *${i.talle}*)` : ""} *x${i.cantidad}* — $*${(i.price * i.cantidad).toLocaleString("es-AR")}*`
+        );
+        const mensaje =
+            `*Nuevo pedido a través de la tienda online:*\n\n` +
+            `¡Hola 24/7 Sneakers BA! Acabo de elegir estos productos en la web:\n\n` +
+            lineas.join("\n") +
+            `\n\n*Total: $${total.toLocaleString("es-AR")}*`;
+        const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+    }
 
     return (
         <>
@@ -189,7 +205,10 @@ export default function Carrito() {
                         </span> 
                     </div>
 
-                    <button className="w-full bg-primary hover:bg-primary-accent text-white font-semibold py-3 rounded-xl transition-all duration-300 cursor-pointer">
+                    <button
+                        onClick={finalizarCompra}
+                        className="w-full bg-primary hover:bg-primary-accent text-white font-semibold py-3 rounded-xl transition-all duration-300 cursor-pointer"
+                    >
                         Finalizar compra
                     </button>
 
