@@ -1,4 +1,4 @@
-import BotonComprar from "@/BotonComprar.jsx";
+import BotonComprar from "@/components/ui/BotonComprar.jsx";
 
 export default function Card({ producto }) {
   const href = `/productos/${producto.slug}`;
