@@ -6,14 +6,14 @@ export default function Card({ producto, priority = false }) {
     const href = `/productos/${producto.slug}`;
 
     return (
-        <article className="shadow-xl rounded-xl overflow-hidden flex flex-col card-animate">
-            <a href={href} className="h-60 flex items-center justify-center overflow-hidden">
+        <article className="shadow-xl rounded-xl overflow-hidden flex flex-col animate-fade-in-down">
+            <a href={href} className="h-80 object-fit flex items-center justify-center overflow-hidden">
                 {producto.image ? (
                     <img
                         src={producto.image}
                         alt={producto.name}
-                        width="300"
-                        height="240"
+                        width="368"
+                        height="490"
                         className="object-cover h-full w-full transition-transform duration-300 hover:scale-105"
                         fetchPriority={priority ? "high" : "auto"}
                     />

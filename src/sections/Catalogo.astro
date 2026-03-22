@@ -8,9 +8,9 @@ const productos = getProductosAgrupados();
 
     <div class="flex flex-col gap-16 max-w-7xl mx-auto px-6">
 
-        <h1 class="text-6xl font-semibold text-primary font-accent uppercase italic">Nuevos ingresos</h1>
+        <h1 class="text-6xl font-semibold text-primary font-accent uppercase italic animate-fade-in-down animation-delay-200">Nuevos ingresos</h1>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-20">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-20 animate-fade-in-down animate-delay-500">
             {productos.filter(p => p.stock > 0).reverse().slice(0, 12).map((producto) => (
                 <Card producto={producto} client:load />
             ))}

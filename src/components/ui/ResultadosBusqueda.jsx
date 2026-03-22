@@ -67,7 +67,7 @@ export default function ResultadosBusqueda({ productos = [] }) {
             )}
 
             {resultados.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-20">
                     {resultados.map((p, i) => (
                         <Card key={p.slug} producto={p} priority={i === 0} />
                     ))}
