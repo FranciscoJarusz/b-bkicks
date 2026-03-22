@@ -20,6 +20,7 @@ export default function GaleriaImagenes({ images, alt }) {
                         src={img}
                         alt={alt}
                         className={`absolute inset-0 object-cover h-full w-full transition-opacity duration-500 ${i === seleccionada ? "opacity-100" : "opacity-0"}`}
+                        fetchPriority="high"
                     />
                 ))}
 
