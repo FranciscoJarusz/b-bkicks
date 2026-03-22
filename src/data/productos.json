@@ -3,297 +3,344 @@
     "name": "AJ4 Retro Lakers",
     "price": 190,
     "images": [
-      "/productos/AJ4 RETRO LAKERS/aj4-retro-lakers-1.jpg",
-      "/productos/AJ4 RETRO LAKERS/aj4-retro-lakers-2.jpg"
+      "/productos/AJ4 RETRO LAKERS/aj4-retro-lakers-1.webp",
+      "/productos/AJ4 RETRO LAKERS/aj4-retro-lakers-2.webp"
     ],
     "category": "zapatillas",
     "marca": "Air Jordan",
     "specs": {
-      "talle": ["11 US"]
+      "talle": [
+        "11 US"
+      ]
     }
   },
   {
     "name": "Camo Jacquard Shark Denim Jorts",
     "price": 330,
     "images": [
-      "/productos/BAPE X AD!DAS DENIM SHORT/bape-adidas-denim-short-1.jpg",
-      "/productos/BAPE X AD!DAS DENIM SHORT/bape-adidas-denim-short-2.jpg",
-      "/productos/BAPE X AD!DAS DENIM SHORT/bape-adidas-denim-short-3.jpg"
+      "/productos/BAPE X AD!DAS DENIM SHORT/bape-adidas-denim-short-1.webp",
+      "/productos/BAPE X AD!DAS DENIM SHORT/bape-adidas-denim-short-2.webp",
+      "/productos/BAPE X AD!DAS DENIM SHORT/bape-adidas-denim-short-3.webp"
     ],
     "category": "short",
     "marca": "Bape x Adidas originals",
     "specs": {
-      "talle": ["FIT XXL"]
+      "talle": [
+        "FIT XXL"
+      ]
     }
   },
   {
     "name": "Double Zip Up Navy",
     "price": 250,
     "images": [
-      "/productos/CORTEIZ DOUBLE ZIP UP NAVY/corteiz-double-zip-navy-1.jpg",
-      "/productos/CORTEIZ DOUBLE ZIP UP NAVY/corteiz-double-zip-navy-2.jpg"
+      "/productos/CORTEIZ DOUBLE ZIP UP NAVY/corteiz-double-zip-navy-1.webp",
+      "/productos/CORTEIZ DOUBLE ZIP UP NAVY/corteiz-double-zip-navy-2.webp"
     ],
     "category": "zip hoodie",
     "marca": "corteiz",
     "specs": {
-      "talle": ["l"]
+      "talle": [
+        "l"
+      ]
     }
   },
   {
     "name": "Satin C Star",
     "price": 235,
     "images": [
-      "/productos/CORTEIZ HOODIE/corteiz-hoodie-1.jpg",
-      "/productos/CORTEIZ HOODIE/corteiz-hoodie-2.jpg"
+      "/productos/CORTEIZ HOODIE/corteiz-hoodie-1.webp",
+      "/productos/CORTEIZ HOODIE/corteiz-hoodie-2.webp"
     ],
     "category": "hoodie",
     "marca": "corteiz",
     "specs": {
-      "talle": ["m"]
+      "talle": [
+        "m"
+      ]
     }
   },
   {
     "name": "Island Cargo Pant",
     "price": 290,
     "images": [
-      "/productos/CORTEIZ ISLAND CARGO PANT/corteiz-island-cargo-pant-1.jpg",
-      "/productos/CORTEIZ ISLAND CARGO PANT/corteiz-island-cargo-pant-2.jpg"
+      "/productos/CORTEIZ ISLAND CARGO PANT/corteiz-island-cargo-pant-1.webp",
+      "/productos/CORTEIZ ISLAND CARGO PANT/corteiz-island-cargo-pant-2.webp"
     ],
     "category": "cargo pant",
     "marca": "corteiz",
     "specs": {
-      "talle": ["M"]
+      "talle": [
+        "M"
+      ]
     }
   },
   {
     "name": "Essentials Double Zip Up",
     "price": 200,
     "images": [
-      "/productos/Essentilas Fear of god Double ZIP UP/fear-of-god-double-zip-1.jpg",
-      "/productos/Essentilas Fear of god Double ZIP UP/fear-of-god-double-zip-2.jpg"
+      "/productos/Essentilas Fear of god Double ZIP UP/fear-of-god-double-zip-1.webp",
+      "/productos/Essentilas Fear of god Double ZIP UP/fear-of-god-double-zip-2.webp"
     ],
     "category": "zip hoodie",
     "marca": "fear of god",
     "specs": {
-      "talle": ["xl"]
+      "talle": [
+        "xl"
+      ]
     }
   },
   {
     "name": "J4 Retro Cavestone",
     "price": 290,
     "images": [
-      "/productos/J4 RETRO CAVESTONE/j4-retro-cavestone-1.jpg",
-      "/productos/J4 RETRO CAVESTONE/j4-retro-cavestone-2.jpg"
+      "/productos/J4 RETRO CAVESTONE/j4-retro-cavestone-1.webp",
+      "/productos/J4 RETRO CAVESTONE/j4-retro-cavestone-2.webp"
     ],
     "category": "zapatillas",
     "marca": "jordan",
     "specs": {
-      "talle": ["8.5 US"]
+      "talle": [
+        "8.5 US"
+      ]
     }
   },
   {
     "name": "Curved Logo Tee",
     "price": 190,
     "images": [
-      "/productos/PALM ANGELS TEE/palm-angels-tee-1.jpg"
+      "/productos/PALM ANGELS TEE/palm-angels-tee-1.webp"
     ],
     "category": "remera",
     "marca": "palm angels",
     "specs": {
-      "talle": ["FIT XL"]
+      "talle": [
+        "FIT XL"
+      ]
     }
   },
   {
     "name": "Track Jacket",
     "price": 270,
     "images": [
-      "/productos/Palm Angels Track Jacket/palm-angels-track-jacket-1.jpg",
-      "/productos/Palm Angels Track Jacket/palm-angels-track-jacket-2.jpg"
+      "/productos/Palm Angels Track Jacket/palm-angels-track-jacket-1.webp",
+      "/productos/Palm Angels Track Jacket/palm-angels-track-jacket-2.webp"
     ],
     "category": "jacket",
     "marca": "palm angels",
     "specs": {
-      "talle": ["m"]
+      "talle": [
+        "m"
+      ]
     }
   },
   {
     "name": "P*NK V2 Hoodie",
     "price": 350,
     "images": [
-      "/productos/SP5DER HOODIE/sp5der-hoodie-1.jpg",
-      "/productos/SP5DER HOODIE/sp5der-hoodie-2.jpg"
+      "/productos/SP5DER HOODIE/sp5der-hoodie-1.webp",
+      "/productos/SP5DER HOODIE/sp5der-hoodie-2.webp"
     ],
     "category": "hoodie",
     "marca": "sp5der",
     "specs": {
-      "talle": ["XL"]
+      "talle": [
+        "XL"
+      ]
     }
   },
   {
     "name": "OG Web Rhinestone Hoodie",
     "price": 400,
     "images": [
-      "/productos/SP5DER OG WEB RHINESTONE HOODIE/sp5der-og-web-rhinestone-1.jpg",
-      "/productos/SP5DER OG WEB RHINESTONE HOODIE/sp5der-og-web-rhinestone-2.jpg",
-      "/productos/SP5DER OG WEB RHINESTONE HOODIE/sp5der-og-web-rhinestone-3.jpg"
+      "/productos/SP5DER OG WEB RHINESTONE HOODIE/sp5der-og-web-rhinestone-1.webp",
+      "/productos/SP5DER OG WEB RHINESTONE HOODIE/sp5der-og-web-rhinestone-2.webp",
+      "/productos/SP5DER OG WEB RHINESTONE HOODIE/sp5der-og-web-rhinestone-3.webp"
     ],
     "category": "hoodie",
     "marca": "sp5der",
     "specs": {
-      "talle": ["l"]
+      "talle": [
+        "l"
+      ]
     }
   },
   {
     "name": "Gradient Hoodie",
     "price": 250,
     "images": [
-      "/productos/SUPREME GRADIENT HOODIE/supreme-gradient-hoodie-1.jpg"
+      "/productos/SUPREME GRADIENT HOODIE/supreme-gradient-hoodie-1.webp"
     ],
     "category": "hoodie",
     "marca": "supreme",
     "specs": {
-      "talle": ["L"]
+      "talle": [
+        "L"
+      ]
     }
   },
   {
     "name": "Sharpshooter Tee",
     "price": 80,
     "images": [
-      "/productos/TRAPSTAR TEE/trapstar-tee-1.jpg"
+      "/productos/TRAPSTAR TEE/trapstar-tee-1.webp"
     ],
     "category": "remera",
     "marca": "trapstar",
     "specs": {
-      "talle": ["L"]
+      "talle": [
+        "L"
+      ]
     }
   },
   {
     "name": "Rhinestones Zip Up",
     "price": 330,
     "images": [
-      "/productos/VALLEY RHINESTONES ZIP UP/valley-rhinestones-zip-1.jpg"
+      "/productos/VALLEY RHINESTONES ZIP UP/valley-rhinestones-zip-1.webp"
     ],
     "category": "zip hoodie",
     "marca": "valley",
     "specs": {
-      "talle": ["L"]
+      "talle": [
+        "L"
+      ]
     }
   },
   {
     "name": "AM 95 Honey Black",
     "price": 300,
     "images": [
-      "/productos/AM 95 X CRTZ HONEY BLACK/am95-crtz-honey-black-1.jpg",
-      "/productos/AM 95 X CRTZ HONEY BLACK/am95-crtz-honey-black-2.jpg"
+      "/productos/AM 95 X CRTZ HONEY BLACK/am95-crtz-honey-black-1.webp",
+      "/productos/AM 95 X CRTZ HONEY BLACK/am95-crtz-honey-black-2.webp"
     ],
     "category": "zapatillas",
     "marca": "Nike x Corteiz",
     "specs": {
-      "talle": ["10 US"]
+      "talle": [
+        "10 US"
+      ]
     }
   },
   {
     "name": "22 Skater Tee",
     "price": 330,
     "images": [
-      "/productos/AMIRI SKATER TEE/amiri-skater-tee-1.jpg",
-      "/productos/AMIRI SKATER TEE/amiri-skater-tee-2.jpg"
+      "/productos/AMIRI SKATER TEE/amiri-skater-tee-1.webp",
+      "/productos/AMIRI SKATER TEE/amiri-skater-tee-2.webp"
     ],
     "category": "remera",
     "marca": "amiri",
     "specs": {
-      "talle": ["L"]
+      "talle": [
+        "L"
+      ]
     }
   },
   {
     "name": "Gel-NYC Cream Cloud Grey",
     "price": 120,
     "images": [
-      "/productos/ASICS GEL-NYC CREAM CLOUD GREY/asics-gel-nyc-cream-1.jpg",
-      "/productos/ASICS GEL-NYC CREAM CLOUD GREY/asics-gel-nyc-cream-2.jpg"
+      "/productos/ASICS GEL-NYC CREAM CLOUD GREY/asics-gel-nyc-cream-1.webp",
+      "/productos/ASICS GEL-NYC CREAM CLOUD GREY/asics-gel-nyc-cream-2.webp"
     ],
     "category": "zapatillas",
     "marca": "asics",
     "specs": {
-      "talle": ["9 US"]
+      "talle": [
+        "9 US"
+      ]
     }
   },
   {
     "name": "Bad Bunny Back to School",
     "price": 300,
     "images": [
-      "/productos/BADBUNNY BACK TO SCHOOL/badbunny-back-to-school-1.jpg",
-      "/productos/BADBUNNY BACK TO SCHOOL/badbunny-back-to-school-2.jpg"
+      "/productos/BADBUNNY BACK TO SCHOOL/badbunny-back-to-school-1.webp",
+      "/productos/BADBUNNY BACK TO SCHOOL/badbunny-back-to-school-2.webp"
     ],
     "category": "zapatillas",
     "marca": "adidas",
     "specs": {
-      "talle": ["7 US"]
+      "talle": [
+        "7 US"
+      ]
     }
   },
   {
     "name": "Royale Heavyweight Tee",
     "price": 160,
     "images": [
-      "/productos/CRTZ HEAVY WEIGHT TEE/crtz-heavy-weight-tee-1.jpg",
-      "/productos/CRTZ HEAVY WEIGHT TEE/crtz-heavy-weight-tee-2.jpg"
+      "/productos/CRTZ HEAVY WEIGHT TEE/crtz-heavy-weight-tee-1.webp",
+      "/productos/CRTZ HEAVY WEIGHT TEE/crtz-heavy-weight-tee-2.webp"
     ],
     "category": "remera",
     "marca": "corteiz",
     "specs": {
-      "talle": ["L"]
+      "talle": [
+        "L"
+      ]
     }
   },
   {
     "name": "3M College Knit Zip Hoodie",
     "price": 240,
     "images": [
-      "/productos/CRTZ REFLECTIVE KNIT ZIP UP/crtz-reflective-knit-zip-1.jpg",
-      "/productos/CRTZ REFLECTIVE KNIT ZIP UP/crtz-reflective-knit-zip-2.jpg",
-      "/productos/CRTZ REFLECTIVE KNIT ZIP UP/crtz-reflective-knit-zip-3.jpg"
+      "/productos/CRTZ REFLECTIVE KNIT ZIP UP/crtz-reflective-knit-zip-1.webp",
+      "/productos/CRTZ REFLECTIVE KNIT ZIP UP/crtz-reflective-knit-zip-2.webp",
+      "/productos/CRTZ REFLECTIVE KNIT ZIP UP/crtz-reflective-knit-zip-3.webp"
     ],
     "category": "zip hoodie",
     "marca": "corteiz",
     "specs": {
-      "talle": ["XL", "L"]
+      "talle": [
+        "XL",
+        "L"
+      ]
     }
   },
   {
     "name": "Essentials Sweatshort Jet Black",
     "price": 130,
     "images": [
-      "/productos/Essentials sweatshort Jet Black/essentials-sweatshort-jet-black-1.jpg"
+      "/productos/Essentials sweatshort Jet Black/essentials-sweatshort-jet-black-1.webp"
     ],
     "category": "short",
     "marca": "fear of god",
     "specs": {
-      "talle": ["S"]
+      "talle": [
+        "S"
+      ]
     }
   },
   {
     "name": "Off-White Out Of Office",
     "price": 600,
     "images": [
-      "/productos/OFF WHITE OUT OF OFFICE/off-white-out-of-office-1.jpg",
-      "/productos/OFF WHITE OUT OF OFFICE/off-white-out-of-office-2.jpg"
+      "/productos/OFF WHITE OUT OF OFFICE/off-white-out-of-office-1.webp",
+      "/productos/OFF WHITE OUT OF OFFICE/off-white-out-of-office-2.webp"
     ],
     "category": "zapatillas",
     "marca": "off-white",
     "specs": {
-      "talle": ["8/8.5 US"]
+      "talle": [
+        "8/8.5 US"
+      ]
     }
   },
   {
     "name": "Double Layer Short",
     "price": 75,
     "images": [
-      "/productos/SP5DER DOUBLE LAYER SHORT/sp5der-double-layer-short-1.jpg",
-      "/productos/SP5DER DOUBLE LAYER SHORT/sp5der-double-layer-short-2.jpg"
+      "/productos/SP5DER DOUBLE LAYER SHORT/sp5der-double-layer-short-1.webp",
+      "/productos/SP5DER DOUBLE LAYER SHORT/sp5der-double-layer-short-2.webp"
     ],
     "category": "short",
     "marca": "sp5der",
     "specs": {
-      "talle": ["XL"]
+      "talle": [
+        "XL"
+      ]
     }
   }
 ]

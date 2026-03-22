@@ -10,8 +10,10 @@ const productos = getProductosAgrupados();
 <Layout
     title="Búsqueda de Productos"
     description="Buscá sneakers y streetwear en 24/7 Sneakers BA. Encontrá zapatillas de las mejores marcas con envíos a todo el país."
-    noindex={true}
 >
+    {productos[0]?.image && (
+        <link slot="head" rel="preload" as="image" href={productos[0].image} fetchpriority="high" />
+    )}
     <Header />
 
     <ResultadosBusqueda productos={productos} client:load />

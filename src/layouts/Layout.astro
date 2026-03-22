@@ -48,15 +48,25 @@ const pageImage = ogImage ?? '/og-image.jpg';
 		<meta name="twitter:image" content={pageImage} />
 
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" /></noscript>
+
+		<link rel="preconnect" href="https://use.typekit.net" />
+		<link rel="preload" as="style" href="https://use.typekit.net/ots3kmz.css" onload="this.onload=null;this.rel='stylesheet'" />
+		<noscript><link rel="stylesheet" href="https://use.typekit.net/ots3kmz.css" /></noscript>
+
 		<title>{pageTitle}</title>
+		<slot name="head" />
 
 	</head>
 
 	<body class="min-h-dvh flex flex-col"> 
-		<div class="flex-1">
+		<main class="flex-1">
 			<slot />
-		</div>
+		</main>
 		<Footer />
 	</body>
 	

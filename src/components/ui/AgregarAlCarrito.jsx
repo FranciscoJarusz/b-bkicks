@@ -101,7 +101,7 @@ export default function AgregarAlCarrito({ producto }) {
                         <button
                             key={t.nombre}
                             onClick={() => setTalleSeleccionado(t.nombre)}
-                            className={`border text-sm px-3 py-1 rounded-full transition-colors cursor-pointer
+                            className={`border text-sm px-3 py-1 rounded-full uppercase transition-colors cursor-pointer
                             ${talleSeleccionado === t.nombre
                             ? 'border-primary bg-primary text-white'
                             : 'border-gray/30 text-gray hover:border-primary hover:text-primary'

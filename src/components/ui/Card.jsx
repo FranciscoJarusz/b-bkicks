@@ -5,7 +5,7 @@ import BotonComprar from "@/components/ui/BotonComprar.jsx";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Card({ producto }) {
+export default function Card({ producto, priority = false }) {
   const href = `/productos/${producto.slug}`;
   const cardRef = useRef(null);
 
@@ -36,7 +36,10 @@ export default function Card({ producto }) {
             <img
                 src={producto.image}
                 alt={producto.name}
+                width="300"
+                height="240"
                 className="object-cover h-full w-full transition-transform duration-300 hover:scale-105"
+                fetchPriority={priority ? "high" : "auto"}
             />
             ) : (
                 <span className="text-gray text-sm">Sin imagen</span>
@@ -52,9 +55,9 @@ export default function Card({ producto }) {
                 </span>
             )}
 
-            <h3 className="font-bold text-black text-lg leading-tight">
+            <h1 className="font-bold text-black text-lg leading-tight">
                 {producto.name || "Producto sin nombre"}
-            </h3>
+            </h1>
 
             <div className="flex items-center justify-between mt-5">
 
