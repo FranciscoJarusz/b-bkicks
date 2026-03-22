@@ -11,7 +11,23 @@
             <p>Recordá que el tiempo estimado de entrega es de 15 a 20 días.</p>
             <p>Compramos a retailers oficiales o de reventa con verificación, para así garantizar la autenticidad de los productos.</p>
         </div>    
+
+        <a
+            class="bg-secondary text-primary font-semibold px-5 py-2 rounded-full text-sm hover:scale-102 transition-all duration-300 cursor-pointer "
+            onclick="enviarWhatsApp()"
+        >
+            Realizar un encargo
+        </a>
         
     </div>
 
 </section>
+
+<script is:inline>
+    const mensaje = `*Nuevo mensaje desde la tienda online* \n\n¡Hola 24/7 Sneakers BA, estoy interesado en realizar un encargo!\n\n*Producto:* \n*Talle:* \n*Consulta:* `;
+    const WHATSAPP_NUMERO = "5491154595247";
+    function enviarWhatsApp() {
+        const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+    }
+</script>
