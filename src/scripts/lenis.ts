@@ -19,8 +19,11 @@ document.addEventListener('click', (e: MouseEvent) => {
             const element = document.querySelector<HTMLElement>(href);
             
             if (element) {
+
+                const offset = -100;
                 lenis.scrollTo(element, {
                     duration: 1.2,
+                    offset,
                 });
             }
         }
