@@ -68,6 +68,7 @@ export default function BuscadorHeader({ productos = [] }) {
                 <input
                     type="text"
                     placeholder="Buscar..."
+                    id="busqueda-header"
                     value={busqueda}
                     onInput={handleInput}
                     onFocus={() => busqueda && setAbierto(true)}

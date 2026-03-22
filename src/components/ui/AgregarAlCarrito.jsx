@@ -61,25 +61,33 @@ export default function AgregarAlCarrito({ producto }) {
         setCantidad(c => Math.max(c - 1, 1));
     }
 
-    function handleAgregar() {
-        if (sinStock || agregando || (talles.length > 0 && !talleSeleccionado)) return;
+    async function handleAgregar() {
+        
+        if (sinStock || agregando) return;
+        if (talles.length > 0 && !talleSeleccionado) {
+            return;
+        }
+
         setAgregando(true);
+
         setTimeout(() => {
             agregarAlCarrito({
-                slug: producto.slug,
-                name: producto.name,
-                marca: producto.marca,
-                category: producto.category,
-                image: producto.images?.[0] ?? producto.image ?? null,
-                price: producto.price,
-                talle: talleSeleccionado,
-                stock: stockDelTalle,
+            slug: producto.slug,
+            name: producto.name,
+            marca: producto.marca,
+            category: producto.category,
+            image: producto.images?.[0] ?? producto.image ?? null,
+            price: producto.price,
+            talle: talleSeleccionado,
+            stock: stockDelTalle,
             }, cantidad);
-            setCantidad(1);
-            setAgregando(false);
+
             setAgregado(true);
-            setTimeout(() => setAgregado(false), 4000);
-        }, 1500);
+            setTimeout(() => {
+                setAgregado(false);
+                setAgregando(false);
+            }, 2000);
+        }, 1000); 
     }
 
     if (talles.length === 0) {
