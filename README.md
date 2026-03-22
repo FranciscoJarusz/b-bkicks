@@ -1,46 +1,60 @@
-# Astro Starter Kit: Basics
 
-```sh
-npm create astro@latest -- --template basics
-```
+# 24/7 Sneakers BA
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Proyecto Astro para tienda de sneakers y streetwear.
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## 🚀 Estructura del Proyecto
 
 ```text
 /
 ├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+│   ├── favicon.svg, imágenes, íconos
+│   └── productos/ (carpetas con imágenes de cada producto)
+├── src/
+│   ├── assets/           # (vacío)
+│   ├── components/
+│   │   ├── Footer.astro, Header.astro, ProductoDetalle.astro
+│   │   └── ui/           # Componentes React (migrar a Astro si es necesario)
+│   ├── data/
+│   │   └── productos.json
+│   ├── layouts/
+│   │   └── Layout.astro
+│   ├── pages/
+│   │   ├── index.astro, busqueda.astro
+│   │   └── productos/[slug].astro
+│   ├── scripts/
+│   │   └── lenis.ts
+│   ├── sections/
+│   │   ├── Catalogo.astro, Encargos.astro, Hero.astro
+│   ├── styles/
+│   │   └── global.css
+│   └── utils/
+│       ├── carrito.js, productos.js
+├── package.json
+├── astro.config.mjs
+└── tsconfig.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### Descripción de carpetas principales
+- **public/**: Archivos estáticos e imágenes de productos.
+- **src/components/**: Componentes Astro y subcarpeta `ui/` para componentes React (migrar a Astro si es posible).
+- **src/data/**: Datos de productos en formato JSON.
+- **src/layouts/**: Layouts reutilizables.
+- **src/pages/**: Páginas principales y rutas dinámicas.
+- **src/scripts/**: Scripts utilitarios (ej: animaciones).
+- **src/sections/**: Secciones reutilizables para páginas.
+- **src/styles/**: Estilos globales.
+- **src/utils/**: Utilidades JS para lógica de carrito y productos.
 
-## 🧞 Commands
+## 🧞 Comandos útiles
 
-All commands are run from the root of the project, from a terminal:
+Todos los comandos se ejecutan desde la raíz del proyecto:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
+| Comando           | Acción                                              |
+|-------------------|-----------------------------------------------------|
+| `npm install`     | Instala las dependencias                            |
+| `npm run dev`     | Inicia el servidor de desarrollo en `localhost:4321`|
+| `npm run build`   | Genera el sitio para producción en `./dist/`        |
+| `npm run preview` | Previsualiza el sitio generado antes de desplegar   |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
