@@ -17,7 +17,7 @@ export default function BuscadorHeader({ productos = [] }) {
             const q = busqueda.toLowerCase();
             return (
                 p.name?.toLowerCase().includes(q) ||
-                p.marca?.toLowerCase().includes(q) ||
+                (Array.isArray(p.marca) ? p.marca.some(m => m.toLowerCase().includes(q)) : p.marca?.toLowerCase().includes(q)) ||
                 p.category?.toLowerCase().includes(q)
             );
         })
