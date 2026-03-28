@@ -111,7 +111,7 @@ export default function AgregarAlCarrito({ producto }) {
                             onClick={() => setTalleSeleccionado(t.nombre)}
                             className={`border text-sm px-3 py-1 rounded-full uppercase transition-colors cursor-pointer
                             ${talleSeleccionado === t.nombre
-                            ? 'border-primary bg-primary text-white'
+                            ? 'border-primary bg-primary text-secondary'
                             : 'border-gray/30 text-gray hover:border-primary hover:text-primary'
                             }`}
                             >
@@ -161,7 +161,7 @@ export default function AgregarAlCarrito({ producto }) {
                     <button
                         onClick={!sinStock ? handleAgregar : undefined}
                         disabled={sinStock}
-                        className={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-gray/10 text-gray cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-white cursor-pointer'}`}
+                        className={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-gray/10 text-gray cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-secondary cursor-pointer'}`}
                         >
                         {sinStock ? 'Sin stock para este talle' : agregando ? 'Agregando al carrito...' : agregado ? '¡Agregado!' : 'Agregar al carrito'}
                     </button>

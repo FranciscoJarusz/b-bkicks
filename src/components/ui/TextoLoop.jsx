@@ -1,4 +1,4 @@
-export default function TextoLoop({ textos = ["ENCARGOS POR WHATSAPP", "ENVÍOS GRÁTIS EN EL DÍA"], repeticiones = 15, velocidad = 150 }) {
+export default function TextoLoop({ textos = ["ENCARGOS POR WHATSAPP", "ENVÍOS A TODO EL PAÍS"], repeticiones = 15, velocidad = 150 }) {
     const items = Array.from({ length: repeticiones }, (_, i) => i);
 
     return (

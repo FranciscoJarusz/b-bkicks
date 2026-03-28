@@ -7,7 +7,7 @@ import {
     vaciarCarrito,
 } from "@/utils/carrito.js";
 
-const WHATSAPP_NUMERO = "5491154595247";
+const WHATSAPP_NUMERO = "5491125322786";
 
 export default function Carrito() {
     const [abierto, setAbierto] = useState(false);
@@ -35,7 +35,7 @@ export default function Carrito() {
         );
         const mensaje =
             `*Nuevo pedido a través de la tienda online:*\n\n` +
-            `¡Hola 24/7 Sneakers BA! Acabo de elegir estos productos en la web:\n\n` +
+            `¡Hola B&B KICKS! Acabo de elegir estos productos en la web:\n\n` +
             lineas.join("\n") +
             `\n\n*Total: $${total.toLocaleString("es-AR")}*`;
         const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
@@ -47,7 +47,7 @@ export default function Carrito() {
         
         <button
             onClick={() => setAbierto(true)}
-            className="relative flex items-center gap-2 text-white hover:text-primary transition-colors duration-300 cursor-pointer"
+            className="relative flex items-center gap-2 text-secondary hover:text-primary transition-colors duration-300 cursor-pointer"
             aria-label="Abrir carrito"
         >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" nfill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -57,7 +57,7 @@ export default function Carrito() {
             </svg>
 
             {cantidad > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-primary text-secondary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {cantidad}
                 </span>
             )}
@@ -207,7 +207,7 @@ export default function Carrito() {
 
                     <button
                         onClick={finalizarCompra}
-                        className="w-full bg-primary hover:bg-primary-accent text-white font-semibold py-3 rounded-xl transition-all duration-300 cursor-pointer"
+                        className="w-full bg-primary hover:bg-primary-accent text-secondary font-semibold py-3 rounded-xl transition-all duration-300 cursor-pointer"
                     >
                         Finalizar compra
                     </button>

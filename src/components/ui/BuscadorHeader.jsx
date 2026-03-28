@@ -59,7 +59,7 @@ export default function BuscadorHeader({ productos = [] }) {
             <div className="flex items-center gap-2 border border-white/10 focus-within:border-primary transition-all duration-300 rounded-xl px-3 py-1.5 w-full">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4 text-white/40 hover:text-white transition-colors shrink-0 cursor-pointer"
+                    className="w-4 h-4 text-secondary/40 hover:text-secondary transition-colors shrink-0 cursor-pointer"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                     onClick={buscar}
                 >
@@ -73,12 +73,12 @@ export default function BuscadorHeader({ productos = [] }) {
                     onInput={handleInput}
                     onFocus={() => busqueda && setAbierto(true)}
                     onKeyDown={(e) => e.key === 'Enter' && buscar()}
-                    className="bg-transparent text-white placeholder-white/40 text-sm focus:outline-none w-full"
+                    className="bg-transparent text-secondary placeholder-white/40 text-sm focus:outline-none w-full"
                 />
                 {busqueda && (
                     <button
                         onClick={limpiar}
-                        className="text-white/40 hover:text-white transition-all duration-300 shrink-0 cursor-pointer"
+                        className="text-secondary/40 hover:text-secondary transition-all duration-300 shrink-0 cursor-pointer"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
