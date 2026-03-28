@@ -614,7 +614,7 @@ export default function AdminPanel() {
 
   if (!session || !isAuthorized) {
     return (
-      <section className="flex min-h-screen items-center justify-center bg-white px-6 py-12 text-secondary">
+      <section className="flex min-h-screen items-center justify-center bg-secondary px-6 py-12 text-secondary">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-20 lg:gap-60 lg:grid-cols-[1.1fr_0.9fr]">
 
           <div className="flex flex-col justify-center">
@@ -782,7 +782,7 @@ export default function AdminPanel() {
         </form>
 
         <div className="mt-6 overflow-hidden ring-1 ring-black/10">
-          <div className="flex items-center justify-between gap-4 border-b border-black/10 bg-white px-4 py-3">
+          <div className="flex items-center justify-between gap-4 border-b border-black/10 bg-secondary px-4 py-3">
             <label className="flex items-center gap-3 text-sm font-medium text-black">
               <input
                 type="checkbox"
@@ -826,7 +826,7 @@ export default function AdminPanel() {
             const isExpanded = expandedProductId === producto.id_producto;
 
             return (
-              <div key={producto.id_producto} className="border-t border-black/10 bg-white first:border-t-0">
+              <div key={producto.id_producto} className="border-t border-black/10 bg-secondary first:border-t-0">
                 <div className="grid gap-3 px-4 py-4 md:grid-cols-[32px_minmax(0,1.6fr)_120px_120px_140px] md:items-center">
                   <div className="flex items-center justify-center">
                     <input
@@ -903,7 +903,7 @@ export default function AdminPanel() {
                           {producto.producto_talle.map((variante) => {
                             const rowKey = `${producto.id_producto}-${variante.id_talle}`;
                             return (
-                              <tr key={rowKey} className="bg-white">
+                              <tr key={rowKey} className="bg-secondary">
                                 <td className="rounded-l-2xl px-3 py-3 font-semibold text-black">
                                   {variante.talle?.nombre ?? "Sin talle"}
                                 </td>
