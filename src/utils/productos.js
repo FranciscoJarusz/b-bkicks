@@ -1,51 +1,75 @@
-import productos from '@/data/productos.json';
+import { supabase } from "@/lib/supabase.js";
 
 export function getSlug(nombre) {
-    return nombre.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return nombre.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 }
 
-function contarTalles(strings) {
-  const counts = {};
-  for (const t of strings) {
-    if (t) counts[t] = (counts[t] ?? 0) + 1;
-  }
-  return Object.entries(counts).map(([nombre, stock]) => ({ nombre, stock }));
+function normalizeSupabaseProducts(rows = []) {
+  return rows.map((producto) => {
+    const talles = (producto.producto_talle ?? []).map((item) => ({
+      nombre: item.talle?.nombre ?? "",
+      stock: item.stock ?? 0,
+    }));
+
+    const stock = talles.reduce((sum, item) => sum + item.stock, 0);
+    const images = (producto.producto_imagen ?? [])
+      .slice()
+      .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+      .map((item) => item.url)
+      .filter(Boolean);
+    const image = images[0] ?? producto.imagen_url ?? null;
+    const priceFromSizes = producto.producto_talle?.find((item) => item.precio != null)?.precio;
+
+    return {
+      name: producto.nombre,
+      slug: getSlug(producto.nombre),
+      image,
+      images: images.length > 0 ? images : image ? [image] : [],
+      category: "",
+      marca: producto.marca?.nombre ?? "",
+      description: "",
+      price: Number(priceFromSizes ?? producto.precio_base ?? 0),
+      stock,
+      specs: {
+        talle: talles,
+      },
+    };
+  });
 }
 
-export function getProductosAgrupados() {
-  const map = new Map();
+async function getProductosFromSupabase() {
+  const { data, error } = await supabase
+    .from("producto")
+    .select(`
+      id_producto,
+      nombre,
+      precio_base,
+      imagen_url,
+      producto_imagen (
+        url,
+        orden
+      ),
+      marca (
+        nombre
+      ),
+      producto_talle (
+        stock,
+        precio,
+        talle (
+          nombre
+        )
+      )
+    `)
+    .order("id_producto", { ascending: true });
 
-  for (const producto of productos) {
-    const key = producto.name.toLowerCase();
-    const tallesRaw = producto.specs?.talle ?? [];
-    const talles = contarTalles(tallesRaw);
-
-    if (map.has(key)) {
-      const existing = map.get(key);
-      for (const t of talles) {
-        const found = existing.specs.talle.find(e => e.nombre === t.nombre);
-        if (found) {
-          found.stock += t.stock;
-        } else {
-          existing.specs.talle.push({ ...t });
-        }
-      }
-      existing.stock = existing.specs.talle.reduce((sum, t) => sum + t.stock, 0);
-    } else {
-      const images = producto.images ?? (producto.image ? [producto.image] : []);
-      map.set(key, {
-        ...producto,
-        images,
-        image: images[0] ?? null,
-        slug: getSlug(producto.name),
-        stock: talles.reduce((sum, t) => sum + t.stock, 0),
-        specs: {
-          ...producto.specs,
-          talle: talles,
-        },
-      });
-    }
+  if (error) {
+    throw error;
   }
 
-  return Array.from(map.values());
+  return normalizeSupabaseProducts(data ?? []);
+}
+
+export async function getProductosAgrupados() {
+  const productos = await getProductosFromSupabase();
+  return productos;
 }
