@@ -1,0 +1,93 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+---
+
+<Layout
+  title="404"
+  description="La pagina que buscabas no existe o ya no esta disponible en B&B KICKS."
+  noindex={true}
+>
+  <Header />
+
+  <section class="relative isolate overflow-hidden bg-[#fffaff]">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(204,10,10,0.08),transparent_42%)]"></div>
+
+    <div class="relative z-10 mx-auto flex min-h-[calc(100dvh-9rem)] max-w-7xl items-center px-6 py-16 sm:px-8 lg:px-10">
+      <div class="grid w-full gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div class="max-w-3xl">
+          <p class="mb-5 text-xs font-semibold uppercase tracking-[0.38em] text-black/45">
+            Error 404
+          </p>
+
+          <h1 class="max-w-4xl font-accent text-5xl leading-[0.9] text-primary sm:text-6xl lg:text-7xl">
+            ESTA PAGINA NO
+            <br />
+            ENCONTRO SU PAR.
+          </h1>
+
+          <p class="mt-6 max-w-2xl text-base leading-8 text-black/70 sm:text-lg">
+            Puede que el producto ya no exista, que la URL haya cambiado o que el link este roto.
+            Volve al catalogo y segui buscando tu proximo par.
+          </p>
+
+          <div class="mt-8 flex flex-col gap-4 sm:flex-row">
+            <a
+              href="/"
+              class="inline-flex min-h-13 items-center justify-center rounded-full bg-primary px-7 text-base font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent"
+            >
+              Volver al inicio
+            </a>
+
+            <a
+              href="/busqueda"
+              class="inline-flex min-h-13 items-center justify-center rounded-full border border-black/15 px-7 text-base font-semibold text-black transition-all duration-300 hover:border-primary hover:text-primary"
+            >
+              Ir al catalogo
+            </a>
+          </div>
+        </div>
+
+        <div class="rounded-[2rem] border border-black/10 bg-black px-6 py-8 text-secondary shadow-[0_25px_80px_rgba(0,0,0,0.18)] sm:px-8 sm:py-10">
+          <div class="flex items-center justify-between gap-4 border-b border-secondary/10 pb-5">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.34em] text-secondary/45">
+                B&B KICKS
+              </p>
+              <p class="mt-2 text-2xl font-semibold text-secondary">
+                Ruta no encontrada
+              </p>
+            </div>
+
+            <span class="rounded-full border border-secondary/10 bg-secondary/5 px-4 py-2 text-sm font-semibold text-primary">
+              404
+            </span>
+          </div>
+
+          <div class="mt-6 space-y-4">
+            <div class="rounded-3xl border border-secondary/10 bg-secondary/5 p-5">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary/45">
+                Que puede haber pasado
+              </p>
+              <ul class="mt-4 space-y-3 text-sm leading-7 text-secondary/75">
+                <li>El producto fue eliminado o cambio de slug.</li>
+                <li>Entraste desde un link viejo o mal copiado.</li>
+                <li>La pagina todavia no existe en esta version del sitio.</li>
+              </ul>
+            </div>
+
+            <div class="rounded-3xl border border-secondary/10 bg-secondary/5 p-5">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondary/45">
+                Siguiente paso
+              </p>
+              <p class="mt-4 text-sm leading-7 text-secondary/75">
+                Usa el menu, la busqueda o volve al inicio para seguir navegando sin perderte los
+                nuevos ingresos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
