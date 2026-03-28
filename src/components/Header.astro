@@ -3,52 +3,187 @@ import Carrito from '@/components/ui/Carrito.jsx';
 import TextoLoop from '@/components/ui/TextoLoop.jsx';
 import BuscadorHeader from '@/components/ui/BuscadorHeader.jsx';
 import { getProductosAgrupados } from '@/utils/productos.js';
+
 const productos = await getProductosAgrupados();
 const marcas = [...new Set(productos.map((producto) => producto.marca).filter(Boolean))].sort((a, b) =>
   a.localeCompare(b, "es", { sensitivity: "base" })
 );
 ---
 
-<header class="sticky top-0 z-50">
-    <TextoLoop/>
+<header class="sticky top-0 z-50" id="site-header">
+    <TextoLoop />
 
-    <div class="bg-black py-4">
-        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+    <div class="bg-black py-3 md:py-4">
+        <div class="mx-auto max-w-7xl px-4 md:px-6">
+            <div class="relative grid grid-cols-[auto_1fr_auto] items-center gap-3 md:hidden">
+                <div class="relative h-11 w-11">
+                    <button
+                        id="mobile-menu-open"
+                        type="button"
+                        class="absolute inset-0 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-secondary transition-all duration-300 hover:bg-white/8"
+                        aria-label="Abrir menu"
+                    >
+                        <span class="relative block h-5 w-6">
+                            <span data-menu-line="top" class="absolute left-0 top-0 h-[2.5px] w-6 rounded-full bg-current transition-all duration-300 ease-out"></span>
+                            <span data-menu-line="middle" class="absolute left-0 top-1/2 h-[2.5px] w-6 -translate-y-1/2 rounded-full bg-current transition-all duration-300 ease-out"></span>
+                            <span data-menu-line="bottom" class="absolute left-0 bottom-0 h-[2.5px] w-4 rounded-full bg-current transition-all duration-300 ease-out"></span>
+                        </span>
+                    </button>
+                </div>
 
-            <div class="flex items-center gap-10">
-                <a href="/" class="shrink-0">
-                    <img src="/Logotipo.svg" alt="Logo B&B KICKS" width="80" height="40" class="w-18 hover:scale-102 transition-all duration-300" />
-                </a>
+                <div
+                    id="mobile-menu"
+                    class="pointer-events-none fixed inset-x-0 bottom-0 z-60 opacity-0 transition duration-300"
+                    aria-hidden="true"
+                >
+                    <button
+                        id="mobile-menu-close-overlay"
+                        type="button"
+                        class="fixed inset-0"
+                        aria-label="Cerrar menu"
+                    ></button>
 
-                <details class="group relative hidden md:block">
-                    <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold uppercase text-secondary transition-all duration-300 hover:text-primary">
-                        Marcas
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
-                        </svg>
-                    </summary>
+                    <div class="absolute bottom-0 left-0 top-0 flex w-full -translate-x-full flex-col border-t border-secondary/10 bg-black px-5 py-5 transition-transform duration-300" data-mobile-drawer>
+                        <div class="flex items-center justify-between">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-secondary/45">
+                                Menu
+                            </p>
+                        </div>
 
-                    <div class="absolute left-0 top-full mt-4 min-w-55 rounded-3xl border border-white/10 bg-black/90 p-3 shadow-2xl shadow-black/40 backdrop-blur">
-                        <div class="flex flex-col">
+                        <div class="mt-5">
+                            <BuscadorHeader productos={productos} client:load />
+                        </div>
+
+                        <div class="mt-6 flex flex-col overflow-y-auto pb-6">
+                            <p class="pb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-secondary/45">
+                                Marcas
+                            </p>
                             {marcas.map((marca) => (
                                 <a
                                     href={`/busqueda?q=${encodeURIComponent(marca)}`}
-                                    class="rounded-2xl px-4 py-3 text-sm font-medium text-secondary transition-all duration-300 hover:bg-white/10"
+                                    class="rounded-2xl px-4 py-3 text-sm font-medium text-secondary transition-all duration-300 hover:bg-secondary/10"
                                 >
                                     {marca}
                                 </a>
                             ))}
                         </div>
                     </div>
-                </details>
+                </div>
+
+                <a href="/" class="flex justify-center">
+                    <img src="/Logotipo.svg" alt="Logo B&B KICKS" width="80" height="40" class="h-auto w-18 transition-all duration-300 hover:scale-102" />
+                </a>
+
+                <div class="flex items-center justify-end gap-1.5">
+                    <Carrito client:load />
+                </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <BuscadorHeader productos={productos} client:load />
-                <Carrito client:load />
+            <div class="hidden items-center justify-between md:flex">
+                <div class="flex items-center gap-10">
+                    <a href="/" class="shrink-0">
+                        <img src="/Logotipo.svg" alt="Logo B&B KICKS" width="80" height="40" class="w-12 transition-all duration-300 hover:scale-102 lg:w-18" />
+                    </a>
+
+                    <details class="group relative">
+                        <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold uppercase text-secondary transition-all duration-300 hover:text-primary">
+                            Marcas
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+                            </svg>
+                        </summary>
+
+                        <div class="absolute left-0 top-full mt-4 min-w-55 rounded-3xl border border-secondary/10 bg-black/90 p-3 shadow-2xl shadow-black/40 backdrop-blur">
+                            <div class="flex flex-col">
+                                {marcas.map((marca) => (
+                                    <a
+                                        href={`/busqueda?q=${encodeURIComponent(marca)}`}
+                                        class="rounded-2xl px-4 py-3 text-sm font-medium text-secondary transition-all duration-300 hover:bg-secondary/10"
+                                    >
+                                        {marca}
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="w-[20rem] lg:w-[24rem]">
+                        <BuscadorHeader productos={productos} client:load />
+                    </div>
+                    <Carrito client:load />
+                </div>
             </div>
-        
-        </div>        
+        </div>
     </div>
-    
 </header>
+
+<script is:inline>
+    const siteHeader = document.getElementById('site-header');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileDrawer = mobileMenu?.querySelector('[data-mobile-drawer]');
+    const openButton = document.getElementById('mobile-menu-open');
+    const closeOverlay = document.getElementById('mobile-menu-close-overlay');
+    const menuTopLine = openButton?.querySelector('[data-menu-line="top"]');
+    const menuMiddleLine = openButton?.querySelector('[data-menu-line="middle"]');
+    const menuBottomLine = openButton?.querySelector('[data-menu-line="bottom"]');
+
+    function setMenuIconState(isOpen) {
+        if (!menuTopLine || !menuMiddleLine || !menuBottomLine) return;
+
+        if (isOpen) {
+            menuTopLine.classList.add('top-1/2', '-translate-y-1/2', 'rotate-45');
+            menuTopLine.classList.remove('top-0');
+
+            menuMiddleLine.classList.add('opacity-0');
+
+            menuBottomLine.classList.add('top-1/2', '-translate-y-1/2', 'w-6', '-rotate-45');
+            menuBottomLine.classList.remove('bottom-0', 'w-4');
+        } else {
+            menuTopLine.classList.remove('top-1/2', '-translate-y-1/2', 'rotate-45');
+            menuTopLine.classList.add('top-0');
+
+            menuMiddleLine.classList.remove('opacity-0');
+
+            menuBottomLine.classList.remove('top-1/2', '-translate-y-1/2', 'w-6', '-rotate-45');
+            menuBottomLine.classList.add('bottom-0', 'w-4');
+        }
+    }
+
+    function syncMobileMenuOffset() {
+        if (!siteHeader || !mobileMenu) return;
+        const { bottom } = siteHeader.getBoundingClientRect();
+        mobileMenu.style.top = `${Math.max(bottom, 0)}px`;
+    }
+
+    function openMobileMenu() {
+        if (!mobileMenu || !mobileDrawer) return;
+        syncMobileMenuOffset();
+        mobileMenu.classList.remove('pointer-events-none', 'opacity-0');
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        mobileDrawer.classList.remove('-translate-x-full');
+        setMenuIconState(true);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+        if (!mobileMenu || !mobileDrawer) return;
+        mobileMenu.classList.add('pointer-events-none', 'opacity-0');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        mobileDrawer.classList.add('-translate-x-full');
+        setMenuIconState(false);
+        document.body.style.overflow = '';
+    }
+
+    openButton?.addEventListener('click', openMobileMenu);
+    closeOverlay?.addEventListener('click', closeMobileMenu);
+    window.addEventListener('resize', syncMobileMenuOffset);
+    window.addEventListener('scroll', syncMobileMenuOffset, { passive: true });
+    syncMobileMenuOffset();
+    setMenuIconState(false);
+
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeMobileMenu();
+    });
+</script>
