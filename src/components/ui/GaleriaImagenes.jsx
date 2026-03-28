@@ -8,7 +8,7 @@ export default function GaleriaImagenes({ images, alt }) {
     }
 
     if (!images || images.length === 0) {
-        return <span className="text-gray text-sm">Sin imagen</span>;
+        return <span className="text-black/50 text-sm">Sin imagen</span>;
     }
 
     return (

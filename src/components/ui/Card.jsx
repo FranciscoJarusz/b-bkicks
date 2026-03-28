@@ -17,14 +17,14 @@ export default function Card({ producto, priority = false }) {
                         fetchPriority={priority ? "high" : "auto"}
                     />
                 ) : (
-                    <span className="text-gray text-sm">Sin imagen</span>
+                    <span className="text-blac/50 text-sm">Sin imagen</span>
                 )}
             </a>
             <div className="flex flex-col flex-1 gap-1 py-4 items-center text-center">
                 <h1 className="font-bold text-black text-sm lg:text-lg leading-tight">
                     {producto.name || "Producto sin nombre"}
                 </h1>                
-                <span className="text-[8px] lg:text-[11px] font-semibold uppercase tracking-wide text-gray-accent">
+                <span className="text-[8px] lg:text-[11px] font-semibold uppercase tracking-wide text-black/70">
                     {producto.marca}
                 </span>
                 <div className="flex items-center justify-between">

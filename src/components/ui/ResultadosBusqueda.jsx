@@ -45,7 +45,7 @@ export default function ResultadosBusqueda({ productos = [] }) {
     return (
         <div className="flex flex-col gap-10 max-w-7xl mx-auto px-6 py-16">
             <div className="flex flex-col gap-2">
-                <a href="/" className="flex items-center gap-1.5 text-sm text-gray-accent hover:text-primary w-fit transition-colors">
+                <a href="/" className="flex items-center gap-1.5 text-sm text-black/70 hover:text-primary w-fit transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                     </svg>
@@ -55,13 +55,13 @@ export default function ResultadosBusqueda({ productos = [] }) {
                 <h1 className="text-3xl font-bold text-primary">
                     {q ? `Resultados para "${q}"` : "Todos los productos"}
                 </h1>
-                <p className="text-gray-accent mt-1 text-sm">
+                <p className="text-black mt-1 text-sm">
                     {resultados.length} {resultados.length === 1 ? "producto encontrado" : "productos encontrados"}
                 </p>
             </div>
 
             {q && resultados.length === 0 && (
-                <p className="text-gray-accent">
+                <p className="text-black">
                     No se encontraron productos para "<span className="text-black font-semibold">{q}</span>".
                 </p>
             )}

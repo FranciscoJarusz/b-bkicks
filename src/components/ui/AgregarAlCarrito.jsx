@@ -91,7 +91,7 @@ export default function AgregarAlCarrito({ producto }) {
     }
 
     if (talles.length === 0) {
-        return <p className="text-sm font-semibold text-gray-accent uppercase">Sin stock</p>;
+        return <p className="text-sm font-semibold text-black/70 uppercase">Sin stock</p>;
     }
 
     return (
@@ -100,7 +100,7 @@ export default function AgregarAlCarrito({ producto }) {
         {talles.length > 0 && (
             <div className="flex flex-col gap-2 justify-center">
 
-                <p className="text-xs font-semibold uppercase text-gray-accent">
+                <p className="text-xs font-semibold uppercase text-black/70">
                     {talleSeleccionado ? `Talle: ${talleSeleccionado}` : 'Talle'}
                 </p>
 
@@ -112,7 +112,7 @@ export default function AgregarAlCarrito({ producto }) {
                             className={`border text-sm px-3 py-1 rounded-full uppercase transition-colors cursor-pointer
                             ${talleSeleccionado === t.nombre
                             ? 'border-primary bg-primary text-secondary'
-                            : 'border-gray/30 text-gray hover:border-primary hover:text-primary'
+                            : 'border-black/10 text-black/50 hover:border-primary hover:text-primary'
                             }`}
                             >
                             {t.nombre}
@@ -130,11 +130,11 @@ export default function AgregarAlCarrito({ producto }) {
 
                 <div className="flex items-center gap-3">
                     
-                    <div className="flex items-center gap-2 border border-gray/30 rounded-xl px-3 py-2">
+                    <div className="flex items-center gap-2 border border-black/30 rounded-xl px-3 py-2">
                         <button
                             onClick={restar}
                             disabled={sinStock || cantidad <= 1}
-                            className={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad > 1 ? 'hover:text-primary' : ''}`}
+                            className={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad > 1 ? 'hover:text-primary' : ''}`}
                             aria-label="Restar uno"
                         >
 
@@ -149,7 +149,7 @@ export default function AgregarAlCarrito({ producto }) {
                         <button
                             onClick={sumar}
                             disabled={sinStock || cantidad >= disponible}
-                            className={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad < disponible ? 'hover:text-primary' : ''}`}
+                            className={`w-6 h-6 flex items-center justify-center text-lg cursor-pointer leading-none text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${!sinStock && cantidad < disponible ? 'hover:text-primary' : ''}`}
                             aria-label="Sumar uno"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -161,7 +161,7 @@ export default function AgregarAlCarrito({ producto }) {
                     <button
                         onClick={!sinStock ? handleAgregar : undefined}
                         disabled={sinStock}
-                        className={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-gray/10 text-gray cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-secondary cursor-pointer'}`}
+                        className={`flex-1 max-w-sm font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm ${sinStock ? 'bg-black/10 text-black/50 cursor-not-allowed' : 'bg-primary hover:bg-primary-accent text-secondary cursor-pointer'}`}
                         >
                         {sinStock ? 'Sin stock para este talle' : agregando ? 'Agregando al carrito...' : agregado ? '¡Agregado!' : 'Agregar al carrito'}
                     </button>

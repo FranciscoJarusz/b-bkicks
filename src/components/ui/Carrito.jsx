@@ -127,7 +127,7 @@ export default function Carrito() {
                                     className="object-cover w-full h-full"
                                 />
                             ) : (
-                                <span className="text-gray text-xs">Sin img</span>
+                                <span className="text-black/50 text-xs">Sin img</span>
                             )}
                         </div>
 
