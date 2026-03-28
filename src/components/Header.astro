@@ -3,7 +3,10 @@ import Carrito from '@/components/ui/Carrito.jsx';
 import TextoLoop from '@/components/ui/TextoLoop.jsx';
 import BuscadorHeader from '@/components/ui/BuscadorHeader.jsx';
 import { getProductosAgrupados } from '@/utils/productos.js';
-const productos = getProductosAgrupados();
+const productos = await getProductosAgrupados();
+const marcas = [...new Set(productos.map((producto) => producto.marca).filter(Boolean))].sort((a, b) =>
+  a.localeCompare(b, "es", { sensitivity: "base" })
+);
 ---
 
 <header class="sticky top-0 z-50">
@@ -12,10 +15,33 @@ const productos = getProductosAgrupados();
     <div class="bg-black py-4">
         <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
 
-            <a href="/" class="shrink-0">
-                <img src="/favicon.svg" alt="Logo 24/7 Sneakers BA" width="48" height="48" class="w-12 h-12 sm:hidden hover:scale-105 transition-all duration-300" />
-                <img src="/Logotipo.svg" alt="Logo 24/7 Sneakers BA" width="192" height="40" class="hidden sm:block w-48 hover:scale-102 transition-all duration-300" />
-            </a>
+            <div class="flex items-center gap-10">
+                <a href="/" class="shrink-0">
+                    <img src="/Logotipo.svg" alt="Logo B&B KICKS" width="80" height="40" class="w-18 hover:scale-102 transition-all duration-300" />
+                </a>
+
+                <details class="group relative hidden md:block">
+                    <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold uppercase text-secondary transition-all duration-300 hover:text-primary">
+                        Marcas
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+                        </svg>
+                    </summary>
+
+                    <div class="absolute left-0 top-full mt-4 min-w-55 rounded-3xl border border-white/10 bg-black/90 p-3 shadow-2xl shadow-black/40 backdrop-blur">
+                        <div class="flex flex-col">
+                            {marcas.map((marca) => (
+                                <a
+                                    href={`/busqueda?q=${encodeURIComponent(marca)}`}
+                                    class="rounded-2xl px-4 py-3 text-sm font-medium text-secondary transition-all duration-300 hover:bg-white/10"
+                                >
+                                    {marca}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </details>
+            </div>
 
             <div class="flex items-center gap-4">
                 <BuscadorHeader productos={productos} client:load />
