@@ -4,12 +4,12 @@ import Header from '@/components/Header.astro';
 import ResultadosBusqueda from '@/components/ui/ResultadosBusqueda.jsx';
 import { getProductosAgrupados } from '@/utils/productos.js';
 
-const productos = getProductosAgrupados();
+const productos = await getProductosAgrupados();
 ---
 
 <Layout
     title="Búsqueda de Productos"
-    description="Buscá sneakers y streetwear en 24/7 Sneakers BA. Encontrá zapatillas de las mejores marcas con envíos a todo el país."
+    description="Buscá sneakers y streetwear en B&B KICKS. Encontrá zapatillas de las mejores marcas con envíos a todo el país."
 >
     {productos[0]?.image && (
         <link slot="head" rel="preload" as="image" href={productos[0].image} fetchpriority="high" />
