@@ -2,18 +2,18 @@
 
     <div class="flex flex-col items-start justify-center text-start px-6 max-w-7xl mx-auto gap-6">
         
-        <h1 class="text-5xl font-semibold text-secondary uppercase font-accent italic">
-           Cómo realizar encargos
+        <h1 class="text-5xl text-secondary uppercase font-accent">
+           Cómo realizar tu encargo
         </h1>
 
-        <div class="flex flex-col gap-3 text-sm md:text-md lg:text-lg max-w-md md:max-w-2xl text-secondary">
-            <p>Para encargar con nosotros, envíanos el nombre o foto del producto que estás buscando y nosotros nos te lo cotizamos.</p>
-            <p>Recordá que el tiempo estimado de entrega es de 15 a 20 días.</p>
-            <p>Compramos a retailers oficiales o de reventa con verificación, para así garantizar la autenticidad de los productos.</p>
+        <div class="flex flex-col gap-2 text-sm md:text-md lg:text-lg max-w-md md:max-w-2xl text-secondary">
+            <p></p>Envianos el nombre o foto del producto que buscás y te lo cotizamos al instante.
+            <p></p>Recordá que el tiempo estimado de entrega es de 15 a 20 días.
+            <p></p>Compramos solo en retailers oficiales para garantizar la autenticidad total de tus sneakers.
         </div>    
 
         <button
-            class="flex justify-center items-center gap-3 bg-secondary text-primary font-semibold px-5 py-2 rounded-full text-sm hover:brightness-110 transition-all duration-300 cursor-pointer"
+            class="flex justify-center items-center gap-3 bg-secondary text-primary font-bold px-5 py-2 rounded-full text-sm hover:brightness-90 transition-all duration-300 cursor-pointer"
             aria-label="Boton para realizar un encargo a través de WhatsApp"
             onclick="enviarWhatsApp()"
         >
@@ -28,8 +28,8 @@
 </section>
 
 <script is:inline>
-    const mensaje = `*Nuevo mensaje desde la tienda online* \n\n¡Hola 24/7 Sneakers BA, estoy interesado en realizar un encargo!\n\n*Producto:* \n*Talle:* \n*Consulta:* `;
-    const WHATSAPP_NUMERO = "5491154595247";
+    const mensaje = `*Nuevo mensaje desde la tienda online* \n\n¡Hola B&B KICKS, estoy interesado en realizar un encargo!\n\n*Producto:* \n*Talle:* \n*Consulta:* `;
+    const WHATSAPP_NUMERO = "91125322786";
     function enviarWhatsApp() {
         const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
         window.open(url, '_blank');
