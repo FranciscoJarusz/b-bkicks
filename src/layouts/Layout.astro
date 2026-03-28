@@ -7,16 +7,18 @@ interface Props {
   description?: string;
   ogImage?: string;
   noindex?: boolean;
+  hideFooter?: boolean;
+  disableSmoothScroll?: boolean;
 }
 
-const { title, description, ogImage, noindex = false } = Astro.props;
+const { title, description, ogImage, noindex = false, hideFooter = false, disableSmoothScroll = false } = Astro.props;
 
 const pageTitle = title
-  ? `${title} - 24/7 Sneakers BA`
-  : '24/7 Sneakers BA | Sneakers y Streetwear en Buenos Aires';
+  ? `${title} - B&B KICKS`
+  : 'B&B KICKS | Sneakers y Streetwear en Buenos Aires';
 
 const pageDescription = description
-  ?? '24/7 Sneakers BA — Tienda online de sneakers y ropa streetwear en Buenos Aires. Las mejores marcas con envíos a todo el país.';
+  ?? 'B&B KICKS — Tienda online de sneakers y ropa streetwear en Buenos Aires. Las mejores marcas con envíos a todo el país.';
 
 const pageImage = ogImage ?? '/og-image.jpg';
 ---
@@ -33,11 +35,11 @@ const pageImage = ogImage ?? '/og-image.jpg';
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 
 		<meta name="description" content={pageDescription} />
-		<meta name="author" content="24/7 Sneakers BA" />
+		<meta name="author" content="B&B KICKS" />
 		<meta name="keywords" content="sneakers, zapatillas, streetwear, ropa, Buenos Aires, tienda online" />
 
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="24/7 Sneakers BA" />
+		<meta property="og:site_name" content="B&B KICKS" />
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={pageDescription} />
 		<meta property="og:image" content={pageImage} />
@@ -47,7 +49,7 @@ const pageImage = ogImage ?? '/og-image.jpg';
 		<meta name="twitter:description" content={pageDescription} />
 		<meta name="twitter:image" content={pageImage} />
 
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/svg+xml" href="/Logotipo.svg" />
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -67,11 +69,13 @@ const pageImage = ogImage ?? '/og-image.jpg';
 		<main class="flex-1">
 			<slot />
 		</main>
-		<Footer />
+		{!hideFooter && <Footer />}
 	</body>
 	
 	<link/>
-	<script>
-		import '@/scripts/lenis.ts';
-	</script>
+	{!disableSmoothScroll && (
+		<script>
+			import '@/scripts/lenis.ts';
+		</script>
+	)}
 </html>

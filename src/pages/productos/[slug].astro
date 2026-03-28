@@ -4,66 +4,45 @@ import Header from '@/components/Header.astro';
 import ProductoDetalle from '@/components/ProductoDetalle.astro';
 import ProductosSimilares from '@/components/ui/ProductosSimilares.jsx';
 import { getProductosAgrupados } from '@/utils/productos.js';
-import productos from '@/data/productos.json';
 
-export function getStaticPaths() {
-    function getSlug(name: string) {
-        return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    }
+const todosLosProductos = await getProductosAgrupados();
+const producto = todosLosProductos.find((item) => item.slug === Astro.params.slug);
 
-    function contarTalles(strings: string[]) {
-        const counts: Record<string, number> = {};
-        for (const t of strings) {
-        if (t) counts[t] = (counts[t] ?? 0) + 1;
-        }
-        return Object.entries(counts).map(([nombre, stock]) => ({ nombre, stock }));
-    }
-
-    const map = new Map();
-    for (const p of productos) {
-    const key = p.name.toLowerCase();
-    const talles = contarTalles(p.specs?.talle ?? []);
-    if (map.has(key)) {
-        const ex = map.get(key);
-        for (const t of talles) {
-            const found = ex.specs.talle.find((e: any) => e.nombre === t.nombre);
-            if (found) {
-                found.stock += t.stock;
-            } else {
-            ex.specs.talle.push({ ...t });
-            }
-        }
-        ex.stock = ex.specs.talle.reduce((sum: number, t: any) => sum + t.stock, 0);
-    }   
-    else {
-        map.set(key, {
-            ...p,
-            slug: getSlug(p.name),
-            stock: talles.reduce((sum: number, t: any) => sum + t.stock, 0),
-            specs: { ...p.specs, talle: talles },
-        });
-    }
-    }
-
-    return Array.from(map.values()).map((producto) => ({
-        params: { slug: producto.slug },
-        props: { producto },
-    }));
+if (!producto) {
+    Astro.response.status = 404;
 }
 
-const { producto } = Astro.props;
-const todosLosProductos = getProductosAgrupados();
-
-const productDescription = `Comprá ${producto.name} de ${producto.marca} en 24/7 Sneakers BA. Precio: $${producto.price}. Envíos a todo el país.`;
-const productImage = producto.images?.[0];
+const productTitle = producto?.name ?? "Producto no encontrado";
+const productDescription = producto
+    ? `Compra ${producto.name} de ${producto.marca} en B&B KICKS. Precio: $${producto.price}. Envios a todo el pais.`
+    : "El producto que buscas no esta disponible en este momento.";
+const productImage = producto?.images?.[0];
 ---
 
 <Layout
-    title={producto.name}
+    title={productTitle}
     description={productDescription}
     ogImage={productImage}
 >
     <Header />
-    <ProductoDetalle producto={producto} />
-    <ProductosSimilares producto={producto} productos={todosLosProductos} client:load />
+    {producto ? (
+        <>
+            <ProductoDetalle producto={producto} />
+            <ProductosSimilares producto={producto} productos={todosLosProductos} client:load />
+        </>
+    ) : (
+        <section class="mx-auto max-w-6xl px-6 py-20">
+            <p class="text-sm uppercase tracking-[0.35em] text-black/45">Producto</p>
+            <h1 class="mt-4 text-4xl font-black uppercase tracking-tight text-black">No encontrado</h1>
+            <p class="mt-4 max-w-xl text-lg text-black/65">
+                El producto que buscas ya no esta publicado o cambio de slug en Supabase.
+            </p>
+            <a
+                href="/"
+                class="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-black px-6 text-sm font-semibold text-secondary transition hover:bg-black/85"
+            >
+                Volver al inicio
+            </a>
+        </section>
+    )}
 </Layout>
