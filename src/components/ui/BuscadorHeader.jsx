@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 
 /** @param {{ productos: object[] }} props */
 export default function BuscadorHeader({ productos = [] }) {
+    const inputId = useId();
     const [busqueda, setBusqueda] = useState("");
     const [abierto, setAbierto] = useState(false);
     const ref = useRef(null);
@@ -68,7 +69,8 @@ export default function BuscadorHeader({ productos = [] }) {
                 <input
                     type="text"
                     placeholder="Buscar..."
-                    id="busqueda-header"
+                    id={inputId}
+                    name="busqueda"
                     value={busqueda}
                     onInput={handleInput}
                     onFocus={() => busqueda && setAbierto(true)}
