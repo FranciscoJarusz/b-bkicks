@@ -189,7 +189,7 @@ export default function AgregarAlCarrito({ producto }) {
                 alignItems: 'center',
                 gap: '0.6rem',
                 background: 'var(--color-black)',
-                color: 'var(--color-white)',
+                color: 'var(--color-secondary)',
                 borderRadius: '1rem',
                 padding: '0.75rem 1.25rem',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.18)',

@@ -47,14 +47,10 @@ export default function Carrito() {
         
         <button
             onClick={() => setAbierto(true)}
-            className="relative flex items-center gap-2 text-secondary hover:text-primary transition-colors duration-300 cursor-pointer"
+            className="relative flex h-11 w-11 items-center justify-center text-secondary rounded-full transition-all duration-300 hover:bg-white/8 cursor-pointer"
             aria-label="Abrir carrito"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" nfill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                    <line x1="3" y1="6" x2="21" y2="6" strokeLinecap="round" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 10a4 4 0 01-8 0"/>
-            </svg>
+            <img src="/shop.svg" alt="Carrito de compras" className="w-8 h-8"/>
 
             {cantidad > 0 && (
                 <span className="absolute -top-2 -right-2 bg-primary text-secondary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -67,18 +63,30 @@ export default function Carrito() {
             <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setAbierto(false)}/>
         )}
 
+        {abierto && (
+            <button
+                onClick={() => setAbierto(false)}
+                className="fixed right-4 top-[calc(env(safe-area-inset-top)+2.85rem)] z-70 flex h-11 w-11 items-center justify-center rounded-full text-secondary transition-all duration-300 hover:bg-white/8 md:hidden cursor-pointer"
+                aria-label="Cerrar carrito"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        )}
+
         <aside
-            className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ${
+            className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-black text-secondary shadow-2xl transition-transform duration-300 md:max-w-md ${
             abierto ? "translate-x-0" : "translate-x-full"
             }`}
         >
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray/20">
+            <div className="flex min-h-[calc(env(safe-area-inset-top)+6.7rem)] items-end justify-between border-b border-secondary/10 px-6 pb-6 pt-[env(safe-area-inset-top)] md:min-h-0 md:items-center md:px-6 md:py-5">
             
-                <h2 className="text-lg font-bold text-gray-900">Carrito de compras</h2>
+                <h2 className="text-lg font-bold text-secondary">Carrito de compras</h2>
 
                 <button
                     onClick={() => setAbierto(false)}
-                    className="text-gray/50 hover:text-black transition-colors duration-300 cursor-pointer"
+                    className="hidden cursor-pointer text-secondary/55 transition-colors duration-300 hover:text-secondary md:inline-flex"
                     aria-label="Cerrar carrito"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -92,7 +100,7 @@ export default function Carrito() {
                 
                 {items.length === 0 ? (
                     
-                    <div className="flex items-center justify-center h-full gap-3 text-gray-accent">
+                    <div className="flex h-full items-center justify-center gap-3 text-secondary/55">
                         
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
@@ -125,21 +133,21 @@ export default function Carrito() {
 
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                             
-                            <p className="text-xs text-gray/50 uppercase font-semibold truncate">
+                            <p className="truncate text-xs font-semibold uppercase text-secondary/45">
                                 {[item.category, item.marca].filter(Boolean).join(" ")}
                             </p>
 
-                            <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
+                            <p className="truncate text-sm leading-tight font-semibold text-secondary">
                                 {item.name}
                                 {item.talle ? ` (${item.talle})` : ""}
                             </p>
 
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 border border-gray/30 rounded-xl px-3 py-1 w-fit">
+                                <div className="flex w-fit items-center gap-2 rounded-xl border border-secondary/15 px-3 py-1">
                                     <button
                                         onClick={() => restarDelCarrito(item.slug, item.talle)}
                                         disabled={item.cantidad <= 1}
-                                        className={`w-6 h-6 flex items-center justify-center cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${item.cantidad > 1 ? "hover:text-primary" : ""}`}
+                                        className={`flex h-6 w-6 items-center justify-center cursor-pointer leading-none text-secondary/75 transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${item.cantidad > 1 ? "hover:text-primary" : ""}`}
                                         aria-label="Restar uno"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -147,7 +155,7 @@ export default function Carrito() {
                                         </svg>
                                     </button>
 
-                                    <span className="text-sm font-semibold w-4 text-center">
+                                    <span className="w-4 text-center text-sm font-semibold text-secondary">
                                         {item.cantidad}
                                     </span>
 
@@ -165,7 +173,7 @@ export default function Carrito() {
                                         })
                                         }
                                         disabled={item.stock != null && item.cantidad >= item.stock}
-                                        className={`w-6 h-6 flex items-center justify-center cursor-pointer leading-none text-gray/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${item.stock == null || item.cantidad < item.stock ? "hover:text-primary" : ""}`}
+                                        className={`flex h-6 w-6 items-center justify-center cursor-pointer leading-none text-secondary/75 transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${item.stock == null || item.cantidad < item.stock ? "hover:text-primary" : ""}`}
                                         aria-label="Sumar uno"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -176,7 +184,7 @@ export default function Carrito() {
 
                                 <button
                                     onClick={() => quitarDelCarrito(item.slug, item.talle)}
-                                    className="text-sm ml-auto text-gray/80 hover:text-black transition-all duration-300 cursor-pointer"
+                                    className="ml-auto cursor-pointer text-sm text-secondary/65 transition-all duration-300 hover:text-secondary"
                                     aria-label="Eliminar"
                                 >
                                     Borrar
@@ -195,9 +203,9 @@ export default function Carrito() {
             </div>
 
             {items.length > 0 && (
-                <div className="px-6 py-5 border-t border-gray/20 flex flex-col gap-3">
+                <div className="flex flex-col gap-3 border-t border-secondary/10 px-6 py-5">
 
-                    <div className="flex text-xl font-bold text-black justify-between items-center">
+                    <div className="flex items-center justify-between text-xl font-bold text-secondary">
                         <span>Total:</span>
                         
                         <span>
@@ -207,14 +215,14 @@ export default function Carrito() {
 
                     <button
                         onClick={finalizarCompra}
-                        className="w-full bg-primary hover:bg-primary-accent text-secondary font-semibold py-3 rounded-xl transition-all duration-300 cursor-pointer"
+                        className="w-full cursor-pointer rounded-xl bg-primary py-3 font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent"
                     >
                         Finalizar compra
                     </button>
 
                     <button
                     onClick={vaciarCarrito}
-                    className="text-xs text-gray/80 hover:text-black transition-all duration-300 text-center cursor-pointer"
+                    className="cursor-pointer text-center text-xs text-secondary/65 transition-all duration-300 hover:text-secondary"
                     >
                         Vaciar carrito
                     </button>

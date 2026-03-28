@@ -56,7 +56,7 @@ export default function BuscadorHeader({ productos = [] }) {
 
     return (
         <div ref={ref} className="relative w-full">
-            <div className="flex items-center gap-2 border border-white/10 focus-within:border-primary transition-all duration-300 rounded-xl px-3 py-1.5 w-full">
+            <div className="flex items-center gap-2 border border-secondary/10 focus-within:border-primary transition-all duration-300 rounded-xl px-3 py-1.5 w-full">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-4 h-4 text-secondary/40 hover:text-secondary transition-colors shrink-0 cursor-pointer"
@@ -73,7 +73,7 @@ export default function BuscadorHeader({ productos = [] }) {
                     onInput={handleInput}
                     onFocus={() => busqueda && setAbierto(true)}
                     onKeyDown={(e) => e.key === 'Enter' && buscar()}
-                    className="bg-transparent text-secondary placeholder-white/40 text-sm focus:outline-none w-full"
+                    className="bg-transparent text-secondary placeholder-secondary/40 text-sm focus:outline-none w-full"
                 />
                 {busqueda && (
                     <button
@@ -88,7 +88,7 @@ export default function BuscadorHeader({ productos = [] }) {
             </div>
 
             {abierto && sugerencias.length > 0 && (
-                <ul className="absolute top-full mt-2 left-0 w-full bg-white rounded-xl shadow-2xl overflow-hidden z-50">
+                <ul className="absolute top-full mt-2 left-0 w-full bg-secondary rounded-xl shadow-2xl overflow-hidden z-50">
                     {sugerencias.map((p) => (
                         <li key={p.slug}>
                             <button
