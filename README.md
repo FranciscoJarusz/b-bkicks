@@ -8,7 +8,7 @@ Tienda de sneakers y streetwear construida con Astro, React y Supabase.
 - React 19
 - Tailwind CSS 4
 - Supabase
-- Node adapter para render del lado del servidor
+- Vercel adapter para render del lado del servidor
 
 ## Que hace hoy
 
@@ -44,6 +44,25 @@ Todos los comandos se corren desde la raiz del proyecto.
 | `npm run build` | Genera el build |
 | `npm run preview` | Previsualiza el build |
 | `npm run import:supabase` | Importa `src/data/productos.json` a Supabase |
+
+## Deploy en Vercel
+
+El proyecto ya esta configurado para Vercel con `@astrojs/vercel/serverless`.
+
+En Vercel:
+
+1. Importa el repo.
+2. Deja los comandos por defecto:
+   - Build Command: `npm run build`
+   - Install Command: `npm install`
+3. Agrega estas Environment Variables:
+   - `PUBLIC_SUPABASE_URL`
+   - `PUBLIC_SUPABASE_ANON_KEY`
+   - `PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET`
+   - `PUBLIC_ADMIN_EMAIL`
+4. Haz deploy.
+
+No hace falta agregar un `vercel.json` para la configuracion actual.
 
 ## Estructura
 
