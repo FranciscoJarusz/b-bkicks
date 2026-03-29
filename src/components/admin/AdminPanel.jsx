@@ -38,6 +38,66 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+const WEBP_QUALITY = 0.82;
+const BYPASS_WEBP_TYPES = new Set(["image/gif", "image/svg+xml"]);
+
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error(`No pudimos procesar la imagen ${file.name}.`));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("No pudimos convertir la imagen antes de subirla."));
+        return;
+      }
+
+      resolve(blob);
+    }, type, quality);
+  });
+}
+
+async function convertImageToWebp(file) {
+  if (!file?.type?.startsWith("image/")) return file;
+  if (BYPASS_WEBP_TYPES.has(file.type) || file.type === "image/webp") return file;
+
+  const image = await loadImageFromFile(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth || image.width;
+  canvas.height = image.naturalHeight || image.height;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("No pudimos preparar la optimizacion de la imagen.");
+  }
+
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  const blob = await canvasToBlob(canvas, "image/webp", WEBP_QUALITY);
+  const originalName = file.name.replace(/\.[^.]+$/, "") || `imagen-${Date.now()}`;
+
+  return new File([blob], `${originalName}.webp`, {
+    type: "image/webp",
+    lastModified: Date.now(),
+  });
+}
+
 function getStoragePathFromUrl(url) {
   if (!url) return null;
 
@@ -101,12 +161,16 @@ async function uploadFiles(productName, files, startIndex = 0) {
   const folder = slugify(productName) || `producto-${Date.now()}`;
 
   for (const [index, file] of files.entries()) {
-    const extension = file.name.includes(".") ? file.name.split(".").pop() : "webp";
+    const optimizedFile = await convertImageToWebp(file);
+    const extension = optimizedFile.name.includes(".") ? optimizedFile.name.split(".").pop() : "webp";
     const filePath = `${folder}/${Date.now()}-${startIndex + index}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .upload(filePath, file, { upsert: false });
+      .upload(filePath, optimizedFile, {
+        upsert: false,
+        contentType: optimizedFile.type || undefined,
+      });
 
     if (uploadError) throw uploadError;
 
