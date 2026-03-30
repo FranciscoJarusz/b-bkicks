@@ -5,41 +5,80 @@ import Card from "@/components/ui/Card.jsx";
 export default function ResultadosBusqueda({ productos = [] }) {
     const [q, setQ] = useState("");
 
+    function normalizeText(value) {
+        return String(value ?? "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+    }
+
+    function getDedupKey(producto) {
+        return [
+            normalizeText(producto.slug),
+            normalizeText(producto.name),
+            normalizeText(producto.marca),
+            Number(producto.price ?? 0),
+            normalizeText(producto.image),
+        ].join("::");
+    }
+
+    function getRenderKey(producto) {
+        return String(producto.id ?? getDedupKey(producto));
+    }
+
+    function dedupeProducts(lista) {
+        const seen = new Set();
+
+        return lista.filter((producto) => {
+            const key = getDedupKey(producto);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         setQ(params.get("q")?.trim() ?? "");
     }, []);
 
-    const resultados = q.length === 0 ? productos : productos.filter((p) => {
-        const query = q.toLowerCase();
-        return (
-            p.name?.toLowerCase().includes(query) ||
-            p.marca?.toLowerCase().includes(query) ||
-            p.category?.toLowerCase().includes(query)
-        );
-    });
+    const productosUnicos = dedupeProducts(productos);
+    const query = normalizeText(q);
 
-    const sugerencias = productos
-        .filter(p => p.marca?.toLowerCase().includes(q.toLowerCase()))
-        .filter(p => !resultados.includes(p))
+    const resultados = query.length === 0
+        ? productosUnicos
+        : (() => {
+            const porMarca = productosUnicos.filter((p) =>
+                normalizeText(p.marca).includes(query)
+            );
+
+            if (porMarca.length > 0) {
+                return porMarca;
+            }
+
+            return productosUnicos.filter((p) =>
+                normalizeText(p.name).includes(query) ||
+                normalizeText(p.marca).includes(query) ||
+                normalizeText(p.category).includes(query)
+            );
+        })();
+
+    const resultadoKeys = new Set(resultados.map(getDedupKey));
+
+    const sugerencias = productosUnicos
+        .filter((p) => normalizeText(p.marca).includes(query))
+        .filter((p) => !resultadoKeys.has(getDedupKey(p)))
         .sort(() => Math.random() - 0.5)
         .slice(0, 4)
-        // fallback: si no hay coincidencia de marca, mostrar random
         .concat(
-            productos
-                .filter(p => !resultados.includes(p))
+            productosUnicos
+                .filter((p) => !resultadoKeys.has(getDedupKey(p)))
                 .sort(() => Math.random() - 0.5)
         )
-        .filter((p, i, arr) => arr.indexOf(p) === i)
-        .slice(0, 4);
-
-    const categoriasResultados = new Set(resultados.map(p => p.category).filter(Boolean));
-    const marcasResultados = new Set(resultados.map(p => p.marca).filter(Boolean));
-
-    const relacionados = productos
-        .filter(p => !resultados.includes(p))
-        .filter(p => marcasResultados.has(p.marca))
-        .sort(() => Math.random() - 0.5)
+        .filter((p, index, arr) =>
+            arr.findIndex((item) => getDedupKey(item) === getDedupKey(p)) === index
+        )
         .slice(0, 4);
 
     return (
@@ -69,7 +108,7 @@ export default function ResultadosBusqueda({ productos = [] }) {
             {resultados.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-20">
                     {resultados.map((p, i) => (
-                        <Card key={p.slug} producto={p} priority={i === 0} />
+                        <Card key={getRenderKey(p)} producto={p} priority={i === 0} />
                     ))}
                 </div>
             )}
@@ -79,7 +118,7 @@ export default function ResultadosBusqueda({ productos = [] }) {
                     <h2 className="text-2xl font-bold text-black">Sugerencias</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-20">
                         {sugerencias.map((p) => (
-                            <Card key={p.slug} producto={p} />
+                            <Card key={getRenderKey(p)} producto={p} />
                         ))}
                     </div>
                 </div>

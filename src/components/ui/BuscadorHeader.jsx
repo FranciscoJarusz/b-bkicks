@@ -7,19 +7,54 @@ export default function BuscadorHeader({ productos = [] }) {
     const [abierto, setAbierto] = useState(false);
     const ref = useRef(null);
 
+    function normalizeText(value) {
+        return String(value ?? "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+    }
+
+    function getDedupKey(producto) {
+        return [
+            normalizeText(producto.slug),
+            normalizeText(producto.name),
+            normalizeText(producto.marca),
+            Number(producto.price ?? 0),
+            normalizeText(producto.image),
+        ].join("::");
+    }
+
+    function getRenderKey(producto) {
+        return String(producto.id ?? getDedupKey(producto));
+    }
+
+    function dedupeProducts(lista) {
+        const seen = new Set();
+
+        return lista.filter((producto) => {
+            const key = getDedupKey(producto);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const q = params.get("q")?.trim() ?? "";
         if (q) setBusqueda(q);
     }, []);
 
-    const sugerencias = busqueda.trim().length < 1 ? [] : productos
+    const sugerencias = busqueda.trim().length < 1 ? [] : dedupeProducts(productos)
         .filter((p) => {
-            const q = busqueda.toLowerCase();
+            const q = normalizeText(busqueda);
             return (
-                p.name?.toLowerCase().includes(q) ||
-                (Array.isArray(p.marca) ? p.marca.some(m => m.toLowerCase().includes(q)) : p.marca?.toLowerCase().includes(q)) ||
-                p.category?.toLowerCase().includes(q)
+                normalizeText(p.name).includes(q) ||
+                (Array.isArray(p.marca)
+                    ? p.marca.some((m) => normalizeText(m).includes(q))
+                    : normalizeText(p.marca).includes(q)) ||
+                normalizeText(p.category).includes(q)
             );
         })
         .slice(0, 6);
@@ -92,7 +127,7 @@ export default function BuscadorHeader({ productos = [] }) {
             {abierto && sugerencias.length > 0 && (
                 <ul className="absolute top-full mt-2 left-0 w-full bg-secondary rounded-xl shadow-2xl overflow-hidden z-50">
                     {sugerencias.map((p) => (
-                        <li key={p.slug}>
+                        <li key={getRenderKey(p)}>
                             <button
                                 onClick={() => seleccionar(p)}
                                 className="flex items-center gap-3 w-full px-3 py-2.5 hover:bg-black/30 transition-all duration-300 cursor-pointer text-left"
