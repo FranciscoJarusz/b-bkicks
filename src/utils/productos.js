@@ -5,30 +5,80 @@ export function getSlug(nombre) {
 }
 
 function normalizeSupabaseProducts(rows = []) {
-  return rows.map((producto) => {
-    const talles = (producto.producto_talle ?? []).map((item) => ({
-      nombre: item.talle?.nombre ?? "",
-      stock: item.stock ?? 0,
-    }));
+  const toArray = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+  const grouped = new Map();
 
-    const stock = talles.reduce((sum, item) => sum + item.stock, 0);
-    const images = (producto.producto_imagen ?? [])
-      .slice()
-      .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
-      .map((item) => item.url)
-      .filter(Boolean);
-    const image = images[0] ?? producto.imagen_url ?? null;
-    const priceFromSizes = producto.producto_talle?.find((item) => item.precio != null)?.precio;
+  for (const producto of rows) {
+    const key = String(producto.id_producto ?? getSlug(producto.nombre ?? ""));
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        id: producto.id_producto,
+        name: producto.nombre,
+        slug: getSlug(producto.nombre),
+        category: "",
+        marca: producto.marca?.nombre ?? "",
+        description: "",
+        price: Number(producto.precio_base ?? 0),
+        fallbackImage: producto.imagen_url ?? null,
+        tallesMap: new Map(),
+        imagesMap: new Map(),
+      });
+    }
+
+    const item = grouped.get(key);
+
+    for (const talle of toArray(producto.producto_talle)) {
+      const talleNombre = talle?.talle?.nombre ?? "";
+      if (!talleNombre) continue;
+
+      const current = item.tallesMap.get(talleNombre);
+      const stock = Number(talle?.stock ?? 0);
+      const precio = talle?.precio != null ? Number(talle.precio) : undefined;
+
+      if (!current) {
+        item.tallesMap.set(talleNombre, { nombre: talleNombre, stock, precio });
+      } else {
+        item.tallesMap.set(talleNombre, {
+          nombre: talleNombre,
+          stock: Math.max(current.stock, stock),
+          precio: current.precio ?? precio,
+        });
+      }
+
+      if (item.price === 0 && precio != null) {
+        item.price = precio;
+      }
+    }
+
+    for (const image of toArray(producto.producto_imagen)) {
+      const url = image?.url;
+      if (!url) continue;
+      item.imagesMap.set(url, { url, orden: image?.orden ?? 0 });
+    }
+  }
+
+  return Array.from(grouped.values()).map((item) => {
+    const talles = Array.from(item.tallesMap.values()).map(({ nombre, stock }) => ({
+      nombre,
+      stock,
+    }));
+    const stock = talles.reduce((sum, talle) => sum + talle.stock, 0);
+    const images = Array.from(item.imagesMap.values())
+      .sort((a, b) => a.orden - b.orden)
+      .map((image) => image.url);
+    const image = images[0] ?? item.fallbackImage ?? null;
 
     return {
-      name: producto.nombre,
-      slug: getSlug(producto.nombre),
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
       image,
       images: images.length > 0 ? images : image ? [image] : [],
-      category: "",
-      marca: producto.marca?.nombre ?? "",
-      description: "",
-      price: Number(priceFromSizes ?? producto.precio_base ?? 0),
+      category: item.category,
+      marca: item.marca,
+      description: item.description,
+      price: Number(item.price ?? 0),
       stock,
       specs: {
         talle: talles,
