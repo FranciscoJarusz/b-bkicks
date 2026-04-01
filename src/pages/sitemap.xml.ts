@@ -3,7 +3,13 @@ import { getProductosAgrupados } from "@/utils/productos.js";
 
 export const GET: APIRoute = async ({ url }) => {
   const base = url.origin;
-  const productos = await getProductosAgrupados();
+  const todosProductos = await getProductosAgrupados();
+  const slugsVistos = new Set<string>();
+  const productos = todosProductos.filter((p) => {
+    if (slugsVistos.has(p.slug)) return false;
+    slugsVistos.add(p.slug);
+    return true;
+  });
 
   const staticRoutes = ["", "/busqueda"];
 
