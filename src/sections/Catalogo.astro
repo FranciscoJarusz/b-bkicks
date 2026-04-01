@@ -8,7 +8,7 @@ const productos = await getProductosAgrupados();
 
     <div class="flex flex-col gap-8 lg:gap-16 max-w-7xl mx-auto px-6">
 
-        <h1 class="text-4xl lg:text-6xl text-primary font-accent uppercase animate-fade-in-down animation-delay-200">Nuevos ingresos</h1>
+        <h2 class="text-4xl lg:text-6xl text-primary font-accent uppercase animate-fade-in-down animation-delay-200">Nuevos ingresos</h2>
 
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-20 animate-fade-in-down animate-delay-500">
             {productos.filter(p => p.stock > 0).reverse().slice(0, 12).map((producto) => (

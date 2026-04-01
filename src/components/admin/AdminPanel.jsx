@@ -1,8 +1,10 @@
 import { useEffect, useState, useTransition } from "react";
 import { supabase } from "@/lib/supabase.js";
 
-const ADMIN_EMAIL = import.meta.env.PUBLIC_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
-const STORAGE_BUCKET = import.meta.env.PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET?.trim() || "productos";
+const ADMIN_EMAIL =
+  import.meta.env.PUBLIC_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
+const STORAGE_BUCKET =
+  import.meta.env.PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET?.trim() || "productos";
 
 const initialProductForm = {
   nombre: "",
@@ -62,20 +64,25 @@ function loadImageFromFile(file) {
 
 function canvasToBlob(canvas, type, quality) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error("No pudimos convertir la imagen antes de subirla."));
-        return;
-      }
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("No pudimos convertir la imagen antes de subirla."));
+          return;
+        }
 
-      resolve(blob);
-    }, type, quality);
+        resolve(blob);
+      },
+      type,
+      quality,
+    );
   });
 }
 
 async function convertImageToWebp(file) {
   if (!file?.type?.startsWith("image/")) return file;
-  if (BYPASS_WEBP_TYPES.has(file.type) || file.type === "image/webp") return file;
+  if (BYPASS_WEBP_TYPES.has(file.type) || file.type === "image/webp")
+    return file;
 
   const image = await loadImageFromFile(file);
   const canvas = document.createElement("canvas");
@@ -90,7 +97,8 @@ async function convertImageToWebp(file) {
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
   const blob = await canvasToBlob(canvas, "image/webp", WEBP_QUALITY);
-  const originalName = file.name.replace(/\.[^.]+$/, "") || `imagen-${Date.now()}`;
+  const originalName =
+    file.name.replace(/\.[^.]+$/, "") || `imagen-${Date.now()}`;
 
   return new File([blob], `${originalName}.webp`, {
     type: "image/webp",
@@ -162,7 +170,9 @@ async function uploadFiles(productName, files, startIndex = 0) {
 
   for (const [index, file] of files.entries()) {
     const optimizedFile = await convertImageToWebp(file);
-    const extension = optimizedFile.name.includes(".") ? optimizedFile.name.split(".").pop() : "webp";
+    const extension = optimizedFile.name.includes(".")
+      ? optimizedFile.name.split(".").pop()
+      : "webp";
     const filePath = `${folder}/${Date.now()}-${startIndex + index}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
@@ -174,7 +184,9 @@ async function uploadFiles(productName, files, startIndex = 0) {
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+    const { data } = supabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(filePath);
     uploaded.push(data.publicUrl);
   }
 
@@ -196,7 +208,9 @@ async function replaceProductImages(productId, imageUrls) {
       orden,
     }));
 
-    const { error: insertError } = await supabase.from("producto_imagen").insert(payload);
+    const { error: insertError } = await supabase
+      .from("producto_imagen")
+      .insert(payload);
     if (insertError) throw insertError;
   }
 
@@ -211,7 +225,9 @@ async function replaceProductImages(productId, imageUrls) {
 async function appendProductImages(producto, imageUrls) {
   if (imageUrls.length === 0) return;
 
-  const existing = [...(producto.producto_imagen ?? [])].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  const existing = [...(producto.producto_imagen ?? [])].sort(
+    (a, b) => (a.orden ?? 0) - (b.orden ?? 0),
+  );
   const payload = imageUrls.map((url, index) => ({
     id_producto: producto.id_producto,
     url,
@@ -264,14 +280,16 @@ export default function AdminPanel() {
       }
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!alive) return;
-      setSession(nextSession);
-      if (!nextSession) {
-        setProductos([]);
-        setStatus("Ingresa con tu cuenta para administrar el stock.");
-      }
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, nextSession) => {
+        if (!alive) return;
+        setSession(nextSession);
+        if (!nextSession) {
+          setProductos([]);
+          setStatus("Ingresa con tu cuenta para administrar el stock.");
+        }
+      },
+    );
 
     return () => {
       alive = false;
@@ -294,7 +312,8 @@ export default function AdminPanel() {
     setStatus("Cargando productos...");
     const { data, error } = await supabase
       .from("producto")
-      .select(`
+      .select(
+        `
         id_producto,
         nombre,
         precio_base,
@@ -315,7 +334,8 @@ export default function AdminPanel() {
             nombre
           )
         )
-      `)
+      `,
+      )
       .order("id_producto", { ascending: false });
 
     if (error) {
@@ -329,7 +349,9 @@ export default function AdminPanel() {
     }));
 
     setProductos(normalized);
-    setStatus(normalized.length > 0 ? "" : "No hay productos cargados todavia.");
+    setStatus(
+      normalized.length > 0 ? "" : "No hay productos cargados todavia.",
+    );
   }
 
   async function handleLogin(event) {
@@ -370,10 +392,12 @@ export default function AdminPanel() {
         return {
           ...producto,
           producto_talle: producto.producto_talle.map((variante) =>
-            variante.id_talle === talleId ? { ...variante, [field]: value } : variante
+            variante.id_talle === talleId
+              ? { ...variante, [field]: value }
+              : variante,
           ),
         };
-      })
+      }),
     );
   }
 
@@ -465,7 +489,11 @@ export default function AdminPanel() {
       setStatus("Talle agregado.");
       await loadProductos();
     } catch (error) {
-      setStatus(error.message?.includes("duplicate") ? "Ese talle ya existe para el producto." : "No pudimos agregar el talle.");
+      setStatus(
+        error.message?.includes("duplicate")
+          ? "Ese talle ya existe para el producto."
+          : "No pudimos agregar el talle.",
+      );
     } finally {
       setPendingKey("");
     }
@@ -501,12 +529,14 @@ export default function AdminPanel() {
 
       if (productForm.talle.trim()) {
         const sizeId = await getOrCreateSize(productForm.talle);
-        const { error: variantError } = await supabase.from("producto_talle").insert({
-          id_producto: product.id_producto,
-          id_talle: sizeId,
-          stock: Number(productForm.stock || 0),
-          precio: Number(productForm.precioBase || 0),
-        });
+        const { error: variantError } = await supabase
+          .from("producto_talle")
+          .insert({
+            id_producto: product.id_producto,
+            id_talle: sizeId,
+            stock: Number(productForm.stock || 0),
+            precio: Number(productForm.precioBase || 0),
+          });
 
         if (variantError) throw variantError;
       }
@@ -521,7 +551,7 @@ export default function AdminPanel() {
       setStatus(
         error?.message?.includes("storage")
           ? `No pudimos subir las imagenes al bucket. ${error.message}`
-          : `No pudimos crear el producto. ${error?.message ?? "Revisa las policies y el bucket de Storage."}`
+          : `No pudimos crear el producto. ${error?.message ?? "Revisa las policies y el bucket de Storage."}`,
       );
     } finally {
       setPendingKey("");
@@ -541,16 +571,25 @@ export default function AdminPanel() {
 
     try {
       const existingCount = (producto.producto_imagen ?? []).length;
-      const uploadedUrls = await uploadFiles(producto.nombre, files, existingCount);
+      const uploadedUrls = await uploadFiles(
+        producto.nombre,
+        files,
+        existingCount,
+      );
       await appendProductImages(producto, uploadedUrls);
 
       setProductImageFiles((prev) => ({ ...prev, [producto.id_producto]: [] }));
-      setProductImageKeys((prev) => ({ ...prev, [producto.id_producto]: (prev[producto.id_producto] ?? 0) + 1 }));
+      setProductImageKeys((prev) => ({
+        ...prev,
+        [producto.id_producto]: (prev[producto.id_producto] ?? 0) + 1,
+      }));
       setStatus("Imagenes agregadas.");
       await loadProductos();
     } catch (error) {
       console.error("Error al subir imagenes:", error);
-      setStatus(`No pudimos subir las imagenes del producto. ${error?.message ?? ""}`.trim());
+      setStatus(
+        `No pudimos subir las imagenes del producto. ${error?.message ?? ""}`.trim(),
+      );
     } finally {
       setPendingKey("");
     }
@@ -559,7 +598,9 @@ export default function AdminPanel() {
   async function deleteProductRecord(producto, key) {
     try {
       const imagePaths = [
-        ...(producto.producto_imagen ?? []).map((item) => getStoragePathFromUrl(item.url)),
+        ...(producto.producto_imagen ?? []).map((item) =>
+          getStoragePathFromUrl(item.url),
+        ),
         getStoragePathFromUrl(producto.imagen_url),
       ].filter(Boolean);
 
@@ -571,11 +612,17 @@ export default function AdminPanel() {
 
       if (error) throw error;
       if (!deletedRows || deletedRows.length === 0) {
-        throw new Error("Supabase no confirmo el borrado del producto. Revisa la policy DELETE de producto.");
+        throw new Error(
+          "Supabase no confirmo el borrado del producto. Revisa la policy DELETE de producto.",
+        );
       }
 
-      setProductos((prev) => prev.filter((item) => item.id_producto !== producto.id_producto));
-      setSelectedProductIds((prev) => prev.filter((id) => id !== producto.id_producto));
+      setProductos((prev) =>
+        prev.filter((item) => item.id_producto !== producto.id_producto),
+      );
+      setSelectedProductIds((prev) =>
+        prev.filter((id) => id !== producto.id_producto),
+      );
 
       if (expandedProductId === producto.id_producto) {
         setExpandedProductId(null);
@@ -585,10 +632,13 @@ export default function AdminPanel() {
 
       if (imagePaths.length > 0) {
         const uniquePaths = [...new Set(imagePaths)];
-        const { error: storageError } = await supabase.storage.from(STORAGE_BUCKET).remove(uniquePaths);
+        const { error: storageError } = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .remove(uniquePaths);
         if (storageError) {
           console.error("Error al borrar imagenes del bucket:", storageError);
-          statusMessage = "Producto eliminado. Las imagenes del bucket quedaron sin borrar.";
+          statusMessage =
+            "Producto eliminado. Las imagenes del bucket quedaron sin borrar.";
         }
       }
 
@@ -598,13 +648,16 @@ export default function AdminPanel() {
       console.error("Error al borrar producto:", error);
       return {
         ok: false,
-        message: `No pudimos borrar el producto. ${error?.message ?? ""}`.trim(),
+        message:
+          `No pudimos borrar el producto. ${error?.message ?? ""}`.trim(),
       };
     }
   }
 
   async function handleDeleteProduct(producto) {
-    const confirmed = window.confirm(`Vas a borrar "${producto.nombre}" completo. Esta accion no se puede deshacer.`);
+    const confirmed = window.confirm(
+      `Vas a borrar "${producto.nombre}" completo. Esta accion no se puede deshacer.`,
+    );
     if (!confirmed) return;
 
     const key = `delete-product-${producto.id_producto}`;
@@ -620,13 +673,17 @@ export default function AdminPanel() {
   }
 
   async function handleDeleteSelectedProducts() {
-    const selectedProducts = productos.filter((producto) => selectedProductIds.includes(producto.id_producto));
+    const selectedProducts = productos.filter((producto) =>
+      selectedProductIds.includes(producto.id_producto),
+    );
     if (selectedProducts.length === 0) {
       setStatus("Selecciona al menos un producto para borrar.");
       return;
     }
 
-    const confirmed = window.confirm(`Vas a borrar ${selectedProducts.length} producto(s). Esta accion no se puede deshacer.`);
+    const confirmed = window.confirm(
+      `Vas a borrar ${selectedProducts.length} producto(s). Esta accion no se puede deshacer.`,
+    );
     if (!confirmed) return;
 
     setPendingKey("delete-selected-products");
@@ -635,7 +692,10 @@ export default function AdminPanel() {
     let lastError = "";
 
     for (const producto of selectedProducts) {
-      const result = await deleteProductRecord(producto, "delete-selected-products");
+      const result = await deleteProductRecord(
+        producto,
+        "delete-selected-products",
+      );
       if (result.ok) {
         deletedCount += 1;
       } else {
@@ -655,7 +715,7 @@ export default function AdminPanel() {
     setStatus(
       deletedCount === 1
         ? "Se elimino 1 producto."
-        : `Se eliminaron ${deletedCount} productos.`
+        : `Se eliminaron ${deletedCount} productos.`,
     );
     await loadProductos();
   }
@@ -664,40 +724,48 @@ export default function AdminPanel() {
     setSelectedProductIds((prev) =>
       prev.includes(productId)
         ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+        : [...prev, productId],
     );
   }
 
   function toggleSelectAllProducts() {
     setSelectedProductIds((prev) =>
-      prev.length === productos.length ? [] : productos.map((producto) => producto.id_producto)
+      prev.length === productos.length
+        ? []
+        : productos.map((producto) => producto.id_producto),
     );
   }
 
-  const isAuthorized = session && (!ADMIN_EMAIL || session.user.email?.toLowerCase() === ADMIN_EMAIL);
+  const isAuthorized =
+    session &&
+    (!ADMIN_EMAIL || session.user.email?.toLowerCase() === ADMIN_EMAIL);
 
   if (!session || !isAuthorized) {
     return (
       <section className="flex min-h-screen items-center justify-center bg-secondary px-6 py-12 text-secondary">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-20 lg:gap-60 lg:grid-cols-[1.1fr_0.9fr]">
-
           <div className="flex flex-col justify-center">
-            <span className="text-xs uppercase tracking-[0.35em] text-black">Admin B&B KICKS</span>
+            <span className="text-xs uppercase tracking-[0.35em] text-black">
+              Admin B&B KICKS
+            </span>
             <h1 className="mt-4 max-w-xl font-accent text-5xl uppercase leading-none text-primary">
               Controla stock, talles y productos desde un solo lugar.
             </h1>
             <p className="mt-6 max-w-xl text-sm leading-6 text-black">
-              Este panel trabaja directo contra Supabase. Para que quede realmente seguro, necesitas
-              policies RLS y permisos del bucket para escribir solo al admin autenticado.
+              Este panel trabaja directo contra Supabase. Para que quede
+              realmente seguro, necesitas policies RLS y permisos del bucket
+              para escribir solo al admin autenticado.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-5 rounded-4xl border border-black/10 p-8 shadow-2xl shadow-black/20">
+          <form
+            onSubmit={handleLogin}
+            className="flex flex-col gap-5 rounded-4xl border border-black/10 p-8 shadow-2xl shadow-black/20"
+          >
             <div className="flex flex-col items-start">
               <h2 className="text-2xl font-bold text-black">Iniciar Sesión</h2>
               <p className="mt-2 text-sm text-black/50">{status}</p>
             </div>
-            
 
             <label className="text-sm flex flex-col gap-2">
               <span className="font-semibold text-primary text-lg">Email</span>
@@ -712,7 +780,9 @@ export default function AdminPanel() {
             </label>
 
             <label className="text-sm flex flex-col gap-2">
-              <span className="font-semibold text-primary text-lg">Contraseña</span>
+              <span className="font-semibold text-primary text-lg">
+                Contraseña
+              </span>
               <input
                 type="password"
                 value={password}
@@ -723,7 +793,9 @@ export default function AdminPanel() {
               />
             </label>
 
-            {authError && <p className="mt-4 text-sm text-red-300">{authError}</p>}
+            {authError && (
+              <p className="mt-4 text-sm text-red-300">{authError}</p>
+            )}
 
             <button
               type="submit"
@@ -743,9 +815,15 @@ export default function AdminPanel() {
         <div className="rounded-4xl py-10">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <span className="text-xs uppercase tracking-[0.3em] text-black/50">Panel Admin</span>
-              <h1 className="mt-2 font-accent text-5xl uppercase text-primary">Stock, talles, productos e imagenes</h1>
-              <p className="mt-2 text-sm text-black">Sesion activa: {session.user.email}</p>
+              <span className="text-xs uppercase tracking-[0.3em] text-black/50">
+                Panel Admin
+              </span>
+              <h2 className="mt-2 font-accent text-5xl uppercase text-primary">
+                Stock, talles, productos e imagenes
+              </h2>
+              <p className="mt-2 text-sm text-black">
+                Sesion activa: {session.user.email}
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -769,13 +847,15 @@ export default function AdminPanel() {
           {status && <p className="mt-4 text-sm text-black/50">{status}</p>}
         </div>
 
-        <form
-          onSubmit={handleCreateProduct}
-        >
+        <form onSubmit={handleCreateProduct}>
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
-              <span className="text-xs uppercase tracking-[0.3em] text-black/50">Nuevo producto</span>
-              <h2 className="mt-2 text-3xl font-semibold text-black">Cargar nuevo producto</h2>
+              <span className="text-xs uppercase tracking-[0.3em] text-black/50">
+                Nuevo producto
+              </span>
+              <h2 className="mt-2 text-3xl font-semibold text-black">
+                Cargar nuevo producto
+              </h2>
             </div>
             <button
               type="submit"
@@ -789,14 +869,24 @@ export default function AdminPanel() {
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <input
               value={productForm.nombre}
-              onChange={(event) => setProductForm((prev) => ({ ...prev, nombre: event.target.value }))}
+              onChange={(event) =>
+                setProductForm((prev) => ({
+                  ...prev,
+                  nombre: event.target.value,
+                }))
+              }
               className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
               placeholder="Nombre"
               required
             />
             <input
               value={productForm.marca}
-              onChange={(event) => setProductForm((prev) => ({ ...prev, marca: event.target.value }))}
+              onChange={(event) =>
+                setProductForm((prev) => ({
+                  ...prev,
+                  marca: event.target.value,
+                }))
+              }
               className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
               placeholder="Marca"
               required
@@ -806,14 +896,24 @@ export default function AdminPanel() {
               min="0"
               step="0.01"
               value={productForm.precioBase}
-              onChange={(event) => setProductForm((prev) => ({ ...prev, precioBase: event.target.value }))}
+              onChange={(event) =>
+                setProductForm((prev) => ({
+                  ...prev,
+                  precioBase: event.target.value,
+                }))
+              }
               className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
               placeholder="Precio base"
               required
             />
             <input
               value={productForm.talle}
-              onChange={(event) => setProductForm((prev) => ({ ...prev, talle: event.target.value }))}
+              onChange={(event) =>
+                setProductForm((prev) => ({
+                  ...prev,
+                  talle: event.target.value,
+                }))
+              }
               className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
               placeholder="Primer talle opcional"
             />
@@ -821,25 +921,38 @@ export default function AdminPanel() {
               type="number"
               min="0"
               value={productForm.stock}
-              onChange={(event) => setProductForm((prev) => ({ ...prev, stock: event.target.value }))}
+              onChange={(event) =>
+                setProductForm((prev) => ({
+                  ...prev,
+                  stock: event.target.value,
+                }))
+              }
               className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
               placeholder="Stock inicial"
             />
             <label className="flex min-h-28 flex-col justify-center rounded-2xl ring ring-black/50 px-4 py-3 text-sm text-black cursor-pointer">
-              <span className="text-black/50">Subir archivos al bucket {STORAGE_BUCKET}</span>
+              <span className="text-black/50">
+                Subir archivos al bucket {STORAGE_BUCKET}
+              </span>
               <input
                 key={productFilesKey}
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(event) => setProductFiles(Array.from(event.target.files ?? []))}
+                onChange={(event) =>
+                  setProductFiles(Array.from(event.target.files ?? []))
+                }
                 className="sr-only"
               />
               <span className="mt-3 font-semibold text-black">
-                {productFiles.length > 0 ? `${productFiles.length} archivo(s) seleccionados` : "Elegir archivos"}
+                {productFiles.length > 0
+                  ? `${productFiles.length} archivo(s) seleccionados`
+                  : "Elegir archivos"}
               </span>
               <span className="mt-2 text-xs text-black/50">
-                {productFiles.length > 0 ? "Listos para subir" : "Todavia no seleccionaste archivos"}
+                {productFiles.length > 0
+                  ? "Listos para subir"
+                  : "Todavia no seleccionaste archivos"}
               </span>
             </label>
           </div>
@@ -850,7 +963,10 @@ export default function AdminPanel() {
             <label className="flex items-center gap-3 text-sm font-medium text-black">
               <input
                 type="checkbox"
-                checked={productos.length > 0 && selectedProductIds.length === productos.length}
+                checked={
+                  productos.length > 0 &&
+                  selectedProductIds.length === productos.length
+                }
                 onChange={toggleSelectAllProducts}
                 className="h-4 w-4 accent-primary cursor-pointer"
               />
@@ -863,11 +979,16 @@ export default function AdminPanel() {
 
             <button
               type="button"
-              disabled={selectedProductIds.length === 0 || pendingKey === "delete-selected-products"}
+              disabled={
+                selectedProductIds.length === 0 ||
+                pendingKey === "delete-selected-products"
+              }
               onClick={handleDeleteSelectedProducts}
               className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
             >
-              {pendingKey === "delete-selected-products" ? "Borrando..." : "Borrar seleccionados"}
+              {pendingKey === "delete-selected-products"
+                ? "Borrando..."
+                : "Borrar seleccionados"}
             </button>
           </div>
 
@@ -883,20 +1004,31 @@ export default function AdminPanel() {
               .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
               .map((item) => item.url);
             const image = orderedImages[0] ?? producto.imagen_url;
-            const newVariant = newVariantForms[producto.id_producto] ?? initialVariantForm;
+            const newVariant =
+              newVariantForms[producto.id_producto] ?? initialVariantForm;
             const imageInputKey = productImageKeys[producto.id_producto] ?? 0;
             const queuedFiles = productImageFiles[producto.id_producto] ?? [];
-            const totalStock = (producto.producto_talle ?? []).reduce((sum, item) => sum + Number(item.stock ?? 0), 0);
+            const totalStock = (producto.producto_talle ?? []).reduce(
+              (sum, item) => sum + Number(item.stock ?? 0),
+              0,
+            );
             const isExpanded = expandedProductId === producto.id_producto;
 
             return (
-              <div key={producto.id_producto} className="border-t border-black/10 bg-secondary first:border-t-0">
+              <div
+                key={producto.id_producto}
+                className="border-t border-black/10 bg-secondary first:border-t-0"
+              >
                 <div className="grid gap-3 px-4 py-4 md:grid-cols-[32px_minmax(0,1.6fr)_120px_120px_140px] md:items-center">
                   <div className="flex items-center justify-center">
                     <input
                       type="checkbox"
-                      checked={selectedProductIds.includes(producto.id_producto)}
-                      onChange={() => toggleProductSelection(producto.id_producto)}
+                      checked={selectedProductIds.includes(
+                        producto.id_producto,
+                      )}
+                      onChange={() =>
+                        toggleProductSelection(producto.id_producto)
+                      }
                       className="h-4 w-4 accent-primary"
                     />
                   </div>
@@ -904,7 +1036,11 @@ export default function AdminPanel() {
                   <div className="flex items-center gap-3">
                     <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-black/10 ring-1 ring-black/10">
                       {image ? (
-                        <img src={image} alt={producto.nombre} className="h-full w-full object-cover" />
+                        <img
+                          src={image}
+                          alt={producto.nombre}
+                          className="h-full w-full object-cover"
+                        />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-[11px] text-black/50">
                           Sin img
@@ -916,37 +1052,53 @@ export default function AdminPanel() {
                       <p className="truncate text-[11px] uppercase tracking-[0.22em] text-black/50">
                         {producto.marca?.nombre ?? "Sin marca"}
                       </p>
-                      <h2 className="truncate text-lg font-bold text-black">{producto.nombre}</h2>
-                      <p className="text-sm font-semibold text-primary">${formatMoney(producto.precio_base)}</p>
+                      <h2 className="truncate text-lg font-bold text-black">
+                        {producto.nombre}
+                      </h2>
+                      <p className="text-sm font-semibold text-primary">
+                        ${formatMoney(producto.precio_base)}
+                      </p>
                     </div>
                   </div>
 
                   <div>
-                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}
+                    >
                       {totalStock > 0 ? "Disponible" : "Sin stock"}
                     </span>
                   </div>
 
                   <div className="text-sm font-semibold text-black">
                     <p>{totalStock}</p>
-                    <p className="text-xs text-black/50">{producto.producto_talle.length} talle/s</p>
+                    <p className="text-xs text-black/50">
+                      {producto.producto_talle.length} talle/s
+                    </p>
                   </div>
 
                   <div className="flex gap-2 md:justify-end">
                     <button
                       type="button"
-                      onClick={() => setExpandedProductId(isExpanded ? null : producto.id_producto)}
+                      onClick={() =>
+                        setExpandedProductId(
+                          isExpanded ? null : producto.id_producto,
+                        )
+                      }
                       className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-secondary transition-all duration-300 hover:bg-primary cursor-pointer"
                     >
                       {isExpanded ? "Cerrar" : "Editar"}
                     </button>
                     <button
                       type="button"
-                      disabled={pendingKey === `delete-product-${producto.id_producto}`}
+                      disabled={
+                        pendingKey === `delete-product-${producto.id_producto}`
+                      }
                       onClick={() => handleDeleteProduct(producto)}
                       className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
                     >
-                      {pendingKey === `delete-product-${producto.id_producto}` ? "Borrando..." : "Borrar"}
+                      {pendingKey === `delete-product-${producto.id_producto}`
+                        ? "Borrando..."
+                        : "Borrar"}
                     </button>
                   </div>
                 </div>
@@ -977,7 +1129,12 @@ export default function AdminPanel() {
                                     min="0"
                                     value={variante.stock ?? 0}
                                     onChange={(event) =>
-                                      updateVariante(producto.id_producto, variante.id_talle, "stock", event.target.value)
+                                      updateVariante(
+                                        producto.id_producto,
+                                        variante.id_talle,
+                                        "stock",
+                                        event.target.value,
+                                      )
                                     }
                                     className="h-11 w-full min-w-27.5 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
                                   />
@@ -987,9 +1144,18 @@ export default function AdminPanel() {
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    value={variante.precio ?? producto.precio_base ?? 0}
+                                    value={
+                                      variante.precio ??
+                                      producto.precio_base ??
+                                      0
+                                    }
                                     onChange={(event) =>
-                                      updateVariante(producto.id_producto, variante.id_talle, "precio", event.target.value)
+                                      updateVariante(
+                                        producto.id_producto,
+                                        variante.id_talle,
+                                        "precio",
+                                        event.target.value,
+                                      )
                                     }
                                     className="h-11 w-full min-w-35 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
                                   />
@@ -1004,27 +1170,42 @@ export default function AdminPanel() {
                                           producto.id_producto,
                                           variante.id_talle,
                                           variante.stock,
-                                          variante.precio ?? producto.precio_base ?? 0
+                                          variante.precio ??
+                                            producto.precio_base ??
+                                            0,
                                         )
                                       }
                                       className="h-11 rounded-xl bg-black px-4 text-sm font-medium text-secondary transition-all duration-300 hover:bg-primary disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
                                     >
-                                      {pendingKey === rowKey ? "Guardando..." : "Guardar"}
+                                      {pendingKey === rowKey
+                                        ? "Guardando..."
+                                        : "Guardar"}
                                     </button>
                                     <button
                                       type="button"
-                                      disabled={Number(variante.stock ?? 0) !== 0 || pendingKey === `delete-${producto.id_producto}-${variante.id_talle}`}
+                                      disabled={
+                                        Number(variante.stock ?? 0) !== 0 ||
+                                        pendingKey ===
+                                          `delete-${producto.id_producto}-${variante.id_talle}`
+                                      }
                                       onClick={() =>
                                         deleteVariante(
                                           producto.id_producto,
                                           variante.id_talle,
-                                          variante.stock
+                                          variante.stock,
                                         )
                                       }
                                       className="h-11 rounded-xl bg-red-50 px-4 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:border-red-100 disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
-                                      title={Number(variante.stock ?? 0) === 0 ? "Eliminar talle" : "Pon el stock en 0 para borrarlo"}
+                                      title={
+                                        Number(variante.stock ?? 0) === 0
+                                          ? "Eliminar talle"
+                                          : "Pon el stock en 0 para borrarlo"
+                                      }
                                     >
-                                      {pendingKey === `delete-${producto.id_producto}-${variante.id_talle}` ? "Borrando..." : "Borrar"}
+                                      {pendingKey ===
+                                      `delete-${producto.id_producto}-${variante.id_talle}`
+                                        ? "Borrando..."
+                                        : "Borrar"}
                                     </button>
                                   </div>
                                 </td>
@@ -1037,11 +1218,19 @@ export default function AdminPanel() {
 
                     <div className="mt-4 grid gap-4 xl:grid-cols-2">
                       <div>
-                        <p className="mb-3 text-sm font-semibold text-black">Agregar talle nuevo</p>
+                        <p className="mb-3 text-sm font-semibold text-black">
+                          Agregar talle nuevo
+                        </p>
                         <div className="grid gap-3 md:grid-cols-[1fr_140px_140px]">
                           <input
                             value={newVariant.talle}
-                            onChange={(event) => updateNewVariantForm(producto.id_producto, "talle", event.target.value)}
+                            onChange={(event) =>
+                              updateNewVariantForm(
+                                producto.id_producto,
+                                "talle",
+                                event.target.value,
+                              )
+                            }
                             className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
                             placeholder="Ej: 10 US"
                           />
@@ -1049,23 +1238,35 @@ export default function AdminPanel() {
                             type="number"
                             min="0"
                             value={newVariant.stock}
-                            onChange={(event) => updateNewVariantForm(producto.id_producto, "stock", event.target.value)}
+                            onChange={(event) =>
+                              updateNewVariantForm(
+                                producto.id_producto,
+                                "stock",
+                                event.target.value,
+                              )
+                            }
                             className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
                             placeholder="Stock"
                           />
                           <button
                             type="button"
-                            disabled={pendingKey === `new-${producto.id_producto}`}
+                            disabled={
+                              pendingKey === `new-${producto.id_producto}`
+                            }
                             onClick={() => handleAddVariant(producto)}
                             className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
                           >
-                            {pendingKey === `new-${producto.id_producto}` ? "Agregando..." : "Agregar"}
+                            {pendingKey === `new-${producto.id_producto}`
+                              ? "Agregando..."
+                              : "Agregar"}
                           </button>
                         </div>
                       </div>
 
                       <div>
-                        <p className="mb-3 text-sm font-semibold text-black">Agregar imagenes</p>
+                        <p className="mb-3 text-sm font-semibold text-black">
+                          Agregar imagenes
+                        </p>
                         <div className="grid gap-3 md:grid-cols-[1fr_180px] md:items-end">
                           <label className="flex h-11 items-center rounded-xl ring ring-black/10 px-3 text-sm text-black cursor-pointer">
                             <input
@@ -1076,22 +1277,30 @@ export default function AdminPanel() {
                               onChange={(event) =>
                                 setProductImageFiles((prev) => ({
                                   ...prev,
-                                  [producto.id_producto]: Array.from(event.target.files ?? []),
+                                  [producto.id_producto]: Array.from(
+                                    event.target.files ?? [],
+                                  ),
                                 }))
                               }
                               className="sr-only"
                             />
                             <span className="truncate font-semibold text-black">
-                              {queuedFiles.length > 0 ? `${queuedFiles.length} archivo(s) seleccionados` : "Elegir archivos"}
+                              {queuedFiles.length > 0
+                                ? `${queuedFiles.length} archivo(s) seleccionados`
+                                : "Elegir archivos"}
                             </span>
                           </label>
                           <button
                             type="button"
-                            disabled={pendingKey === `images-${producto.id_producto}`}
+                            disabled={
+                              pendingKey === `images-${producto.id_producto}`
+                            }
                             onClick={() => handleAddImages(producto)}
                             className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
                           >
-                            {pendingKey === `images-${producto.id_producto}` ? "Subiendo..." : "Agregar imagenes"}
+                            {pendingKey === `images-${producto.id_producto}`
+                              ? "Subiendo..."
+                              : "Agregar imagenes"}
                           </button>
                         </div>
                       </div>
