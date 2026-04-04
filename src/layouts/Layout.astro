@@ -66,6 +66,28 @@ const pageImage = ogImage ?? '/og-image.jpg';
 	</head>
 
 	<body class="min-h-dvh flex flex-col"> 
+
+		<div id="currency-popup" class="fixed inset-0 z-999 flex items-center justify-center p-4" style="display:none!important">
+			<div class="absolute inset-0 bg-black/80" id="currency-popup-backdrop"></div>
+			<div class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center gap-4 text-center">
+				<div class="w-12 h-12 rounded-full flex items-center justify-center bg-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white" class="w-6 h-6">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+					</svg>
+				</div>
+				<h2 class="font-accent text-3xl text-black">PRECIOS EN USD</h2>
+				<p class="text-sm text-black leading-relaxed">
+					Todos los precios de nuestra tienda están expresados en <span class="text-primary font-bold">dólares estadounidenses (USD)</span>.
+				</p>
+				<p class="text-sm text-black leading-relaxed">
+					Al finalizar tu compra podés elegir abonar en <span class="text-primary font-bold">pesos argentinos (ARS)</span> al tipo de cambio del momento, o en otra moneda <span class="font-bold">acordada con nosotros por WhatsApp</span>.
+				</p>
+				<button id="currency-popup-close" class="bg-primary w-full py-3 rounded-xl text-white font-semibold text-sm hover:bg-primary-accent transition-all duration-300 cursor-pointer">
+					Entendido
+				</button>
+			</div>
+		</div>
+
 		<main class="flex-1">
 			<slot />
 		</main>
@@ -78,4 +100,22 @@ const pageImage = ogImage ?? '/og-image.jpg';
 			import '@/scripts/lenis.ts';
 		</script>
 	)}
+
+	<script>
+		const popup = document.getElementById('currency-popup');
+		const closeBtn = document.getElementById('currency-popup-close');
+		const backdrop = document.getElementById('currency-popup-backdrop');
+
+		if (popup && !sessionStorage.getItem('currency-popup-seen')) {
+			popup.style.removeProperty('display');
+
+			const close = () => {
+				popup.style.display = 'none';
+				sessionStorage.setItem('currency-popup-seen', '1');
+			};
+
+			closeBtn?.addEventListener('click', close);
+			backdrop?.addEventListener('click', close);
+		}
+	</script>
 </html>
