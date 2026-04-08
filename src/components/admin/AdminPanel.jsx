@@ -40,7 +40,8 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
-const WEBP_QUALITY = 0.82;
+const WEBP_QUALITY = 0.75;
+const MAX_WIDTH = 1200;
 const BYPASS_WEBP_TYPES = new Set(["image/gif", "image/svg+xml"]);
 
 function loadImageFromFile(file) {
@@ -86,15 +87,24 @@ async function convertImageToWebp(file) {
 
   const image = await loadImageFromFile(file);
   const canvas = document.createElement("canvas");
-  canvas.width = image.naturalWidth || image.width;
-  canvas.height = image.naturalHeight || image.height;
+
+  let width = image.naturalWidth || image.width;
+  let height = image.naturalHeight || image.height;
+
+  if (width > MAX_WIDTH) {
+    const ratio = MAX_WIDTH / width;
+    width = MAX_WIDTH;
+    height = height * ratio;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
 
   const context = canvas.getContext("2d");
   if (!context) {
     throw new Error("No pudimos preparar la optimizacion de la imagen.");
   }
-
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, width, height);
 
   const blob = await canvasToBlob(canvas, "image/webp", WEBP_QUALITY);
   const originalName =
