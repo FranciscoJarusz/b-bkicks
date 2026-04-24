@@ -9,9 +9,7 @@
     "category": "zapatillas",
     "marca": "Nike Air Jordan",
     "specs": {
-      "talle": [
-        "11 US"
-      ]
+      "talle": ["11 US"]
     }
   },
   {
@@ -25,9 +23,7 @@
     "category": "short",
     "marca": "Bape x Adidas originals",
     "specs": {
-      "talle": [
-        "FIT XXL"
-      ]
+      "talle": ["FIT XXL"]
     }
   },
   {
@@ -40,9 +36,7 @@
     "category": "zip hoodie",
     "marca": "corteiz",
     "specs": {
-      "talle": [
-        "l"
-      ]
+      "talle": ["l"]
     }
   },
   {
@@ -55,9 +49,7 @@
     "category": "hoodie",
     "marca": "corteiz",
     "specs": {
-      "talle": [
-        "m"
-      ]
+      "talle": ["m"]
     }
   },
   {
@@ -70,9 +62,7 @@
     "category": "cargo pant",
     "marca": "corteiz",
     "specs": {
-      "talle": [
-        "M"
-      ]
+      "talle": ["M"]
     }
   },
   {
@@ -85,9 +75,7 @@
     "category": "zip hoodie",
     "marca": "fear of god",
     "specs": {
-      "talle": [
-        "xl"
-      ]
+      "talle": ["xl"]
     }
   },
   {
@@ -100,23 +88,17 @@
     "category": "zapatillas",
     "marca": "Nike jordan",
     "specs": {
-      "talle": [
-        "8.5 US"
-      ]
+      "talle": ["8.5 US"]
     }
   },
   {
     "name": "Curved Logo Tee",
     "price": 190,
-    "images": [
-      "/productos/PALM ANGELS TEE/palm-angels-tee-1.webp"
-    ],
+    "images": ["/productos/PALM ANGELS TEE/palm-angels-tee-1.webp"],
     "category": "remera",
     "marca": "palm angels",
     "specs": {
-      "talle": [
-        "FIT XL"
-      ]
+      "talle": ["FIT XL"]
     }
   },
   {
@@ -129,9 +111,7 @@
     "category": "jacket",
     "marca": "palm angels",
     "specs": {
-      "talle": [
-        "m"
-      ]
+      "talle": ["m"]
     }
   },
   {
@@ -144,9 +124,7 @@
     "category": "hoodie",
     "marca": "sp5der",
     "specs": {
-      "talle": [
-        "XL"
-      ]
+      "talle": ["XL"]
     }
   },
   {
@@ -160,9 +138,7 @@
     "category": "hoodie",
     "marca": "sp5der",
     "specs": {
-      "talle": [
-        "l"
-      ]
+      "talle": ["l"]
     }
   },
   {
@@ -174,23 +150,17 @@
     "category": "hoodie",
     "marca": "supreme",
     "specs": {
-      "talle": [
-        "L"
-      ]
+      "talle": ["L"]
     }
   },
   {
     "name": "Sharpshooter Tee",
     "price": 80,
-    "images": [
-      "/productos/TRAPSTAR TEE/trapstar-tee-1.webp"
-    ],
+    "images": ["/productos/TRAPSTAR TEE/trapstar-tee-1.webp"],
     "category": "remera",
     "marca": "trapstar",
     "specs": {
-      "talle": [
-        "L"
-      ]
+      "talle": ["L"]
     }
   },
   {
@@ -202,9 +172,7 @@
     "category": "zip hoodie",
     "marca": "valley",
     "specs": {
-      "talle": [
-        "L"
-      ]
+      "talle": ["L"]
     }
   },
   {
@@ -217,9 +185,7 @@
     "category": "zapatillas",
     "marca": "Nike x Corteiz",
     "specs": {
-      "talle": [
-        "10 US"
-      ]
+      "talle": ["10 US"]
     }
   },
   {
@@ -232,9 +198,7 @@
     "category": "remera",
     "marca": "amiri",
     "specs": {
-      "talle": [
-        "L"
-      ]
+      "talle": ["L"]
     }
   },
   {
@@ -247,9 +211,7 @@
     "category": "zapatillas",
     "marca": "asics",
     "specs": {
-      "talle": [
-        "9 US"
-      ]
+      "talle": ["9 US"]
     }
   },
   {
@@ -262,9 +224,7 @@
     "category": "zapatillas",
     "marca": "adidas",
     "specs": {
-      "talle": [
-        "7 US"
-      ]
+      "talle": ["7 US"]
     }
   },
   {
@@ -277,9 +237,7 @@
     "category": "remera",
     "marca": "corteiz",
     "specs": {
-      "talle": [
-        "L"
-      ]
+      "talle": ["L"]
     }
   },
   {
@@ -293,10 +251,7 @@
     "category": "zip hoodie",
     "marca": "corteiz",
     "specs": {
-      "talle": [
-        "XL",
-        "L"
-      ]
+      "talle": ["XL", "L"]
     }
   },
   {
@@ -308,9 +263,7 @@
     "category": "short",
     "marca": "fear of god",
     "specs": {
-      "talle": [
-        "S"
-      ]
+      "talle": ["S"]
     }
   },
   {
@@ -323,9 +276,7 @@
     "category": "zapatillas",
     "marca": "off-white",
     "specs": {
-      "talle": [
-        "8/8.5 US"
-      ]
+      "talle": ["8/8.5 US"]
     }
   },
   {
@@ -338,9 +289,7 @@
     "category": "short",
     "marca": "sp5der",
     "specs": {
-      "talle": [
-        "XL"
-      ]
+      "talle": ["XL"]
     }
   }
 ]

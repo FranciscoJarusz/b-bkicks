@@ -12,7 +12,7 @@ interface Props {
 }
 
 const { title, description, ogImage, noindex = false, hideFooter = false, disableSmoothScroll = false } = Astro.props;
-
+const canonicalURL = new URL(Astro.url.pathname, 'https://bbkicks.com');
 const pageTitle = title
   ? `${title} - B&B KICKS`
   : 'B&B KICKS - Sneakers y Streetwear en Buenos Aires';
@@ -61,6 +61,7 @@ const pageImage = ogImage ?? '/og-image.jpg';
 		<noscript><link rel="stylesheet" href="https://use.typekit.net/ots3kmz.css" /></noscript>
 
 		<title>{pageTitle}</title>
+		<link rel="canonical" href={canonicalURL.href} />
 		<slot name="head" />
 
 	</head>
