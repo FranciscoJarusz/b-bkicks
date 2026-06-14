@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "import:supabase": "node scripts/import-productos-to-supabase.mjs"
+    "import:supabase": "node scripts/import-productos-to-supabase.mjs",
+    "migrate:cloudinary": "node scripts/migrate-images-to-cloudinary.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",

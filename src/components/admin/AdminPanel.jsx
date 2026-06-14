@@ -5,6 +5,11 @@ const ADMIN_EMAIL =
   import.meta.env.PUBLIC_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
 const STORAGE_BUCKET =
   import.meta.env.PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET?.trim() || "productos";
+const CLOUDINARY_CLOUD_NAME =
+  import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME?.trim() ?? "";
+const CLOUDINARY_UPLOAD_PRESET =
+  import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET?.trim() ?? "";
+const CLOUDINARY_FOLDER = "productos";
 
 const initialProductForm = {
   nombre: "",
@@ -172,32 +177,48 @@ async function getOrCreateSize(nombre) {
   return data.id_talle;
 }
 
-async function uploadFiles(productName, files, startIndex = 0) {
+async function uploadToCloudinary(file, folder) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  if (folder) formData.append("folder", folder);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: "POST", body: formData },
+  );
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(
+      `Cloudinary rechazo la subida (${response.status}). ${detail}`.trim(),
+    );
+  }
+
+  const data = await response.json();
+  if (!data.secure_url) {
+    throw new Error("Cloudinary no devolvio la URL de la imagen.");
+  }
+
+  return data.secure_url;
+}
+
+async function uploadFiles(productName, files) {
   if (!files || files.length === 0) return [];
 
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    throw new Error(
+      "Faltan PUBLIC_CLOUDINARY_CLOUD_NAME y PUBLIC_CLOUDINARY_UPLOAD_PRESET en el entorno.",
+    );
+  }
+
   const uploaded = [];
-  const folder = slugify(productName) || `producto-${Date.now()}`;
+  const folder = `${CLOUDINARY_FOLDER}/${slugify(productName) || `producto-${Date.now()}`}`;
 
-  for (const [index, file] of files.entries()) {
+  for (const file of files) {
     const optimizedFile = await convertImageToWebp(file);
-    const extension = optimizedFile.name.includes(".")
-      ? optimizedFile.name.split(".").pop()
-      : "webp";
-    const filePath = `${folder}/${Date.now()}-${startIndex + index}.${extension}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(filePath, optimizedFile, {
-        upsert: false,
-        contentType: optimizedFile.type || undefined,
-      });
-
-    if (uploadError) throw uploadError;
-
-    const { data } = supabase.storage
-      .from(STORAGE_BUCKET)
-      .getPublicUrl(filePath);
-    uploaded.push(data.publicUrl);
+    const url = await uploadToCloudinary(optimizedFile, folder);
+    uploaded.push(url);
   }
 
   return uploaded;
@@ -580,12 +601,7 @@ export default function AdminPanel() {
     setPendingKey(key);
 
     try {
-      const existingCount = (producto.producto_imagen ?? []).length;
-      const uploadedUrls = await uploadFiles(
-        producto.nombre,
-        files,
-        existingCount,
-      );
+      const uploadedUrls = await uploadFiles(producto.nombre, files);
       await appendProductImages(producto, uploadedUrls);
 
       setProductImageFiles((prev) => ({ ...prev, [producto.id_producto]: [] }));
@@ -942,7 +958,7 @@ export default function AdminPanel() {
             />
             <label className="flex min-h-28 flex-col justify-center rounded-2xl ring ring-black/50 px-4 py-3 text-sm text-black cursor-pointer">
               <span className="text-black/50">
-                Subir archivos al bucket {STORAGE_BUCKET}
+                Subir imagenes del producto
               </span>
               <input
                 key={productFilesKey}
