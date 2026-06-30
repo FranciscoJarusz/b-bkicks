@@ -50,9 +50,18 @@ const { producto } = Astro.props;
             </div>
 
             <div class="flex flex-col gap-8">
-                <span class="text-2xl font-bold text-black">
-                    ${producto.price.toLocaleString("es-AR")}
-                </span>
+                <div class="flex flex-col gap-1">
+                   <span class="text-2xl font-bold text-primary">
+                        ${Math.round(producto.price * 1.25).toLocaleString("es-AR")}
+                    </span>
+                    <span class="text-sm text-black/60">
+                        ($
+                        <span class="font-bold">
+                        {producto.price.toLocaleString("es-AR")}
+                        </span>{" "}
+                        en efectivo o transferencia)
+                    </span>
+                </div>
 
                 <div class="flex items-center gap-2 text-sm text-primary">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 -64 640 640" xmlns="http://www.w3.org/2000/svg">

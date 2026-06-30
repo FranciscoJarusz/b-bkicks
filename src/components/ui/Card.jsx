@@ -29,9 +29,16 @@ export default function Card({ producto, priority = false }) {
         <span className="text-xs font-semibold uppercase tracking-wide text-black/70">
           {producto.marca}
         </span>
-        <div className="flex items-center justify-between">
-          <span className="text-base lg:text-xl font-bold text-primary">
-            ${producto.price.toLocaleString("es-AR")}
+        <div className="flex flex-col items-center gap-0.5">
+          <span class="text-2xl font-bold text-primary">
+            ${Math.round(producto.price * 1.25).toLocaleString("es-AR")}
+          </span>
+          <span class="text-sm text-black/60">
+            ($
+            <span class="font-bold">
+              {producto.price.toLocaleString("es-AR")}
+            </span>{" "}
+            en efectivo o transferencia)
           </span>
           {producto.stock === 0 && (
             <span className="text-xs text-primary font-medium">Sin stock</span>
