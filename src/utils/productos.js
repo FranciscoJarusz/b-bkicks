@@ -20,6 +20,7 @@ function normalizeSupabaseProducts(rows = []) {
         marca: producto.marca?.nombre ?? "",
         description: "",
         price: Number(producto.precio_base ?? 0),
+        esEncargo: Boolean(producto.es_encargo),
         fallbackImage: producto.imagen_url ?? null,
         tallesMap: new Map(),
         imagesMap: new Map(),
@@ -79,6 +80,7 @@ function normalizeSupabaseProducts(rows = []) {
       marca: item.marca,
       description: item.description,
       price: Number(item.price ?? 0),
+      esEncargo: item.esEncargo,
       stock,
       specs: {
         talle: talles,
@@ -95,6 +97,7 @@ async function getProductosFromSupabase() {
       nombre,
       precio_base,
       imagen_url,
+      es_encargo,
       producto_imagen (
         url,
         orden
@@ -121,5 +124,10 @@ async function getProductosFromSupabase() {
 
 export async function getProductosAgrupados() {
   const productos = await getProductosFromSupabase();
-  return productos;
+  return productos.filter((producto) => !producto.esEncargo);
+}
+
+export async function getEncargos() {
+  const productos = await getProductosFromSupabase();
+  return productos.filter((producto) => producto.esEncargo);
 }

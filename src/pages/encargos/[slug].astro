@@ -1,0 +1,44 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import ProductoDetalle from '@/components/ProductoDetalle.astro';
+import { getEncargos } from '@/utils/productos.js';
+
+const encargos = await getEncargos();
+const producto = encargos.find((item) => item.slug === Astro.params.slug);
+
+if (!producto) {
+    Astro.response.status = 404;
+}
+
+const productTitle = producto?.name ?? "Encargo no encontrado";
+const productDescription = producto
+    ? `Encargá ${producto.name} de ${producto.marca} en B&B KICKS. Precio: $${producto.price}. Entrega estimada de 15 a 20 días.`
+    : "El producto que buscás no está disponible para encargar en este momento.";
+const productImage = producto?.images?.[0];
+---
+
+<Layout
+    title={productTitle}
+    description={productDescription}
+    ogImage={productImage}
+>
+    <Header />
+    {producto ? (
+        <ProductoDetalle producto={producto} modo="encargo" />
+    ) : (
+        <section class="mx-auto max-w-6xl px-6 py-20">
+            <p class="text-sm uppercase tracking-[0.35em] text-black/45">Encargo</p>
+            <h1 class="mt-4 text-4xl font-black uppercase tracking-tight text-black">No encontrado</h1>
+            <p class="mt-4 max-w-xl text-lg text-black/65">
+                El producto que buscás ya no está disponible para encargar.
+            </p>
+            <a
+                href="/encargos"
+                class="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-black px-6 text-sm font-semibold text-secondary transition hover:bg-black/85"
+            >
+                Ver todos los encargos
+            </a>
+        </section>
+    )}
+</Layout>
