@@ -1,34 +1,40 @@
 {
-  "name": "247sneakersba",
-  "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "import:supabase": "node scripts/import-productos-to-supabase.mjs",
-    "migrate:cloudinary": "node scripts/migrate-images-to-cloudinary.mjs"
-  },
-  "dependencies": {
-    "@astrojs/check": "^0.9.8",
-    "@astrojs/react": "^5.0.0",
-    "@astrojs/vercel": "^10.0.3",
-    "@supabase/supabase-js": "^2.100.1",
-    "@tailwindcss/vite": "^4.2.1",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "astro": "^6.0.4",
-    "gsap": "^3.14.2",
-    "lenis": "^1.3.19",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "tailwind": "^4.0.0",
-    "tailwind-animations": "^1.0.1",
-    "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3"
-  }
+    "name": "247sneakersba",
+    "type": "module",
+    "version": "0.0.1",
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "import:supabase": "node scripts/import-productos-to-supabase.mjs",
+        "migrate:cloudinary": "node scripts/migrate-images-to-cloudinary.mjs"
+    },
+    "dependencies": {
+        "@astrojs/check": "^0.9.8",
+        "@astrojs/react": "^5.0.0",
+        "@astrojs/vercel": "^10.0.3",
+        "@supabase/supabase-js": "^2.100.1",
+        "@tailwindcss/vite": "^4.2.1",
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
+        "astro": "^6.0.4",
+        "gsap": "^3.14.2",
+        "lenis": "^1.3.19",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
+        "tailwind": "^4.0.0",
+        "tailwind-animations": "^1.0.1",
+        "tailwindcss": "^4.2.1",
+        "typescript": "^5.9.3"
+    },
+    "devDependencies": {
+        "prettier": "^3.9.6",
+        "prettier-plugin-astro": "^0.14.1"
+    }
 }
