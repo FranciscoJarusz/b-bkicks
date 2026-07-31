@@ -1,8 +1,8 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import Card from '@/components/ui/Card.jsx';
-import { getEncargos } from '@/utils/productos.js';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Card from "@/components/ui/Card.jsx";
+import { getEncargos } from "@/utils/productos.js";
 
 const encargos = await getEncargos();
 ---
@@ -14,30 +14,60 @@ const encargos = await getEncargos();
     <Header />
 
     <section class="py-16">
-        <div class="flex flex-col gap-8 lg:gap-16 max-w-7xl mx-auto px-6">
+        <div class="flex flex-col gap-10 max-w-7xl mx-auto px-6">
+            <div class="flex flex-col gap-2">
+                <a
+                    href="/"
+                    class="flex items-center gap-1.5 text-sm text-black/70 hover:text-primary w-fit transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M11 17l-5-5m0 0l5-5m-5 5h12"
+                        />
+                    </svg>
+                    Volver al inicio
+                </a>
 
-            <div class="flex flex-col gap-6">
-                <h1 class="text-4xl lg:text-6xl text-primary font-accent uppercase animate-fade-in-down">
-                    Encargos
+                <h1 class="text-3xl font-bold text-primary">
+                    Todos los productos para encargo
                 </h1>
+
+                <p class="text-black mt-1 text-sm">
+                    {encargos.length}{" "}
+                    {encargos.length === 1
+                        ? "producto encontrado"
+                        : "productos encontrados"}
+                </p>
             </div>
 
-            {encargos.length > 0 ? (
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-20 animate-fade-in-down animate-delay-500">
-                    {encargos.map((producto, index) => (
-                        <Card
-                            producto={producto}
-                            basePath="/encargos"
-                            mostrarTodosLosTalles
-                            priority={index < 3}
-                            client:load
-                        />
-                    ))}
-                </div>
-            ) : (
-                <p class="text-black/60">Todavía no hay productos disponibles para encargar.</p>
-            )}
-
+            {
+                encargos.length > 0 ? (
+                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-20">
+                        {encargos.map((producto, index) => (
+                            <Card
+                                producto={producto}
+                                basePath="/encargos"
+                                mostrarTodosLosTalles
+                                priority={index < 3}
+                                client:load
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <p class="text-black/60">
+                        Todavía no hay productos disponibles para encargar.
+                    </p>
+                )
+            }
         </div>
     </section>
 </Layout>
