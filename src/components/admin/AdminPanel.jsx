@@ -294,7 +294,20 @@ export default function AdminPanel() {
   const [productImageKeys, setProductImageKeys] = useState({});
   const [expandedProductId, setExpandedProductId] = useState(null);
   const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [tab, setTab] = useState("catalogo");
   const [isPending, startTransition] = useTransition();
+
+  const esTabEncargos = tab === "encargos";
+  const productosVisibles = productos.filter(
+    (producto) => Boolean(producto.es_encargo) === esTabEncargos,
+  );
+
+  function cambiarTab(nextTab) {
+    if (nextTab === tab) return;
+    setTab(nextTab);
+    setSelectedProductIds([]);
+    setExpandedProductId(null);
+  }
 
   useEffect(() => {
     let alive = true;
@@ -349,6 +362,7 @@ export default function AdminPanel() {
         nombre,
         precio_base,
         imagen_url,
+        es_encargo,
         marca (
           nombre
         ),
@@ -507,7 +521,7 @@ export default function AdminPanel() {
       const { error } = await supabase.from("producto_talle").insert({
         id_producto: producto.id_producto,
         id_talle: sizeId,
-        stock: Number(form.stock || 0),
+        stock: producto.es_encargo ? 0 : Number(form.stock || 0),
         precio: Number(producto.precio_base || 0),
       });
 
@@ -541,6 +555,10 @@ export default function AdminPanel() {
     setPendingKey("new-product");
 
     try {
+      // Subimos las imagenes primero: si Cloudinary falla, no queda un producto
+      // a medio crear (sin imagen ni talles) en la base.
+      const uploadedUrls = await uploadFiles(productForm.nombre, productFiles);
+
       const brandId = await getOrCreateBrand(productForm.marca);
       const { data: product, error: productError } = await supabase
         .from("producto")
@@ -549,13 +567,13 @@ export default function AdminPanel() {
           precio_base: Number(productForm.precioBase || 0),
           imagen_url: null,
           id_marca: brandId,
+          es_encargo: esTabEncargos,
         })
         .select("id_producto")
         .single();
 
       if (productError) throw productError;
 
-      const uploadedUrls = await uploadFiles(productForm.nombre, productFiles);
       await replaceProductImages(product.id_producto, uploadedUrls);
 
       if (productForm.talle.trim()) {
@@ -565,7 +583,7 @@ export default function AdminPanel() {
           .insert({
             id_producto: product.id_producto,
             id_talle: sizeId,
-            stock: Number(productForm.stock || 0),
+            stock: esTabEncargos ? 0 : Number(productForm.stock || 0),
             precio: Number(productForm.precioBase || 0),
           });
 
@@ -756,9 +774,9 @@ export default function AdminPanel() {
 
   function toggleSelectAllProducts() {
     setSelectedProductIds((prev) =>
-      prev.length === productos.length
+      prev.length === productosVisibles.length
         ? []
-        : productos.map((producto) => producto.id_producto),
+        : productosVisibles.map((producto) => producto.id_producto),
     );
   }
 
@@ -871,16 +889,38 @@ export default function AdminPanel() {
           </div>
 
           {status && <p className="mt-4 text-sm text-black/50">{status}</p>}
+
+          <div className="mt-8 flex gap-2">
+            {[
+              { id: "catalogo", label: "Catalogo" },
+              { id: "encargos", label: "Encargos" },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => cambiarTab(item.id)}
+                className={`rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-300 cursor-pointer ${
+                  tab === item.id
+                    ? "bg-primary text-secondary"
+                    : "ring ring-black/20 text-black hover:ring-primary"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <form onSubmit={handleCreateProduct}>
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
               <span className="text-xs uppercase tracking-[0.3em] text-black/50">
-                Nuevo producto
+                {esTabEncargos ? "Nuevo encargo" : "Nuevo producto"}
               </span>
               <h2 className="mt-2 text-3xl font-semibold text-black">
-                Cargar nuevo producto
+                {esTabEncargos
+                  ? "Cargar nuevo producto para encargar"
+                  : "Cargar nuevo producto"}
               </h2>
             </div>
             <button
@@ -943,19 +983,21 @@ export default function AdminPanel() {
               className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
               placeholder="Primer talle opcional"
             />
-            <input
-              type="number"
-              min="0"
-              value={productForm.stock}
-              onChange={(event) =>
-                setProductForm((prev) => ({
-                  ...prev,
-                  stock: event.target.value,
-                }))
-              }
-              className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-              placeholder="Stock inicial"
-            />
+            {!esTabEncargos && (
+              <input
+                type="number"
+                min="0"
+                value={productForm.stock}
+                onChange={(event) =>
+                  setProductForm((prev) => ({
+                    ...prev,
+                    stock: event.target.value,
+                  }))
+                }
+                className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
+                placeholder="Stock inicial"
+              />
+            )}
             <label className="flex min-h-28 flex-col justify-center rounded-2xl ring ring-black/50 px-4 py-3 text-sm text-black cursor-pointer">
               <span className="text-black/50">
                 Subir imagenes del producto
@@ -990,8 +1032,8 @@ export default function AdminPanel() {
               <input
                 type="checkbox"
                 checked={
-                  productos.length > 0 &&
-                  selectedProductIds.length === productos.length
+                  productosVisibles.length > 0 &&
+                  selectedProductIds.length === productosVisibles.length
                 }
                 onChange={toggleSelectAllProducts}
                 className="h-4 w-4 accent-primary cursor-pointer"
@@ -1022,10 +1064,18 @@ export default function AdminPanel() {
             <span></span>
             <span>Producto</span>
             <span>Estado</span>
-            <span>Stock</span>
+            <span>{esTabEncargos ? "Talles" : "Stock"}</span>
           </div>
 
-          {productos.map((producto) => {
+          {productosVisibles.length === 0 && (
+            <p className="border-t border-black/10 bg-secondary px-5 py-6 text-sm text-black/50">
+              {esTabEncargos
+                ? "No hay productos para encargar cargados todavia."
+                : "No hay productos del catalogo cargados todavia."}
+            </p>
+          )}
+
+          {productosVisibles.map((producto) => {
             const orderedImages = [...(producto.producto_imagen ?? [])]
               .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
               .map((item) => item.url);
@@ -1088,15 +1138,21 @@ export default function AdminPanel() {
                   </div>
 
                   <div>
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}
-                    >
-                      {totalStock > 0 ? "Disponible" : "Sin stock"}
-                    </span>
+                    {esTabEncargos ? (
+                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                        A pedido
+                      </span>
+                    ) : (
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}
+                      >
+                        {totalStock > 0 ? "Disponible" : "Sin stock"}
+                      </span>
+                    )}
                   </div>
 
                   <div className="text-sm font-semibold text-black">
-                    <p>{totalStock}</p>
+                    {!esTabEncargos && <p>{totalStock}</p>}
                     <p className="text-xs text-black/50">
                       {producto.producto_talle.length} talle/s
                     </p>
@@ -1136,7 +1192,9 @@ export default function AdminPanel() {
                         <thead>
                           <tr className="text-left text-[11px] font-semibold uppercase tracking-[0.22em] text-black/50">
                             <th className="px-3 pb-2">Talle</th>
-                            <th className="px-3 pb-2">Stock</th>
+                            {!esTabEncargos && (
+                              <th className="px-3 pb-2">Stock</th>
+                            )}
                             <th className="px-3 pb-2">Precio</th>
                             <th className="px-3 pb-2 text-right">Acciones</th>
                           </tr>
@@ -1149,22 +1207,24 @@ export default function AdminPanel() {
                                 <td className="rounded-l-2xl px-3 py-3 font-semibold text-black">
                                   {variante.talle?.nombre ?? "Sin talle"}
                                 </td>
-                                <td className="px-3 py-3">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    value={variante.stock ?? 0}
-                                    onChange={(event) =>
-                                      updateVariante(
-                                        producto.id_producto,
-                                        variante.id_talle,
-                                        "stock",
-                                        event.target.value,
-                                      )
-                                    }
-                                    className="h-11 w-full min-w-27.5 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
-                                  />
-                                </td>
+                                {!esTabEncargos && (
+                                  <td className="px-3 py-3">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={variante.stock ?? 0}
+                                      onChange={(event) =>
+                                        updateVariante(
+                                          producto.id_producto,
+                                          variante.id_talle,
+                                          "stock",
+                                          event.target.value,
+                                        )
+                                      }
+                                      className="h-11 w-full min-w-27.5 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
+                                    />
+                                  </td>
+                                )}
                                 <td className="px-3 py-3">
                                   <input
                                     type="number"
@@ -1247,7 +1307,9 @@ export default function AdminPanel() {
                         <p className="mb-3 text-sm font-semibold text-black">
                           Agregar talle nuevo
                         </p>
-                        <div className="grid gap-3 md:grid-cols-[1fr_140px_140px]">
+                        <div
+                          className={`grid gap-3 ${esTabEncargos ? "md:grid-cols-[1fr_140px]" : "md:grid-cols-[1fr_140px_140px]"}`}
+                        >
                           <input
                             value={newVariant.talle}
                             onChange={(event) =>
@@ -1260,20 +1322,22 @@ export default function AdminPanel() {
                             className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
                             placeholder="Ej: 10 US"
                           />
-                          <input
-                            type="number"
-                            min="0"
-                            value={newVariant.stock}
-                            onChange={(event) =>
-                              updateNewVariantForm(
-                                producto.id_producto,
-                                "stock",
-                                event.target.value,
-                              )
-                            }
-                            className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
-                            placeholder="Stock"
-                          />
+                          {!esTabEncargos && (
+                            <input
+                              type="number"
+                              min="0"
+                              value={newVariant.stock}
+                              onChange={(event) =>
+                                updateNewVariantForm(
+                                  producto.id_producto,
+                                  "stock",
+                                  event.target.value,
+                                )
+                              }
+                              className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
+                              placeholder="Stock"
+                            />
+                          )}
                           <button
                             type="button"
                             disabled={
