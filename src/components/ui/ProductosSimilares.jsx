@@ -20,9 +20,11 @@ export default function ProductosSimilares({ producto, productos = [] }) {
 
     return (
         <div className="flex flex-col gap-6 max-w-7xl mx-auto px-6 py-16">
-            <h2 className="text-2xl font-bold text-black">Más de {producto.marca}</h2>
+            <h2 className="text-2xl font-bold text-black">
+                Más de {producto.marca}
+            </h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-20">
-                {similares.map(p => (
+                {similares.map((p) => (
                     <Card key={p.slug} producto={p} />
                 ))}
             </div>

@@ -1,12 +1,14 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Header from '@/components/Header.astro';
-import ProductoDetalle from '@/components/ProductoDetalle.astro';
-import ProductosSimilares from '@/components/ui/ProductosSimilares.jsx';
-import { getProductosAgrupados } from '@/utils/productos.js';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import ProductoDetalle from "@/components/ProductoDetalle.astro";
+import ProductosSimilares from "@/components/ui/ProductosSimilares.jsx";
+import { getProductosAgrupados } from "@/utils/productos.js";
 
 const todosLosProductos = await getProductosAgrupados();
-const producto = todosLosProductos.find((item) => item.slug === Astro.params.slug);
+const producto = todosLosProductos.find(
+    (item) => item.slug === Astro.params.slug
+);
 
 if (!producto) {
     Astro.response.status = 404;
@@ -25,24 +27,35 @@ const productImage = producto?.images?.[0];
     ogImage={productImage}
 >
     <Header />
-    {producto ? (
-        <>
-            <ProductoDetalle producto={producto} />
-            <ProductosSimilares producto={producto} productos={todosLosProductos} client:load />
-        </>
-    ) : (
-        <section class="mx-auto max-w-6xl px-6 py-20">
-            <p class="text-sm uppercase tracking-[0.35em] text-black/45">Producto</p>
-            <h1 class="mt-4 text-4xl font-black uppercase tracking-tight text-black">No encontrado</h1>
-            <p class="mt-4 max-w-xl text-lg text-black/65">
-                El producto que buscas ya no esta publicado o cambio de slug en Supabase.
-            </p>
-            <a
-                href="/"
-                class="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-black px-6 text-sm font-semibold text-secondary transition hover:bg-black/85"
-            >
-                Volver al inicio
-            </a>
-        </section>
-    )}
+    {
+        producto ? (
+            <>
+                <ProductoDetalle producto={producto} />
+                <ProductosSimilares
+                    producto={producto}
+                    productos={todosLosProductos}
+                    client:load
+                />
+            </>
+        ) : (
+            <section class="mx-auto max-w-6xl px-6 py-20">
+                <p class="text-sm uppercase tracking-[0.35em] text-black/45">
+                    Producto
+                </p>
+                <h1 class="mt-4 text-4xl font-black uppercase tracking-tight text-black">
+                    No encontrado
+                </h1>
+                <p class="mt-4 max-w-xl text-lg text-black/65">
+                    El producto que buscas ya no esta publicado o cambio de slug
+                    en Supabase.
+                </p>
+                <a
+                    href="/"
+                    class="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-black px-6 text-sm font-semibold text-secondary transition hover:bg-black/85"
+                >
+                    Volver al inicio
+                </a>
+            </section>
+        )
+    }
 </Layout>

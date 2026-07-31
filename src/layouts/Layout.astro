@@ -1,122 +1,179 @@
 ---
-import '@/styles/global.css';
-import Footer from '@/components/Footer.astro';
+import "@/styles/global.css";
+import Footer from "@/components/Footer.astro";
 
 interface Props {
-  title?: string;
-  description?: string;
-  ogImage?: string;
-  noindex?: boolean;
-  hideFooter?: boolean;
-  disableSmoothScroll?: boolean;
+    title?: string;
+    description?: string;
+    ogImage?: string;
+    noindex?: boolean;
+    hideFooter?: boolean;
+    disableSmoothScroll?: boolean;
 }
 
-const { title, description, ogImage, noindex = false, hideFooter = false, disableSmoothScroll = false } = Astro.props;
-const canonicalURL = new URL(Astro.url.pathname, 'https://bbkicks.com');
+const {
+    title,
+    description,
+    ogImage,
+    noindex = false,
+    hideFooter = false,
+    disableSmoothScroll = false,
+} = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, "https://bbkicks.com");
 const pageTitle = title
-  ? `${title} - B&B KICKS`
-  : 'B&B KICKS - Sneakers y Streetwear en Buenos Aires';
+    ? `${title} - B&B KICKS`
+    : "B&B KICKS - Sneakers y Streetwear en Buenos Aires";
 
-const pageDescription = description
-  ?? 'B&B Kicks: Tu tienda de confianza para sneakers y streetwear de tendencia. 100% original, atención personalizada por WhatsApp y envíos rápidos a toda Argentina. Entrá y mirá más.';
+const pageDescription =
+    description ??
+    "B&B Kicks: Tu tienda de confianza para sneakers y streetwear de tendencia. 100% original, atención personalizada por WhatsApp y envíos rápidos a toda Argentina. Entrá y mirá más.";
 
-const pageImage = ogImage ?? '/og-image.jpg';
+const pageImage = ogImage ?? "/og-image.jpg";
 ---
 
 <!doctype html>
-
 <html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<head>
+        {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={pageDescription} />
+        <meta name="author" content="B&B KICKS" />
+        <meta
+            name="keywords"
+            content="sneakers, zapatillas, streetwear, ropa, Buenos Aires, tienda online, corteiz, nike, adidas, noemotions, supreme, jordan"
+        />
 
-		{noindex && <meta name="robots" content="noindex, nofollow" />}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="B&B KICKS" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
 
-		<meta name="description" content={pageDescription} />
-		<meta name="author" content="B&B KICKS" />
-		<meta name="keywords" content="sneakers, zapatillas, streetwear, ropa, Buenos Aires, tienda online, corteiz, nike, adidas, noemotions, supreme, jordan" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
 
-		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="B&B KICKS" />
-		<meta property="og:title" content={pageTitle} />
-		<meta property="og:description" content={pageDescription} />
-		<meta property="og:image" content={pageImage} />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content={pageTitle} />
-		<meta name="twitter:description" content={pageDescription} />
-		<meta name="twitter:image" content={pageImage} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+            onload="this.onload=null;this.rel='stylesheet'"
+        />
+        <noscript
+            ><link
+                rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+            /></noscript
+        >
 
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preconnect" href="https://use.typekit.net" />
+        <link
+            rel="preload"
+            as="style"
+            href="https://use.typekit.net/ots3kmz.css"
+            onload="this.onload=null;this.rel='stylesheet'"
+        />
+        <noscript
+            ><link
+                rel="stylesheet"
+                href="https://use.typekit.net/ots3kmz.css"
+            /></noscript
+        >
 
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" /></noscript>
+        <title>{pageTitle}</title>
+        <link rel="canonical" href={canonicalURL.href} />
+        <slot name="head" />
+    </head>
 
-		<link rel="preconnect" href="https://use.typekit.net" />
-		<link rel="preload" as="style" href="https://use.typekit.net/ots3kmz.css" onload="this.onload=null;this.rel='stylesheet'" />
-		<noscript><link rel="stylesheet" href="https://use.typekit.net/ots3kmz.css" /></noscript>
+    <body class="min-h-dvh flex flex-col">
+        <div
+            id="currency-popup"
+            class="fixed inset-0 z-999 flex items-center justify-center p-4"
+            style="display:none!important"
+        >
+            <div
+                class="absolute inset-0 bg-black/80"
+                id="currency-popup-backdrop"
+            >
+            </div>
+            <div
+                class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center gap-4 text-center"
+            >
+                <div
+                    class="w-12 h-12 rounded-full flex items-center justify-center bg-primary"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="white"
+                        class="w-6 h-6"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                        ></path>
+                    </svg>
+                </div>
+                <h2 class="font-accent text-3xl text-black">PRECIOS EN USD</h2>
+                <p class="text-sm text-black leading-relaxed">
+                    Todos los precios de nuestra tienda están expresados en <span
+                        class="text-primary font-bold"
+                        >dólares estadounidenses (USD)</span
+                    >.
+                </p>
+                <p class="text-sm text-black leading-relaxed">
+                    Al finalizar tu compra podés elegir abonar en <span
+                        class="text-primary font-bold"
+                        >pesos argentinos (ARS)</span
+                    > al tipo de cambio del momento, o en otra moneda <span
+                        class="font-bold"
+                        >acordada con nosotros por WhatsApp</span
+                    >.
+                </p>
+                <button
+                    id="currency-popup-close"
+                    class="bg-primary w-full py-3 rounded-xl text-white font-semibold text-sm hover:bg-primary-accent transition-all duration-300 cursor-pointer"
+                >
+                    Entendido
+                </button>
+            </div>
+        </div>
 
-		<title>{pageTitle}</title>
-		<link rel="canonical" href={canonicalURL.href} />
-		<slot name="head" />
+        <main class="flex-1">
+            <slot />
+        </main>
+        {!hideFooter && <Footer />}
+    </body>
 
-	</head>
+    <link />
+    {!disableSmoothScroll && <script>import '@/scripts/lenis.ts';</script>}
 
-	<body class="min-h-dvh flex flex-col"> 
+    <script>
+        const popup = document.getElementById("currency-popup");
+        const closeBtn = document.getElementById("currency-popup-close");
+        const backdrop = document.getElementById("currency-popup-backdrop");
 
-		<div id="currency-popup" class="fixed inset-0 z-999 flex items-center justify-center p-4" style="display:none!important">
-			<div class="absolute inset-0 bg-black/80" id="currency-popup-backdrop"></div>
-			<div class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center gap-4 text-center">
-				<div class="w-12 h-12 rounded-full flex items-center justify-center bg-primary">
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white" class="w-6 h-6">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-					</svg>
-				</div>
-				<h2 class="font-accent text-3xl text-black">PRECIOS EN USD</h2>
-				<p class="text-sm text-black leading-relaxed">
-					Todos los precios de nuestra tienda están expresados en <span class="text-primary font-bold">dólares estadounidenses (USD)</span>.
-				</p>
-				<p class="text-sm text-black leading-relaxed">
-					Al finalizar tu compra podés elegir abonar en <span class="text-primary font-bold">pesos argentinos (ARS)</span> al tipo de cambio del momento, o en otra moneda <span class="font-bold">acordada con nosotros por WhatsApp</span>.
-				</p>
-				<button id="currency-popup-close" class="bg-primary w-full py-3 rounded-xl text-white font-semibold text-sm hover:bg-primary-accent transition-all duration-300 cursor-pointer">
-					Entendido
-				</button>
-			</div>
-		</div>
+        if (popup && !sessionStorage.getItem("currency-popup-seen")) {
+            popup.style.removeProperty("display");
 
-		<main class="flex-1">
-			<slot />
-		</main>
-		{!hideFooter && <Footer />}
-	</body>
-	
-	<link/>
-	{!disableSmoothScroll && (
-		<script>
-			import '@/scripts/lenis.ts';
-		</script>
-	)}
+            const close = () => {
+                popup.style.display = "none";
+                sessionStorage.setItem("currency-popup-seen", "1");
+            };
 
-	<script>
-		const popup = document.getElementById('currency-popup');
-		const closeBtn = document.getElementById('currency-popup-close');
-		const backdrop = document.getElementById('currency-popup-backdrop');
-
-		if (popup && !sessionStorage.getItem('currency-popup-seen')) {
-			popup.style.removeProperty('display');
-
-			const close = () => {
-				popup.style.display = 'none';
-				sessionStorage.setItem('currency-popup-seen', '1');
-			};
-
-			closeBtn?.addEventListener('click', close);
-			backdrop?.addEventListener('click', close);
-		}
-	</script>
+            closeBtn?.addEventListener("click", close);
+            backdrop?.addEventListener("click", close);
+        }
+    </script>
 </html>

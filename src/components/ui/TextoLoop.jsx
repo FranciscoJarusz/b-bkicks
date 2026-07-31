@@ -1,4 +1,8 @@
-export default function TextoLoop({ textos = ["ENCARGOS POR WHATSAPP", "ENVÍOS A TODO EL PAÍS"], repeticiones = 15, velocidad = 150 }) {
+export default function TextoLoop({
+    textos = ["ENCARGOS POR WHATSAPP", "ENVÍOS A TODO EL PAÍS"],
+    repeticiones = 15,
+    velocidad = 150,
+}) {
     const items = Array.from({ length: repeticiones }, (_, i) => i);
 
     return (
@@ -11,7 +15,10 @@ export default function TextoLoop({ textos = ["ENCARGOS POR WHATSAPP", "ENVÍOS 
             >
                 {items.map((i) =>
                     textos.map((texto, j) => (
-                        <span key={`${i}-${j}`} className="mx-4 text-[10px] text-secondary font-semibold uppercase tracking-widest">
+                        <span
+                            key={`${i}-${j}`}
+                            className="mx-4 text-[10px] text-secondary font-semibold uppercase tracking-widest"
+                        >
                             {texto}
                         </span>
                     ))

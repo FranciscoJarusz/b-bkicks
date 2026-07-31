@@ -27,22 +27,51 @@ export default function GaleriaImagenes({ images, alt }) {
                 {images.length > 1 && (
                     <>
                         <button
-                            onClick={() => cambiar((seleccionada - 1 + images.length) % images.length)}
+                            onClick={() =>
+                                cambiar(
+                                    (seleccionada - 1 + images.length) %
+                                        images.length
+                                )
+                            }
                             className="absolute left-3 top-1/2 -translate-y-1/2 bg-secondary/80 hover:bg-secondary text-black rounded-full w-9 h-9 flex items-center justify-center shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                             aria-label="Anterior"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M15 19l-7-7 7-7"
+                                />
                             </svg>
                         </button>
 
                         <button
-                            onClick={() => cambiar((seleccionada + 1) % images.length)}
+                            onClick={() =>
+                                cambiar((seleccionada + 1) % images.length)
+                            }
                             className="absolute right-3 top-1/2 -translate-y-1/2 bg-secondary/80 hover:bg-secondary text-black rounded-full w-9 h-9 flex items-center justify-center shadow-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                             aria-label="Siguiente"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M9 5l7 7-7 7"
+                                />
                             </svg>
                         </button>
                     </>

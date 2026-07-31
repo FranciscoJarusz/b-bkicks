@@ -14,12 +14,12 @@ Tienda de sneakers y streetwear construida con Astro, React y Supabase.
 
 - Catalogo, busqueda y ficha de producto leen datos desde Supabase.
 - Panel admin en `/admin` para:
-  - iniciar sesion
-  - crear productos
-  - subir imagenes
-  - editar stock y precio por talle
-  - agregar y borrar talles
-  - borrar uno o varios productos
+    - iniciar sesion
+    - crear productos
+    - subir imagenes
+    - editar stock y precio por talle
+    - agregar y borrar talles
+    - borrar uno o varios productos
 - Importador para cargar `productos.json` a Supabase.
 
 ## Variables de entorno
@@ -37,12 +37,12 @@ PUBLIC_ADMIN_EMAIL=tu-admin@email.com
 
 Todos los comandos se corren desde la raiz del proyecto.
 
-| Comando | Descripcion |
-| --- | --- |
-| `npm install` | Instala dependencias |
-| `npm run dev` | Levanta el proyecto en desarrollo |
-| `npm run build` | Genera el build |
-| `npm run preview` | Previsualiza el build |
+| Comando                   | Descripcion                                  |
+| ------------------------- | -------------------------------------------- |
+| `npm install`             | Instala dependencias                         |
+| `npm run dev`             | Levanta el proyecto en desarrollo            |
+| `npm run build`           | Genera el build                              |
+| `npm run preview`         | Previsualiza el build                        |
 | `npm run import:supabase` | Importa `src/data/productos.json` a Supabase |
 
 ## Deploy en Vercel
@@ -53,13 +53,13 @@ En Vercel:
 
 1. Importa el repo.
 2. Deja los comandos por defecto:
-   - Build Command: `npm run build`
-   - Install Command: `npm install`
+    - Build Command: `npm run build`
+    - Install Command: `npm install`
 3. Agrega estas Environment Variables:
-   - `PUBLIC_SUPABASE_URL`
-   - `PUBLIC_SUPABASE_ANON_KEY`
-   - `PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET`
-   - `PUBLIC_ADMIN_EMAIL`
+    - `PUBLIC_SUPABASE_URL`
+    - `PUBLIC_SUPABASE_ANON_KEY`
+    - `PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET`
+    - `PUBLIC_ADMIN_EMAIL`
 4. Haz deploy.
 
 No hace falta agregar un `vercel.json` para la configuracion actual.
