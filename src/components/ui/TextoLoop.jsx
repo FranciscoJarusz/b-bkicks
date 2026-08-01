@@ -1,5 +1,5 @@
 export default function TextoLoop({
-    textos = ["ENCARGOS POR WHATSAPP", "ENVÍOS A TODO EL PAÍS"],
+    textos = ["ENVÍOS A TODO EL PAÍS", "20% OFF TRANSFERENCIA O EFECTIVO"],
     repeticiones = 15,
     velocidad = 150,
 }) {
