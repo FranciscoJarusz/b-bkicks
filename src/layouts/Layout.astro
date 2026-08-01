@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import Footer from "@/components/Footer.astro";
+import BotonWhatsApp from "@/components/ui/BotonWhatsApp.astro";
 
 interface Props {
     title?: string;
@@ -154,6 +155,8 @@ const pageImage = ogImage ?? "/og-image.jpg";
             <slot />
         </main>
         {!hideFooter && <Footer />}
+
+        <BotonWhatsApp />
     </body>
 
     <link />
