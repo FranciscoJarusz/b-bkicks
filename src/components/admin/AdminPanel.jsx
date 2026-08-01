@@ -1,5 +1,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { supabase } from "@/lib/supabase.js";
+import { CATEGORIAS, getEtiquetaCategoria } from "@/utils/categorias.js";
+import SelectMenu from "@/components/ui/SelectMenu.jsx";
 
 const ADMIN_EMAIL =
     import.meta.env.PUBLIC_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
@@ -15,6 +17,7 @@ const CLOUDINARY_FOLDER = "productos";
 const initialProductForm = {
     nombre: "",
     marca: "",
+    categoria: "",
     precioBase: "",
     talle: "",
     stock: "",
@@ -370,6 +373,7 @@ export default function AdminPanel() {
         precio_base,
         imagen_url,
         es_encargo,
+        categoria,
         marca (
           nombre
         ),
@@ -479,6 +483,32 @@ export default function AdminPanel() {
         await loadProductos();
     }
 
+    async function saveCategoria(productoId, categoria) {
+        const key = `categoria-${productoId}`;
+        setPendingKey(key);
+
+        const { error } = await supabase
+            .from("producto")
+            .update({ categoria: categoria || null })
+            .eq("id_producto", productoId);
+
+        setPendingKey("");
+
+        if (error) {
+            setStatus("No pudimos guardar la categoria.");
+            return;
+        }
+
+        setProductos((prev) =>
+            prev.map((producto) =>
+                producto.id_producto === productoId
+                    ? { ...producto, categoria: categoria || null }
+                    : producto
+            )
+        );
+        setStatus("Categoria actualizada.");
+    }
+
     async function deleteVariante(productoId, talleId, stock) {
         if (Number(stock ?? 0) !== 0) {
             setStatus("Solo puedes borrar talles con stock en 0.");
@@ -578,6 +608,7 @@ export default function AdminPanel() {
                 .insert({
                     nombre: productForm.nombre.trim(),
                     precio_base: Number(productForm.precioBase || 0),
+                    categoria: productForm.categoria || null,
                     imagen_url: null,
                     id_marca: brandId,
                     es_encargo: esTabEncargos,
@@ -998,6 +1029,19 @@ export default function AdminPanel() {
                             placeholder="Marca"
                             required
                         />
+                        <SelectMenu
+                            value={productForm.categoria}
+                            options={CATEGORIAS}
+                            onChange={(categoria) =>
+                                setProductForm((prev) => ({
+                                    ...prev,
+                                    categoria,
+                                }))
+                            }
+                            placeholder="Categoria (opcional)"
+                            ariaLabel="Categoria del producto"
+                            size="lg"
+                        />
                         <input
                             type="number"
                             min="0"
@@ -1104,9 +1148,10 @@ export default function AdminPanel() {
                         </button>
                     </div>
 
-                    <div className="hidden grid-cols-[32px_minmax(0,1.6fr)_120px_120px_140px] items-center gap-4 bg-primary px-5 py-3 text-xs font-semibold uppercase text-secondary md:grid">
+                    <div className="hidden grid-cols-[32px_minmax(0,1.6fr)_130px_120px_120px_140px] items-center gap-4 bg-primary px-5 py-3 text-xs font-semibold uppercase text-secondary md:grid">
                         <span></span>
                         <span>Producto</span>
+                        <span>Categoria</span>
                         <span>Estado</span>
                         <span>{esTabEncargos ? "Talles" : "Stock"}</span>
                     </div>
@@ -1147,7 +1192,7 @@ export default function AdminPanel() {
                                 key={producto.id_producto}
                                 className="border-t border-black/10 bg-secondary first:border-t-0"
                             >
-                                <div className="grid gap-3 px-4 py-4 md:grid-cols-[32px_minmax(0,1.6fr)_120px_120px_140px] md:items-center">
+                                <div className="grid gap-3 px-4 py-4 md:grid-cols-[32px_minmax(0,1.6fr)_130px_120px_120px_140px] md:items-center">
                                     <div className="flex items-center justify-center">
                                         <input
                                             type="checkbox"
@@ -1193,6 +1238,20 @@ export default function AdminPanel() {
                                                 )}
                                             </p>
                                         </div>
+                                    </div>
+
+                                    <div>
+                                        {producto.categoria ? (
+                                            <span className="inline-flex rounded-full bg-black/5 px-2.5 py-1 text-xs font-medium text-black">
+                                                {getEtiquetaCategoria(
+                                                    producto.categoria
+                                                )}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                                                Sin categoria
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div>
@@ -1254,6 +1313,28 @@ export default function AdminPanel() {
 
                                 {isExpanded && (
                                     <div className="border-t border-black/10 px-4 py-4">
+                                        <div className="mb-4 flex flex-col gap-2 md:max-w-xs">
+                                            <p className="text-sm font-semibold text-black">
+                                                Categoria
+                                            </p>
+                                            <SelectMenu
+                                                value={producto.categoria ?? ""}
+                                                options={CATEGORIAS}
+                                                disabled={
+                                                    pendingKey ===
+                                                    `categoria-${producto.id_producto}`
+                                                }
+                                                onChange={(categoria) =>
+                                                    saveCategoria(
+                                                        producto.id_producto,
+                                                        categoria
+                                                    )
+                                                }
+                                                placeholder="Sin categoria"
+                                                ariaLabel="Categoria del producto"
+                                            />
+                                        </div>
+
                                         <div className="overflow-x-auto">
                                             <table className="min-w-full">
                                                 <thead>

@@ -22,7 +22,7 @@ function normalizeSupabaseProducts(rows = []) {
                 id: producto.id_producto,
                 name: producto.nombre,
                 slug: getSlug(producto.nombre),
-                category: "",
+                category: producto.categoria ?? "",
                 marca: producto.marca?.nombre ?? "",
                 description: "",
                 price: Number(producto.precio_base ?? 0),
@@ -112,6 +112,7 @@ async function getProductosFromSupabase() {
       precio_base,
       imagen_url,
       es_encargo,
+      categoria,
       producto_imagen (
         url,
         orden
