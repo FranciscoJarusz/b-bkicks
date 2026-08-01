@@ -5,6 +5,9 @@ import BuscadorHeader from "@/components/ui/BuscadorHeader.jsx";
 import { getProductosAgrupados } from "@/utils/productos.js";
 
 const productos = await getProductosAgrupados();
+const marcas = [
+    ...new Set(productos.map((producto) => producto.marca).filter(Boolean)),
+].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
 ---
 
 <header class="sticky top-0 z-50" id="site-header">
@@ -65,6 +68,24 @@ const productos = await getProductosAgrupados();
                         <div class="mt-5">
                             <BuscadorHeader productos={productos} client:load />
                         </div>
+
+                        <div class="mt-6 flex flex-col overflow-y-auto pb-6">
+                            <p
+                                class="pb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-secondary/45"
+                            >
+                                Marcas
+                            </p>
+                            {
+                                marcas.map((marca) => (
+                                    <a
+                                        href={`/busqueda?q=${encodeURIComponent(marca)}`}
+                                        class="rounded-2xl px-4 py-3 text-sm font-medium text-secondary transition-all duration-300 hover:bg-secondary/10"
+                                    >
+                                        {marca}
+                                    </a>
+                                ))
+                            }
+                        </div>
                     </div>
                 </div>
 
@@ -74,7 +95,7 @@ const productos = await getProductosAgrupados();
                         alt="Logo B&B KICKS"
                         width="80"
                         height="40"
-                        class="h-auto w-18 transition-all duration-300 hover:scale-102"
+                        class="h-auto w-18 transition-all duration-300 hover:scale-102 active:scale-95"
                     />
                 </a>
 
@@ -90,7 +111,7 @@ const productos = await getProductosAgrupados();
                         alt="Logo B&B KICKS"
                         width="80"
                         height="40"
-                        class="w-12 transition-all duration-300 hover:scale-102 lg:w-18"
+                        class="w-12 transition-all duration-300 hover:scale-102 active:scale-95 lg:w-18"
                     />
                 </a>
 
