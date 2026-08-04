@@ -1,5 +1,9 @@
 import React from "react";
-import { normalizarTalles, ordenarTalles } from "@/utils/talles.js";
+import {
+    formatearTalle,
+    normalizarTalles,
+    ordenarTalles,
+} from "@/utils/talles.js";
 
 export default function Card({
     producto,
@@ -68,7 +72,7 @@ export default function Card({
                                     key={t.nombre}
                                     className="bg-primary text-white text-xs font-semibold uppercase px-2 py-0.5"
                                 >
-                                    {t.nombre}
+                                    {formatearTalle(t.nombre)}
                                 </span>
                             ))}
                         </div>

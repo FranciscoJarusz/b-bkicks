@@ -1,24 +1,21 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/ui/Card.jsx";
 import { CATEGORIAS, getEtiquetaCategoria } from "@/utils/categorias.js";
-import { normalizarTalles, ordenarTalles } from "@/utils/talles.js";
+import {
+    agruparTalles,
+    formatearTalle,
+    normalizarTalles,
+} from "@/utils/talles.js";
 
 /** El precio que ve el usuario en la card es el base con el recargo aplicado. */
 function getPrecioMostrado(producto) {
     return Math.round(Number(producto.price ?? 0) * 1.25);
 }
 
-/** Los talles vienen cargados a mano, asi que "xs" y "XS " son el mismo talle. */
-function normalizarNombreTalle(nombre) {
-    return String(nombre ?? "")
-        .trim()
-        .toUpperCase();
-}
-
 function getTallesDisponibles(producto, mostrarTodosLosTalles = false) {
     return normalizarTalles(producto.specs?.talle)
         .filter((t) => mostrarTodosLosTalles || t.stock > 0)
-        .map((t) => normalizarNombreTalle(t.nombre));
+        .map((t) => formatearTalle(t.nombre));
 }
 
 /**
@@ -121,15 +118,13 @@ export default function CatalogoConFiltros({
         porBusqueda.some((p) => p.category === categoria.value)
     );
 
-    const tallesDisponibles = ordenarTalles(
-        [
-            ...new Set(
-                porBusqueda.flatMap((p) =>
-                    getTallesDisponibles(p, mostrarTodosLosTalles)
-                )
-            ),
-        ].map((nombre) => ({ nombre, stock: 1 }))
-    ).map((t) => t.nombre);
+    const gruposDeTalles = agruparTalles([
+        ...new Set(
+            porBusqueda.flatMap((p) =>
+                getTallesDisponibles(p, mostrarTodosLosTalles)
+            )
+        ),
+    ]);
 
     const min = precioMin === "" ? null : Number(precioMin);
     const max = precioMax === "" ? null : Number(precioMax);
@@ -367,29 +362,36 @@ export default function CatalogoConFiltros({
                 </div>
             )}
 
-            {tallesDisponibles.length > 0 && (
-                <div className="flex flex-col gap-3 border-t border-black/10 pt-5">
-                    <p className={tituloSeccion}>Tallas</p>
-                    <div className="flex flex-wrap gap-2">
-                        {tallesDisponibles.map((talle) => (
-                            <button
-                                key={talle}
-                                type="button"
-                                onClick={() =>
-                                    toggleEnLista(
-                                        talle,
-                                        tallesSeleccionados,
-                                        setTallesSeleccionados
-                                    )
-                                }
-                                className={`${botonOpcion(
-                                    tallesSeleccionados.includes(talle)
-                                )} min-w-12 text-center`}
-                            >
-                                {talle}
-                            </button>
-                        ))}
-                    </div>
+            {gruposDeTalles.length > 0 && (
+                <div className="flex flex-col gap-5 border-t border-black/10 pt-5">
+                    <p className={tituloSeccion}>Talles</p>
+                    {gruposDeTalles.map((grupo) => (
+                        <div key={grupo.value} className="flex flex-col gap-3">
+                            <p className="text-xs font-semibold text-black">
+                                {grupo.label}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {grupo.talles.map((talle) => (
+                                    <button
+                                        key={talle}
+                                        type="button"
+                                        onClick={() =>
+                                            toggleEnLista(
+                                                talle,
+                                                tallesSeleccionados,
+                                                setTallesSeleccionados
+                                            )
+                                        }
+                                        className={`${botonOpcion(
+                                            tallesSeleccionados.includes(talle)
+                                        )} min-w-12 text-center`}
+                                    >
+                                        {talle}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 

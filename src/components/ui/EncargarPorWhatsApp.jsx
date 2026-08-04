@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { normalizarTalles, ordenarTalles } from "@/utils/talles.js";
+import {
+    formatearTalle,
+    normalizarTalles,
+    ordenarTalles,
+} from "@/utils/talles.js";
 
 const WHATSAPP_NUMERO = "5491125322786";
 
@@ -15,7 +19,7 @@ export default function EncargarPorWhatsApp({ producto }) {
             `*Nuevo encargo a través de la tienda online:*\n\n` +
             `¡Hola B&B KICKS! Quiero encargar este producto:\n\n` +
             `- *${producto.name}*${producto.marca ? ` (${producto.marca})` : ""}` +
-            `${talleSeleccionado ? ` (Talle: *${talleSeleccionado}*)` : ""} *x${cantidad}*`;
+            `${talleSeleccionado ? ` (Talle: *${formatearTalle(talleSeleccionado)}*)` : ""} *x${cantidad}*`;
         const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
         window.open(url, "_blank", "noopener,noreferrer");
     }
@@ -26,7 +30,7 @@ export default function EncargarPorWhatsApp({ producto }) {
                 <div className="flex flex-col gap-2 justify-center">
                     <p className="text-xs font-semibold uppercase text-black/70">
                         {talleSeleccionado
-                            ? `Talle: ${talleSeleccionado}`
+                            ? `Talle: ${formatearTalle(talleSeleccionado)}`
                             : "Talle"}
                     </p>
 
@@ -42,7 +46,7 @@ export default function EncargarPorWhatsApp({ producto }) {
                                         : "border-black/10 text-black/50 hover:border-primary hover:text-primary"
                                 }`}
                             >
-                                {t.nombre}
+                                {formatearTalle(t.nombre)}
                             </button>
                         ))}
                     </div>

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { agregarAlCarrito, getCarrito } from "@/utils/carrito.js";
-import { normalizarTalles, ordenarTalles } from "@/utils/talles.js";
+import {
+    formatearTalle,
+    normalizarTalles,
+    ordenarTalles,
+} from "@/utils/talles.js";
 
 export default function AgregarAlCarrito({ producto }) {
     const talles = ordenarTalles(normalizarTalles(producto.specs?.talle ?? []));
@@ -89,7 +93,7 @@ export default function AgregarAlCarrito({ producto }) {
                 <div className="flex flex-col gap-2 justify-center">
                     <p className="text-xs font-semibold uppercase text-black/70">
                         {talleSeleccionado
-                            ? `Talle: ${talleSeleccionado}`
+                            ? `Talle: ${formatearTalle(talleSeleccionado)}`
                             : "Talle"}
                     </p>
 
@@ -105,7 +109,7 @@ export default function AgregarAlCarrito({ producto }) {
                                     : "border-black/10 text-black/50 hover:border-primary hover:text-primary"
                             }`}
                             >
-                                {t.nombre}
+                                {formatearTalle(t.nombre)}
                             </button>
                         ))}
                     </div>

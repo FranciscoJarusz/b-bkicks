@@ -6,6 +6,7 @@ import {
     quitarDelCarrito,
     vaciarCarrito,
 } from "@/utils/carrito.js";
+import { formatearTalle } from "@/utils/talles.js";
 
 const WHATSAPP_NUMERO = "5491125322786";
 
@@ -30,7 +31,7 @@ export default function Carrito() {
     function finalizarCompra() {
         const lineas = items.map(
             (i) =>
-                `- *${i.name}*${i.talle ? ` (Talle: *${i.talle}*)` : ""} *x${i.cantidad}* — $*${(i.price * i.cantidad).toLocaleString("es-AR")}*`
+                `- *${i.name}*${i.talle ? ` (Talle: *${formatearTalle(i.talle)}*)` : ""} *x${i.cantidad}* — $*${(i.price * i.cantidad).toLocaleString("es-AR")}*`
         );
         const mensaje =
             `*Nuevo pedido a través de la tienda online:*\n\n` +
@@ -192,7 +193,7 @@ export default function Carrito() {
                                         <p className="truncate text-sm leading-tight font-semibold text-secondary">
                                             {item.name}
                                             {item.talle
-                                                ? ` (${item.talle})`
+                                                ? ` (${formatearTalle(item.talle)})`
                                                 : ""}
                                         </p>
 
