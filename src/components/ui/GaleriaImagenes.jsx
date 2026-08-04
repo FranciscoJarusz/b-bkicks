@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 export default function GaleriaImagenes({ images, alt }) {
     const [seleccionada, setSeleccionada] = useState(0);
@@ -17,7 +18,7 @@ export default function GaleriaImagenes({ images, alt }) {
                 {images.map((img, i) => (
                     <img
                         key={i}
-                        src={img}
+                        src={cloudinaryUrl(img, { width: 800, height: 800 })}
                         alt={alt}
                         className={`absolute inset-0 object-cover h-full w-full transition-opacity duration-500 ${i === seleccionada ? "opacity-100" : "opacity-0"}`}
                         fetchPriority="high"

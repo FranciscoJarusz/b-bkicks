@@ -1,6 +1,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { supabase } from "@/lib/supabase.js";
 import { CATEGORIAS, getEtiquetaCategoria } from "@/utils/categorias.js";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 import SelectMenu from "@/components/ui/SelectMenu.jsx";
 
 const ADMIN_EMAIL =
@@ -1212,7 +1213,10 @@ export default function AdminPanel() {
                                         <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-black/10 ring-1 ring-black/10">
                                             {image ? (
                                                 <img
-                                                    src={image}
+                                                    src={cloudinaryUrl(image, {
+                                                        width: 100,
+                                                        height: 100,
+                                                    })}
                                                     alt={producto.nombre}
                                                     className="h-full w-full object-cover"
                                                 />

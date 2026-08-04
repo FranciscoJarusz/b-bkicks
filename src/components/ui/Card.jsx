@@ -4,6 +4,7 @@ import {
     normalizarTalles,
     ordenarTalles,
 } from "@/utils/talles.js";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 export default function Card({
     producto,
@@ -26,7 +27,10 @@ export default function Card({
             >
                 {producto.image ? (
                     <img
-                        src={producto.image}
+                        src={cloudinaryUrl(producto.image, {
+                            width: 500,
+                            height: 667,
+                        })}
                         alt={producto.name}
                         width="368"
                         height="490"

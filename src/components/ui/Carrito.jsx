@@ -7,6 +7,7 @@ import {
     vaciarCarrito,
 } from "@/utils/carrito.js";
 import { formatearTalle } from "@/utils/talles.js";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 const WHATSAPP_NUMERO = "5491125322786";
 
@@ -172,7 +173,13 @@ export default function Carrito() {
                                     <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0">
                                         {item.image ? (
                                             <img
-                                                src={item.image}
+                                                src={cloudinaryUrl(
+                                                    item.image,
+                                                    {
+                                                        width: 150,
+                                                        height: 150,
+                                                    }
+                                                )}
                                                 alt={item.name}
                                                 className="object-cover w-full h-full"
                                             />

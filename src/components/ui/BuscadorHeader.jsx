@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useId } from "react";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 /** @param {{ productos: object[] }} props */
 export default function BuscadorHeader({ productos = [] }) {
@@ -157,7 +158,10 @@ export default function BuscadorHeader({ productos = [] }) {
                             >
                                 {p.image && (
                                     <img
-                                        src={p.image}
+                                        src={cloudinaryUrl(p.image, {
+                                            width: 80,
+                                            height: 80,
+                                        })}
                                         alt={p.name}
                                         className="w-10 h-10 rounded-lg object-cover shrink-0"
                                     />
