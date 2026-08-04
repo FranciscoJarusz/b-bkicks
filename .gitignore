@@ -1,5 +1,9 @@
 # build output
 dist/
+.vercel/
+
+# claude code
+.claude/
 
 # generated types
 .astro/
