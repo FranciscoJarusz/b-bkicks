@@ -1,0 +1,105 @@
+---
+const titulo = "Elegí cómo comprar";
+const subtitulo = "Tenemos lo que buscás, estés donde estés.";
+
+const opciones = [
+    {
+        href: "/busqueda",
+        ariaLabel: "Ver el catálogo de productos",
+        imagen: "/hero.webp",
+        volanta: "Explorá nuestros productos",
+        titulo: "Catálogo",
+        descripcion:
+            "Descubrí sneakers, ropa y accesorios 100% originales y disponibles.",
+        cta: "Ver catálogo",
+        destacado: true,
+    },
+    {
+        href: "/encargos",
+        ariaLabel: "Ver cómo funcionan los encargos",
+        imagen: "/evento.webp",
+        volanta: "¿No está en stock?",
+        titulo: "Encargos",
+        descripcion: "Encargá productos exclusivos que no tenemos en stock.",
+        cta: "Ver encargos",
+        destacado: false,
+    },
+];
+---
+
+<section class="bg-secondary">
+    <div
+        class="mx-auto flex max-w-7xl flex-col gap-10 px-4 pt-16 lg:gap-14 lg:px-6"
+    >
+        <div class="flex flex-col items-center gap-3 text-center">
+            <h2
+                class="text-4xl uppercase text-primary font-accent sm:text-5xl lg:text-6xl animate-fade-in-down"
+            >
+                {titulo}
+            </h2>
+            <span
+                class="h-0.75 w-16 rounded-full bg-primary animate-fade-in-down animate-delay-100"
+            ></span>
+            <p
+                class="text-sm text-black/70 sm:text-base animate-fade-in-down animate-delay-200"
+            >
+                {subtitulo}
+            </p>
+        </div>
+
+        <div
+            class="grid gap-6 lg:grid-cols-2 animate-fade-in-down animate-delay-500"
+        >
+            {
+                opciones.map((opcion) => (
+                    <div class="relative flex min-h-88 px-9 py-14 flex-col justify-center overflow-hidden rounded-3xl bg-black">
+                        <img
+                            src={opcion.imagen}
+                            alt=""
+                            loading="lazy"
+                            class="absolute inset-0 h-full w-full object-cover opacity-25"
+                        />
+                        <div class="absolute inset-0 bg-linear-to-r from-black to-black/40" />
+
+                        <div class="relative flex flex-col items-start justify-between h-full">
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                                {opcion.volanta}
+                            </p>
+                            <h3 class="text-4xl uppercase text-secondary font-accent sm:text-5xl lg:text-6xl">
+                                {opcion.titulo}
+                            </h3>
+                            <p class="max-w-sm text-sm text-secondary/75 sm:text-base">
+                                {opcion.descripcion}
+                            </p>
+
+                            <a
+                                href={opcion.href}
+                                aria-label={opcion.ariaLabel}
+                                class:list={[
+                                    "flex items-center gap-3 rounded-full px-6 py-3 text-sm font-semibold text-secondary transition-all duration-300 hover:scale-102 active:scale-98",
+                                    opcion.destacado
+                                        ? "bg-primary"
+                                        : "ring-2 ring-primary ring-inset hover:bg-primary",
+                                ]}
+                            >
+                                {opcion.cta}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="h-4 w-4"
+                                >
+                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
+    </div>
+</section>
