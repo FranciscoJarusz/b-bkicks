@@ -1,10 +1,18 @@
 import { supabase } from "@/lib/supabase.js";
 
 export function getSlug(nombre) {
-    return nombre
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-]/g, "");
+    return (
+        nombre
+            // Separa la tilde de su letra base y la descarta, para que
+            // "pantalon" no quede como "pantaln". Idem la n con virgulilla.
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "")
+    );
 }
 
 function normalizeSupabaseProducts(rows = []) {
