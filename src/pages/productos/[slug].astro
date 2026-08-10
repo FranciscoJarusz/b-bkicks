@@ -1,9 +1,15 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import ProductoDetalle from "@/components/ProductoDetalle.astro";
 import ProductosSimilares from "@/components/ui/ProductosSimilares.jsx";
 import { getProductosAgrupados } from "@/utils/productos.js";
+import {
+    buildProductSchema,
+    buildBreadcrumbSchema,
+    precioDeLista,
+} from "@/utils/schema.js";
 
 const todosLosProductos = await getProductosAgrupados();
 const producto = todosLosProductos.find(
@@ -16,16 +22,35 @@ if (!producto) {
 
 const productTitle = producto?.name ?? "Producto no encontrado";
 const productDescription = producto
-    ? `Compra ${producto.name} de ${producto.marca} en B&B KICKS. Precio: $${producto.price}. Envios a todo el pais.`
+    ? `Compra ${producto.name} de ${producto.marca} en B&B KICKS. Precio: USD ${precioDeLista(producto.price)}. Envios a todo el pais.`
     : "El producto que buscas no esta disponible en este momento.";
 const productImage = producto?.images?.[0];
+
+const pageUrl = new URL(
+    Astro.url.pathname,
+    Astro.site ?? "https://www.bybkicks.com"
+).href;
+
+const schema = producto
+    ? [
+          buildProductSchema(producto, { pageUrl }),
+          buildBreadcrumbSchema([
+              { name: "Inicio", url: new URL("/", pageUrl).href },
+              { name: "Productos", url: new URL("/busqueda", pageUrl).href },
+              { name: producto.name, url: pageUrl },
+          ]),
+      ]
+    : null;
 ---
 
 <Layout
     title={productTitle}
     description={productDescription}
     ogImage={productImage}
+    ogType={producto ? "product" : "website"}
+    noindex={!producto}
 >
+    {schema && <JsonLd slot="head" data={schema} />}
     <Header />
     {
         producto ? (

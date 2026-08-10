@@ -7,6 +7,7 @@ interface Props {
     title?: string;
     description?: string;
     ogImage?: string;
+    ogType?: "website" | "product";
     noindex?: boolean;
     hideFooter?: boolean;
     disableSmoothScroll?: boolean;
@@ -16,11 +17,13 @@ const {
     title,
     description,
     ogImage,
+    ogType = "website",
     noindex = false,
     hideFooter = false,
     disableSmoothScroll = false,
 } = Astro.props;
-const canonicalURL = new URL(Astro.url.pathname, "https://bbkicks.com");
+const siteURL = Astro.site ?? new URL("https://www.bybkicks.com");
+const canonicalURL = new URL(Astro.url.pathname, siteURL);
 const pageTitle = title
     ? `${title} - B&B KICKS`
     : "B&B KICKS - Sneakers y Streetwear en Buenos Aires";
@@ -29,7 +32,7 @@ const pageDescription =
     description ??
     "B&B Kicks: Tu tienda de confianza para sneakers y streetwear de tendencia. 100% original, atención personalizada por WhatsApp y envíos rápidos a toda Argentina. Entrá y mirá más.";
 
-const pageImage = ogImage ?? "/og-image.jpg";
+const pageImage = new URL(ogImage ?? "/hero.webp", siteURL).href;
 ---
 
 <!doctype html>
@@ -42,13 +45,16 @@ const pageImage = ogImage ?? "/og-image.jpg";
 
         <meta name="description" content={pageDescription} />
         <meta name="author" content="B&B KICKS" />
+
         <meta
-            name="keywords"
-            content="sneakers, zapatillas, streetwear, ropa, Buenos Aires, tienda online, corteiz, nike, adidas, noemotions, supreme, jordan"
+            name="facebook-domain-verification"
+            content="6zjy72u2pj2stmu7y2f96w4rfux4un"
         />
 
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content={ogType} />
         <meta property="og:site_name" content="B&B KICKS" />
+        <meta property="og:locale" content="es_AR" />
+        <meta property="og:url" content={canonicalURL.href} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={pageImage} />
@@ -59,6 +65,7 @@ const pageImage = ogImage ?? "/og-image.jpg";
         <meta name="twitter:image" content={pageImage} />
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -92,9 +99,63 @@ const pageImage = ogImage ?? "/og-image.jpg";
         <title>{pageTitle}</title>
         <link rel="canonical" href={canonicalURL.href} />
         <slot name="head" />
+
+        <!-- Meta Pixel Code -->
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <script is:inline>
+            !(function (f, b, e, v, n, t, s) {
+                if (f.fbq) return;
+                n = f.fbq = function () {
+                    n.callMethod
+                        ? n.callMethod.apply(n, arguments)
+                        : n.queue.push(arguments);
+                };
+                if (!f._fbq) f._fbq = n;
+                n.push = n;
+                n.loaded = !0;
+                n.version = "2.0";
+                n.queue = [];
+                t = b.createElement(e);
+                t.async = !0;
+                t.src = v;
+                s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s);
+            })(
+                window,
+                document,
+                "script",
+                "https://connect.facebook.net/en_US/fbevents.js"
+            );
+            fbq("init", "917173001433329");
+
+            // Chrome prerenderiza paginas en segundo plano cuando el usuario
+            // escribe la URL en la barra de direcciones, sin que llegue a
+            // visitarlas. Si mandamos el PageView ahi, Meta cuenta visitas que
+            // no existieron. Lo diferimos hasta que la pagina se active.
+            const trackPageView = () => fbq("track", "PageView");
+
+            if (document.prerendering) {
+                document.addEventListener("prerenderingchange", trackPageView, {
+                    once: true,
+                });
+            } else {
+                trackPageView();
+            }
+        </script>
+        <!-- End Meta Pixel Code -->
     </head>
 
     <body class="min-h-dvh flex flex-col">
+        <noscript
+            ><img
+                height="1"
+                width="1"
+                style="display:none"
+                alt=""
+                src="https://www.facebook.com/tr?id=917173001433329&ev=PageView&noscript=1"
+            /></noscript
+        >
+
         <div
             id="currency-popup"
             class="fixed inset-0 z-999 flex items-center justify-center p-4"

@@ -22,8 +22,18 @@ export default function Carrito() {
     useEffect(() => {
         sincronizar();
         window.addEventListener("carrito-actualizado", sincronizar);
-        return () =>
+        // El evento "carrito-actualizado" no cruza documentos: si Chrome
+        // prerenderizo esta pagina antes de que el usuario tocara el carrito,
+        // arranca con datos viejos. Releemos localStorage al activarse.
+        document.addEventListener("prerenderingchange", sincronizar);
+        // Idem entre pestañas abiertas.
+        window.addEventListener("storage", sincronizar);
+
+        return () => {
             window.removeEventListener("carrito-actualizado", sincronizar);
+            document.removeEventListener("prerenderingchange", sincronizar);
+            window.removeEventListener("storage", sincronizar);
+        };
     }, []);
 
     const total = items.reduce((acc, i) => acc + i.price * i.cantidad, 0);
@@ -173,13 +183,10 @@ export default function Carrito() {
                                     <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0">
                                         {item.image ? (
                                             <img
-                                                src={cloudinaryUrl(
-                                                    item.image,
-                                                    {
-                                                        width: 150,
-                                                        height: 150,
-                                                    }
-                                                )}
+                                                src={cloudinaryUrl(item.image, {
+                                                    width: 150,
+                                                    height: 150,
+                                                })}
                                                 alt={item.name}
                                                 className="object-cover w-full h-full"
                                             />

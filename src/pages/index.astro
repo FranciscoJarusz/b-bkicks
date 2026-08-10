@@ -1,16 +1,21 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import Hero from "@/sections/Hero.astro";
 import Info from "@/sections/Info.astro";
 import Catalogo from "@/sections/Catalogo.astro";
 import Encargos from "@/sections/Encargos.astro";
+import { buildOrganizationSchema } from "@/utils/schema.js";
+
+const siteUrl = (Astro.site ?? new URL("https://www.bybkicks.com")).href;
 ---
 
 <Layout
     title="Inicio"
     description="B&B Kicks: Tu tienda de confianza para sneakers y streetwear de tendencia. 100% original, atención personalizada por WhatsApp y envíos rápidos a toda Argentina. Entrá y mirá más."
 >
+    <JsonLd slot="head" data={buildOrganizationSchema(siteUrl)} />
     <Header />
     <Hero />
     <Info />
