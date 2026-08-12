@@ -4,6 +4,10 @@ const UPLOAD_MARKER = "/upload/";
  * Inserta transformaciones de Cloudinary (formato/calidad automáticos + resize)
  * en una URL de entrega. Si la URL no es de Cloudinary, la devuelve sin tocar.
  */
+/**
+ * @param {string | undefined | null} url
+ * @param {{ width?: number, height?: number, crop?: string }} [options]
+ */
 export function cloudinaryUrl(url, { width, height, crop = "fill" } = {}) {
     if (!url || typeof url !== "string") return url;
 

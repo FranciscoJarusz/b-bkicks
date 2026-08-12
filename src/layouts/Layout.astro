@@ -2,6 +2,7 @@
 import "@/styles/global.css";
 import Footer from "@/components/Footer.astro";
 import BotonWhatsApp from "@/components/ui/BotonWhatsApp.astro";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 interface Props {
     title?: string;
@@ -11,6 +12,7 @@ interface Props {
     noindex?: boolean;
     hideFooter?: boolean;
     disableSmoothScroll?: boolean;
+    hideCurrencyPopup?: boolean;
 }
 
 const {
@@ -21,6 +23,7 @@ const {
     noindex = false,
     hideFooter = false,
     disableSmoothScroll = false,
+    hideCurrencyPopup = false,
 } = Astro.props;
 const siteURL = Astro.site ?? new URL("https://www.bybkicks.com");
 const canonicalURL = new URL(Astro.url.pathname, siteURL);
@@ -32,7 +35,10 @@ const pageDescription =
     description ??
     "B&B Kicks: Tu tienda de confianza para sneakers y streetwear de tendencia. 100% original, atención personalizada por WhatsApp y envíos rápidos a toda Argentina. Entrá y mirá más.";
 
-const pageImage = new URL(ogImage ?? "/hero.webp", siteURL).href;
+const pageImage = new URL(
+    cloudinaryUrl(ogImage, { width: 1200, height: 630 }) ?? "/hero.webp",
+    siteURL
+).href;
 ---
 
 <!doctype html>
@@ -156,6 +162,7 @@ const pageImage = new URL(ogImage ?? "/hero.webp", siteURL).href;
             /></noscript
         >
 
+        {!hideCurrencyPopup && (
         <div
             id="currency-popup"
             class="fixed inset-0 z-999 flex items-center justify-center p-4"
@@ -211,6 +218,7 @@ const pageImage = new URL(ogImage ?? "/hero.webp", siteURL).href;
                 </button>
             </div>
         </div>
+        )}
 
         <main class="flex-1">
             <slot />

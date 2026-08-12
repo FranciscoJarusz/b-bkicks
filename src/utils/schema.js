@@ -1,3 +1,5 @@
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
+
 const SITE_NAME = "B&B KICKS";
 
 // El sitio muestra el precio de lista (efectivo/transferencia + 25%) como
@@ -36,7 +38,11 @@ export function buildProductSchema(producto, { pageUrl, esEncargo = false }) {
         },
     };
 
-    if (imagenes.length > 0) schema.image = imagenes;
+    if (imagenes.length > 0) {
+        schema.image = imagenes.map((img) =>
+            cloudinaryUrl(img, { width: 1000, height: 1000 })
+        );
+    }
     if (producto.description) schema.description = producto.description;
     if (producto.marca) {
         schema.brand = { "@type": "Brand", name: producto.marca };
