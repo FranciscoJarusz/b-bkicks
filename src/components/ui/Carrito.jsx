@@ -49,6 +49,19 @@ export default function Carrito() {
             `¡Hola B&B KICKS! Acabo de elegir estos productos en la web:\n\n` +
             lineas.join("\n") +
             `\n\n*Total: $${total.toLocaleString("es-AR")}*`;
+
+        if (typeof window.fbq === "function") {
+            window.fbq("track", "InitiateCheckout", {
+                contents: items.map((i) => ({
+                    id: i.slug,
+                    quantity: i.cantidad,
+                })),
+                num_items: cantidad,
+                value: total,
+                currency: "ARS",
+            });
+        }
+
         const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
         window.open(url, "_blank", "noopener,noreferrer");
     }

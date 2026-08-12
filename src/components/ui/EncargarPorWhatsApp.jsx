@@ -20,6 +20,16 @@ export default function EncargarPorWhatsApp({ producto }) {
             `¡Hola B&B KICKS! Quiero encargar este producto:\n\n` +
             `- *${producto.name}*${producto.marca ? ` (${producto.marca})` : ""}` +
             `${talleSeleccionado ? ` (Talle: *${formatearTalle(talleSeleccionado)}*)` : ""} *x${cantidad}*`;
+
+        if (typeof window.fbq === "function") {
+            window.fbq("track", "Lead", {
+                content_name: producto.name,
+                content_category: producto.category,
+                value: producto.price * cantidad,
+                currency: "ARS",
+            });
+        }
+
         const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
         window.open(url, "_blank", "noopener,noreferrer");
     }

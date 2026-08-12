@@ -71,6 +71,16 @@ export default function AgregarAlCarrito({ producto }) {
                 cantidad
             );
 
+            if (typeof window.fbq === "function") {
+                window.fbq("track", "AddToCart", {
+                    content_name: producto.name,
+                    content_category: producto.category,
+                    contents: [{ id: producto.slug, quantity: cantidad }],
+                    value: producto.price * cantidad,
+                    currency: "ARS",
+                });
+            }
+
             setAgregado(true);
             setTimeout(() => {
                 setAgregado(false);

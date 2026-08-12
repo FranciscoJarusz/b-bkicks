@@ -82,7 +82,12 @@ export default function CatalogoConFiltros({
     useEffect(() => {
         if (!conBusqueda) return;
         const params = new URLSearchParams(window.location.search);
-        setQ(params.get("q")?.trim() ?? "");
+        const query = params.get("q")?.trim() ?? "";
+        setQ(query);
+
+        if (query && typeof window.fbq === "function") {
+            window.fbq("track", "Search", { search_string: query });
+        }
     }, [conBusqueda]);
 
     const productosUnicos = dedupeProducts(productos);

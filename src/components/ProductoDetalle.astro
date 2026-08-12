@@ -139,3 +139,31 @@ const esEncargo = modo === "encargo";
         </div>
     </div>
 </section>
+
+<script
+    is:inline
+    define:vars={{
+        nombre: producto.name,
+        categoria: producto.category,
+        valor: producto.price,
+    }}
+>
+    function trackViewContent() {
+        if (typeof window.fbq === "function") {
+            window.fbq("track", "ViewContent", {
+                content_name: nombre,
+                content_category: categoria,
+                value: valor,
+                currency: "ARS",
+            });
+        }
+    }
+
+    if (document.prerendering) {
+        document.addEventListener("prerenderingchange", trackViewContent, {
+            once: true,
+        });
+    } else {
+        trackViewContent();
+    }
+</script>
