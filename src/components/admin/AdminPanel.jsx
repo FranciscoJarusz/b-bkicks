@@ -1,14 +1,11 @@
 import { useEffect, useState, useTransition } from "react";
 import { supabase } from "@/lib/supabase.js";
 import { CATEGORIAS, getEtiquetaCategoria } from "@/utils/categorias.js";
-import { cloudinaryUrl } from "@/utils/cloudinary.js";
+import { cloudinaryUrl, cloudinaryPublicId } from "@/utils/cloudinary.js";
 import SelectMenu from "@/components/ui/SelectMenu.jsx";
 
 const ADMIN_EMAIL =
     import.meta.env.PUBLIC_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
-const STORAGE_BUCKET =
-    import.meta.env.PUBLIC_SUPABASE_PRODUCT_IMAGES_BUCKET?.trim() ||
-    "productos";
 const CLOUDINARY_CLOUD_NAME =
     import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME?.trim() ?? "";
 const CLOUDINARY_UPLOAD_PRESET =
@@ -130,17 +127,23 @@ async function convertImageToWebp(file) {
     });
 }
 
-function getStoragePathFromUrl(url) {
-    if (!url) return null;
+async function deleteFromCloudinary(publicIds, accessToken) {
+    if (!publicIds || publicIds.length === 0) return;
 
-    try {
-        const parsed = new URL(url);
-        const marker = `/object/public/${STORAGE_BUCKET}/`;
-        const index = parsed.pathname.indexOf(marker);
-        if (index === -1) return null;
-        return decodeURIComponent(parsed.pathname.slice(index + marker.length));
-    } catch {
-        return null;
+    const response = await fetch("/api/cloudinary-delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ publicIds }),
+    });
+
+    if (!response.ok) {
+        const detail = await response.text().catch(() => "");
+        throw new Error(
+            `No pudimos borrar las imagenes en Cloudinary. ${detail}`.trim()
+        );
     }
 }
 
@@ -691,11 +694,11 @@ export default function AdminPanel() {
 
     async function deleteProductRecord(producto, key) {
         try {
-            const imagePaths = [
+            const publicIds = [
                 ...(producto.producto_imagen ?? []).map((item) =>
-                    getStoragePathFromUrl(item.url)
+                    cloudinaryPublicId(item.url)
                 ),
-                getStoragePathFromUrl(producto.imagen_url),
+                cloudinaryPublicId(producto.imagen_url),
             ].filter(Boolean);
 
             const { error, data: deletedRows } = await supabase
@@ -724,18 +727,20 @@ export default function AdminPanel() {
 
             let statusMessage = "Producto eliminado.";
 
-            if (imagePaths.length > 0) {
-                const uniquePaths = [...new Set(imagePaths)];
-                const { error: storageError } = await supabase.storage
-                    .from(STORAGE_BUCKET)
-                    .remove(uniquePaths);
-                if (storageError) {
+            if (publicIds.length > 0) {
+                const uniqueIds = [...new Set(publicIds)];
+                try {
+                    await deleteFromCloudinary(
+                        uniqueIds,
+                        session?.access_token
+                    );
+                } catch (cloudinaryError) {
                     console.error(
-                        "Error al borrar imagenes del bucket:",
-                        storageError
+                        "Error al borrar imagenes en Cloudinary:",
+                        cloudinaryError
                     );
                     statusMessage =
-                        "Producto eliminado. Las imagenes del bucket quedaron sin borrar.";
+                        "Producto eliminado. Las imagenes en Cloudinary quedaron sin borrar.";
                 }
             }
 

@@ -22,3 +22,15 @@ export function cloudinaryUrl(url, { width, height, crop = "fill" } = {}) {
     const insertAt = idx + UPLOAD_MARKER.length;
     return `${url.slice(0, insertAt)}${params.join(",")}/${url.slice(insertAt)}`;
 }
+
+/**
+ * Extrae el public_id (carpeta/nombre sin extensión) de una URL de entrega
+ * de Cloudinary. Devuelve null si la URL no es de Cloudinary.
+ * @param {string | undefined | null} url
+ */
+export function cloudinaryPublicId(url) {
+    if (!url || typeof url !== "string") return null;
+
+    const match = url.match(/\/upload\/(?:[^/]+\/)*v\d+\/(.+)\.[a-zA-Z0-9]+$/);
+    return match ? match[1] : null;
+}

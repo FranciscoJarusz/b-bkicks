@@ -22,8 +22,11 @@ function loadEnv(filePath) {
     return Object.fromEntries(entries);
 }
 
-function isCloudinaryUrl(url) {
-    return typeof url === "string" && url.includes("res.cloudinary.com");
+function isOnTargetCloud(url, cloudName) {
+    return (
+        typeof url === "string" &&
+        url.includes(`res.cloudinary.com/${cloudName}/`)
+    );
 }
 
 async function uploadRemoteToCloudinary(
@@ -89,7 +92,7 @@ async function main() {
     const summary = { imagenes: 0, principales: 0, saltadas: 0, errores: 0 };
 
     async function migrateUrl(sourceUrl) {
-        if (!sourceUrl || isCloudinaryUrl(sourceUrl)) return null;
+        if (!sourceUrl || isOnTargetCloud(sourceUrl, cloudName)) return null;
         if (cache.has(sourceUrl)) return cache.get(sourceUrl);
 
         const newUrl = await uploadRemoteToCloudinary(sourceUrl, {
@@ -171,7 +174,7 @@ async function main() {
     console.log("\nResumen:");
     console.log(JSON.stringify(summary, null, 2));
     console.log(
-        "\nMigracion lista. Es re-ejecutable: las URLs que ya estan en Cloudinary se saltan."
+        "\nMigracion lista. Es re-ejecutable: las URLs que ya estan en la cuenta de Cloudinary destino se saltan."
     );
 
     if (summary.errores > 0) {
