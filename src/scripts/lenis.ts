@@ -5,6 +5,16 @@ const lenis = new Lenis({
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
 });
 
+// Las islas de React (el carrito, por ejemplo) necesitan frenar el scroll de
+// la pagina sin instanciar un segundo Lenis.
+declare global {
+    interface Window {
+        lenisInstance?: Lenis;
+    }
+}
+
+window.lenisInstance = lenis;
+
 document.addEventListener("click", (e: MouseEvent) => {
     const target = e.target as HTMLElement;
 

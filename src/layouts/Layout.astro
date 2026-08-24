@@ -132,7 +132,33 @@ const pageImage = new URL(
                 "script",
                 "https://connect.facebook.net/en_US/fbevents.js"
             );
-            fbq("init", "917173001433329");
+            // Coincidencias avanzadas: si el visitante ya completo el checkout,
+            // arrancamos el pixel con sus datos para que Meta pueda atribuir
+            // tambien estas visitas. Los guarda src/utils/meta.js — la clave y
+            // la vigencia estan duplicadas aca porque un script `is:inline` no
+            // puede importar modulos.
+            let coincidenciasAvanzadas = null;
+
+            try {
+                const guardado = JSON.parse(
+                    localStorage.getItem("meta-am") || "null"
+                );
+
+                if (
+                    guardado &&
+                    Date.now() - guardado.guardado < 60 * 24 * 60 * 60 * 1000
+                ) {
+                    coincidenciasAvanzadas = guardado.datos;
+                } else if (guardado) {
+                    localStorage.removeItem("meta-am");
+                }
+            } catch {}
+
+            if (coincidenciasAvanzadas) {
+                fbq("init", "917173001433329", coincidenciasAvanzadas);
+            } else {
+                fbq("init", "917173001433329");
+            }
 
             // Chrome prerenderiza paginas en segundo plano cuando el usuario
             // escribe la URL en la barra de direcciones, sin que llegue a
@@ -172,7 +198,7 @@ const pageImage = new URL(
                     <div
                         class="absolute inset-0 bg-black/80"
                         id="currency-popup-backdrop"
-                    ></div>
+                    />
                     <div class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center gap-4 text-center">
                         <div class="w-12 h-12 rounded-full flex items-center justify-center bg-primary">
                             <svg
