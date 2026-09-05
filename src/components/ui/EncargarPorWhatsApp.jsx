@@ -1,18 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     formatearTalle,
     normalizarTalles,
     ordenarTalles,
 } from "@/utils/talles.js";
+import {
+    getTalleInicial,
+    precioDelTalle,
+    publicarTalleSeleccionado,
+} from "@/utils/precios.js";
 
 const WHATSAPP_NUMERO = "5491125322786";
 
 export default function EncargarPorWhatsApp({ producto }) {
     const talles = ordenarTalles(normalizarTalles(producto.specs?.talle));
-    const [talleSeleccionado, setTalleSeleccionado] = useState(
-        talles[0]?.nombre ?? null
+    const [talleSeleccionado, setTalleSeleccionado] = useState(() =>
+        getTalleInicial(talles)
     );
     const [cantidad, setCantidad] = useState(1);
+    const precio = precioDelTalle(producto, talleSeleccionado);
+
+    // El precio de la ficha lo muestra otro island, que se entera por aca.
+    useEffect(() => {
+        publicarTalleSeleccionado(producto.slug, precio);
+    }, [producto.slug, precio]);
 
     function enviarEncargo() {
         const mensaje =
@@ -25,7 +36,7 @@ export default function EncargarPorWhatsApp({ producto }) {
             window.fbq("track", "Lead", {
                 content_name: producto.name,
                 content_category: producto.category,
-                value: producto.price * cantidad,
+                value: precio * cantidad,
                 currency: "ARS",
             });
         }

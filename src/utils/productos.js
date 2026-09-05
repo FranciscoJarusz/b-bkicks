@@ -33,7 +33,7 @@ function normalizeSupabaseProducts(rows = []) {
                 category: producto.categoria ?? "",
                 marca: producto.marca?.nombre ?? "",
                 description: "",
-                price: Number(producto.precio_base ?? 0),
+                precioBase: Number(producto.precio_base ?? 0),
                 esEncargo: Boolean(producto.es_encargo),
                 fallbackImage: producto.imagen_url ?? null,
                 tallesMap: new Map(),
@@ -49,8 +49,10 @@ function normalizeSupabaseProducts(rows = []) {
 
             const current = item.tallesMap.get(talleNombre);
             const stock = Number(talle?.stock ?? 0);
-            const precio =
-                talle?.precio != null ? Number(talle.precio) : undefined;
+            // El precio del talle manda; precio_base es solo el respaldo para
+            // los talles que nunca recibieron uno propio.
+            const precioTalle = Number(talle?.precio ?? 0);
+            const precio = precioTalle > 0 ? precioTalle : item.precioBase;
 
             if (!current) {
                 item.tallesMap.set(talleNombre, {
@@ -62,12 +64,8 @@ function normalizeSupabaseProducts(rows = []) {
                 item.tallesMap.set(talleNombre, {
                     nombre: talleNombre,
                     stock: Math.max(current.stock, stock),
-                    precio: current.precio ?? precio,
+                    precio: Math.min(current.precio, precio),
                 });
-            }
-
-            if (item.price === 0 && precio != null) {
-                item.price = precio;
             }
         }
 
@@ -80,9 +78,10 @@ function normalizeSupabaseProducts(rows = []) {
 
     return Array.from(grouped.values()).map((item) => {
         const talles = Array.from(item.tallesMap.values()).map(
-            ({ nombre, stock }) => ({
+            ({ nombre, stock, precio }) => ({
                 nombre,
                 stock,
+                precio,
             })
         );
         const stock = talles.reduce((sum, talle) => sum + talle.stock, 0);
@@ -90,6 +89,10 @@ function normalizeSupabaseProducts(rows = []) {
             .sort((a, b) => a.orden - b.orden)
             .map((image) => image.url);
         const image = images[0] ?? item.fallbackImage ?? null;
+        const { priceMin, priceMax } = getRangoDePrecios(
+            talles,
+            item.precioBase
+        );
 
         return {
             id: item.id,
@@ -100,7 +103,12 @@ function normalizeSupabaseProducts(rows = []) {
             category: item.category,
             marca: item.marca,
             description: item.description,
-            price: Number(item.price ?? 0),
+            // El precio "del producto" es el mas barato que se puede comprar
+            // hoy; la ficha lo ajusta al talle que elige el comprador.
+            price: priceMin,
+            priceMin,
+            priceMax,
+            precioBase: item.precioBase,
             esEncargo: item.esEncargo,
             stock,
             specs: {
@@ -108,6 +116,28 @@ function normalizeSupabaseProducts(rows = []) {
             },
         };
     });
+}
+
+/**
+ * Rango de precios que puede pagar un comprador. Miramos solo los talles con
+ * stock, que son los unicos que se pueden comprar; si no queda ninguno (un
+ * encargo o un producto agotado) caemos a todos los talles, y si el producto
+ * todavia no tiene talles cargados, al precio base.
+ *
+ * @param {{ stock: number, precio: number }[]} talles
+ * @param {number} precioBase
+ */
+export function getRangoDePrecios(talles = [], precioBase = 0) {
+    const base = Number(precioBase ?? 0);
+    const conStock = talles.filter((talle) => Number(talle.stock ?? 0) > 0);
+    const considerados = conStock.length > 0 ? conStock : talles;
+    const precios = considerados
+        .map((talle) => Number(talle.precio ?? 0))
+        .filter((precio) => precio > 0);
+
+    if (precios.length === 0) return { priceMin: base, priceMax: base };
+
+    return { priceMin: Math.min(...precios), priceMax: Math.max(...precios) };
 }
 
 async function getProductosFromSupabase() {

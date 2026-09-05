@@ -18,6 +18,9 @@ export default function Card({
             (t) => mostrarTodosLosTalles || t.stock > 0
         )
     );
+    // Si los talles no valen todos lo mismo, el precio de la card es el mas
+    // barato y lo aclaramos con un "Desde".
+    const desde = Number(producto.priceMax ?? 0) > Number(producto.price ?? 0);
 
     return (
         <article className="flex flex-col animate-fade-in-down">
@@ -50,6 +53,11 @@ export default function Card({
                         {producto.marca}
                     </span>
                     <span className="text-lg lg:text-2xl font-bold text-primary">
+                        {desde && (
+                            <span className="text-xs lg:text-sm font-semibold">
+                                Desde{" "}
+                            </span>
+                        )}
                         $
                         {Math.round(producto.price * 1.25).toLocaleString(
                             "es-AR"

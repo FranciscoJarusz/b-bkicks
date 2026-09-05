@@ -22,20 +22,38 @@ export function buildProductSchema(producto, { pageUrl, esEncargo = false }) {
           ? [producto.image]
           : [];
 
+    // Cuando los talles no valen todos lo mismo declaramos el rango, para no
+    // prometerle a Google un precio unico que el comprador no siempre paga.
+    const desde = precioDeLista(producto.priceMin ?? producto.price);
+    const hasta = precioDeLista(producto.priceMax ?? producto.price);
+    const comun = {
+        priceCurrency: "USD",
+        availability: disponibilidad,
+        itemCondition: "https://schema.org/NewCondition",
+        seller: { "@type": "Organization", name: SITE_NAME },
+    };
+
     const schema = {
         "@context": "https://schema.org",
         "@type": "Product",
         name: producto.name,
         url: pageUrl,
-        offers: {
-            "@type": "Offer",
-            url: pageUrl,
-            price: String(precioDeLista(producto.price)),
-            priceCurrency: "USD",
-            availability: disponibilidad,
-            itemCondition: "https://schema.org/NewCondition",
-            seller: { "@type": "Organization", name: SITE_NAME },
-        },
+        offers:
+            hasta > desde
+                ? {
+                      "@type": "AggregateOffer",
+                      url: pageUrl,
+                      lowPrice: String(desde),
+                      highPrice: String(hasta),
+                      offerCount: producto.specs?.talle?.length ?? 1,
+                      ...comun,
+                  }
+                : {
+                      "@type": "Offer",
+                      url: pageUrl,
+                      price: String(desde),
+                      ...comun,
+                  },
     };
 
     if (imagenes.length > 0) {

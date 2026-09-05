@@ -12,6 +12,11 @@ function getPrecioMostrado(producto) {
     return Math.round(Number(producto.price ?? 0) * 1.25);
 }
 
+/** El techo del rango, para productos que valen distinto segun el talle. */
+function getPrecioMaximo(producto) {
+    return Math.round(Number(producto.priceMax ?? producto.price ?? 0) * 1.25);
+}
+
 function getTallesDisponibles(producto, mostrarTodosLosTalles = false) {
     return normalizarTalles(producto.specs?.talle)
         .filter((t) => mostrarTodosLosTalles || t.stock > 0)
@@ -157,10 +162,13 @@ export default function CatalogoConFiltros({
                 }
             }
 
-            const precio = getPrecioMostrado(p);
-            if (min != null && Number.isFinite(min) && precio < min)
+            // Un producto entra si alguno de sus talles cae en el rango, no
+            // solo el mas barato.
+            const desde = getPrecioMostrado(p);
+            const hasta = getPrecioMaximo(p);
+            if (min != null && Number.isFinite(min) && hasta < min)
                 return false;
-            if (max != null && Number.isFinite(max) && precio > max)
+            if (max != null && Number.isFinite(max) && desde > max)
                 return false;
 
             return true;

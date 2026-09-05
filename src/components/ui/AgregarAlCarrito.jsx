@@ -5,11 +5,16 @@ import {
     normalizarTalles,
     ordenarTalles,
 } from "@/utils/talles.js";
+import {
+    getTalleInicial,
+    precioDelTalle,
+    publicarTalleSeleccionado,
+} from "@/utils/precios.js";
 
 export default function AgregarAlCarrito({ producto }) {
     const talles = ordenarTalles(normalizarTalles(producto.specs?.talle ?? []));
-    const [talleSeleccionado, setTalleSeleccionado] = useState(
-        talles[0]?.nombre ?? null
+    const [talleSeleccionado, setTalleSeleccionado] = useState(() =>
+        getTalleInicial(talles)
     );
     const [cantidad, setCantidad] = useState(1);
     const [cantidadEnCarrito, setCantidadEnCarrito] = useState(0);
@@ -18,6 +23,12 @@ export default function AgregarAlCarrito({ producto }) {
 
     const stockDelTalle =
         talles.find((t) => t.nombre === talleSeleccionado)?.stock ?? 0;
+    const precio = precioDelTalle(producto, talleSeleccionado);
+
+    // El precio de la ficha lo muestra otro island, que se entera por aca.
+    useEffect(() => {
+        publicarTalleSeleccionado(producto.slug, precio);
+    }, [producto.slug, precio]);
 
     useEffect(() => {
         function sincronizar() {
@@ -64,7 +75,7 @@ export default function AgregarAlCarrito({ producto }) {
                     marca: producto.marca,
                     category: producto.category,
                     image: producto.images?.[0] ?? producto.image ?? null,
-                    price: producto.price,
+                    price: precio,
                     talle: talleSeleccionado,
                     stock: stockDelTalle,
                 },
@@ -76,7 +87,7 @@ export default function AgregarAlCarrito({ producto }) {
                     content_name: producto.name,
                     content_category: producto.category,
                     contents: [{ id: producto.slug, quantity: cantidad }],
-                    value: producto.price * cantidad,
+                    value: precio * cantidad,
                     currency: "ARS",
                 });
             }

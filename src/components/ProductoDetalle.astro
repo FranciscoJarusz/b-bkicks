@@ -2,7 +2,7 @@
 import AgregarAlCarrito from "@/components/ui/AgregarAlCarrito.jsx";
 import EncargarPorWhatsApp from "@/components/ui/EncargarPorWhatsApp.jsx";
 import GaleriaImagenes from "@/components/ui/GaleriaImagenes.jsx";
-import { precioDeLista } from "@/utils/schema.js";
+import PrecioProducto from "@/components/ui/PrecioProducto.jsx";
 
 interface Props {
     modo?: "catalogo" | "encargo";
@@ -16,7 +16,10 @@ interface Props {
         description: string;
         price: number;
         stock: number;
-        specs: { talle: { nombre: string; stock: number }[] | string[] };
+        specs: {
+            talle:
+                { nombre: string; stock: number; precio?: number }[] | string[];
+        };
     };
 }
 
@@ -80,18 +83,7 @@ const esEncargo = modo === "encargo";
             </div>
 
             <div class="flex flex-col gap-8">
-                <div class="flex flex-col gap-1">
-                    <span class="text-2xl font-bold text-primary">
-                        ${precioDeLista(producto.price).toLocaleString("es-AR")}
-                    </span>
-                    <span class="text-sm text-black/60">
-                        ($
-                        <span class="font-bold">
-                            {producto.price.toLocaleString("es-AR")}
-                        </span>{" "}
-                        en efectivo o transferencia)
-                    </span>
-                </div>
+                <PrecioProducto producto={producto} client:load />
 
                 <div class="flex items-center gap-2 text-sm text-primary">
                     {
