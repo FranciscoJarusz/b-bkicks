@@ -167,7 +167,10 @@ async function getProductosFromSupabase() {
       )
     `
         )
-        .order("id_producto", { ascending: true });
+        // Del mas nuevo al mas viejo: no hay fecha de alta en la tabla, pero el
+        // id es autoincremental, asi que sirve de proxy (es el mismo criterio
+        // que usa el panel de admin).
+        .order("id_producto", { ascending: false });
 
     if (error) {
         throw error;

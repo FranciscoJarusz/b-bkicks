@@ -18,7 +18,6 @@ const productos = await getProductosAgrupados();
             {
                 productos
                     .filter((p) => p.stock > 0)
-                    .reverse()
                     .slice(0, 12)
                     .map((producto) => <Card producto={producto} client:load />)
             }
