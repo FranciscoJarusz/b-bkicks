@@ -1,13 +1,8 @@
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
+import { WHATSAPP_NUMERO, urlWhatsApp } from "@/config.js";
+import { precioDeLista } from "@/utils/precios.js";
 
 const SITE_NAME = "B&B KICKS";
-
-// El sitio muestra el precio de lista (efectivo/transferencia + 25%) como
-// precio general, y el precio base como descuento por pago en efectivo.
-// Google necesita el precio que paga cualquier comprador: el de lista.
-export function precioDeLista(precioBase) {
-    return Math.round(Number(precioBase ?? 0) * 1.25);
-}
 
 export function buildProductSchema(producto, { pageUrl, esEncargo = false }) {
     const disponibilidad = esEncargo
@@ -22,6 +17,7 @@ export function buildProductSchema(producto, { pageUrl, esEncargo = false }) {
           ? [producto.image]
           : [];
 
+    // Google necesita el precio que paga cualquier comprador: el de lista.
     // Cuando los talles no valen todos lo mismo declaramos el rango, para no
     // prometerle a Google un precio unico que el comprador no siempre paga.
     const desde = precioDeLista(producto.priceMin ?? producto.price);
@@ -95,7 +91,7 @@ export function buildOrganizationSchema(siteUrl) {
         image: `${origin}/hero.webp`,
         description:
             "Tienda de sneakers y streetwear original en Buenos Aires. Envios a toda Argentina.",
-        telephone: "+5491125322786",
+        telephone: `+${WHATSAPP_NUMERO}`,
         foundingDate: "2024",
         areaServed: { "@type": "Country", name: "Argentina" },
         address: {
@@ -103,9 +99,6 @@ export function buildOrganizationSchema(siteUrl) {
             addressLocality: "Buenos Aires",
             addressCountry: "AR",
         },
-        sameAs: [
-            "https://www.instagram.com/bybkicks_/",
-            "https://wa.me/5491125322786",
-        ],
+        sameAs: ["https://www.instagram.com/bybkicks_/", urlWhatsApp()],
     };
 }

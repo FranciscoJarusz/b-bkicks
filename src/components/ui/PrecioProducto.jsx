@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { normalizarTalles, ordenarTalles } from "@/utils/talles.js";
-import { precioDeLista } from "@/utils/schema.js";
-import { getTalleInicial, precioDelTalle } from "@/utils/precios.js";
+import {
+    getTalleInicial,
+    precioDeLista,
+    precioDelTalle,
+} from "@/utils/precios.js";
 
 /**
  * El precio de la ficha. Vive aparte del selector de talles (que esta en

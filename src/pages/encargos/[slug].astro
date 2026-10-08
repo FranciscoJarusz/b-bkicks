@@ -4,11 +4,8 @@ import Header from "@/components/Header.astro";
 import JsonLd from "@/components/JsonLd.astro";
 import ProductoDetalle from "@/components/ProductoDetalle.astro";
 import { getEncargos } from "@/utils/productos.js";
-import {
-    buildProductSchema,
-    buildBreadcrumbSchema,
-    precioDeLista,
-} from "@/utils/schema.js";
+import { buildProductSchema, buildBreadcrumbSchema } from "@/utils/schema.js";
+import { precioDeLista } from "@/utils/precios.js";
 
 const encargos = await getEncargos();
 const producto = encargos.find((item) => item.slug === Astro.params.slug);

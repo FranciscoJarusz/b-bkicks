@@ -5,6 +5,7 @@ import {
     ordenarTalles,
 } from "@/utils/talles.js";
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
+import { precioDeLista } from "@/utils/precios.js";
 
 export default function Card({
     producto,
@@ -39,6 +40,8 @@ export default function Card({
                         height="490"
                         className="object-cover h-full w-full transition-transform duration-300 hover:scale-105"
                         fetchPriority={priority ? "high" : "auto"}
+                        loading={priority ? "eager" : "lazy"}
+                        decoding="async"
                     />
                 ) : (
                     <span className="text-blac/50 text-sm">Sin imagen</span>
@@ -58,10 +61,7 @@ export default function Card({
                                 Desde{" "}
                             </span>
                         )}
-                        $
-                        {Math.round(producto.price * 1.25).toLocaleString(
-                            "es-AR"
-                        )}
+                        ${precioDeLista(producto.price).toLocaleString("es-AR")}
                     </span>
                     <span className="text-[10px] lg:text-sm text-black/60">
                         ($

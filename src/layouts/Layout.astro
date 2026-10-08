@@ -3,6 +3,8 @@ import "@/styles/global.css";
 import Footer from "@/components/Footer.astro";
 import BotonWhatsApp from "@/components/ui/BotonWhatsApp.astro";
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
+import { META_PIXEL_ID } from "@/config.js";
+import { CLAVE_AM, VIGENCIA_AM } from "@/utils/meta.js";
 
 interface Props {
     title?: string;
@@ -88,19 +90,13 @@ const pageImage = new URL(
             /></noscript
         >
 
-        <link rel="preconnect" href="https://use.typekit.net" />
         <link
             rel="preload"
-            as="style"
-            href="https://use.typekit.net/ots3kmz.css"
-            onload="this.onload=null;this.rel='stylesheet'"
+            as="font"
+            type="font/otf"
+            href="/fonts/Franklin%20Gothic%20Extra%20Condensed.otf"
+            crossorigin
         />
-        <noscript
-            ><link
-                rel="stylesheet"
-                href="https://use.typekit.net/ots3kmz.css"
-            /></noscript
-        >
 
         <title>{pageTitle}</title>
         <link rel="canonical" href={canonicalURL.href} />
@@ -108,7 +104,14 @@ const pageImage = new URL(
 
         <!-- Meta Pixel Code -->
         <link rel="preconnect" href="https://connect.facebook.net" />
-        <script is:inline>
+        <script
+            is:inline
+            define:vars={{
+                pixelId: META_PIXEL_ID,
+                claveAm: CLAVE_AM,
+                vigenciaAm: VIGENCIA_AM,
+            }}
+        >
             !(function (f, b, e, v, n, t, s) {
                 if (f.fbq) return;
                 n = f.fbq = function () {
@@ -134,30 +137,25 @@ const pageImage = new URL(
             );
             // Coincidencias avanzadas: si el visitante ya completo el checkout,
             // arrancamos el pixel con sus datos para que Meta pueda atribuir
-            // tambien estas visitas. Los guarda src/utils/meta.js — la clave y
-            // la vigencia estan duplicadas aca porque un script `is:inline` no
-            // puede importar modulos.
+            // tambien estas visitas. Los guarda src/utils/meta.js.
             let coincidenciasAvanzadas = null;
 
             try {
                 const guardado = JSON.parse(
-                    localStorage.getItem("meta-am") || "null"
+                    localStorage.getItem(claveAm) || "null"
                 );
 
-                if (
-                    guardado &&
-                    Date.now() - guardado.guardado < 60 * 24 * 60 * 60 * 1000
-                ) {
+                if (guardado && Date.now() - guardado.guardado < vigenciaAm) {
                     coincidenciasAvanzadas = guardado.datos;
                 } else if (guardado) {
-                    localStorage.removeItem("meta-am");
+                    localStorage.removeItem(claveAm);
                 }
             } catch {}
 
             if (coincidenciasAvanzadas) {
-                fbq("init", "917173001433329", coincidenciasAvanzadas);
+                fbq("init", pixelId, coincidenciasAvanzadas);
             } else {
-                fbq("init", "917173001433329");
+                fbq("init", pixelId);
             }
 
             // Chrome prerenderiza paginas en segundo plano cuando el usuario
@@ -184,7 +182,7 @@ const pageImage = new URL(
                 width="1"
                 style="display:none"
                 alt=""
-                src="https://www.facebook.com/tr?id=917173001433329&ev=PageView&noscript=1"
+                src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
             /></noscript
         >
 
@@ -256,8 +254,6 @@ const pageImage = new URL(
 
         <BotonWhatsApp />
     </body>
-
-    <link />
     {!disableSmoothScroll && <script>import '@/scripts/lenis.ts';</script>}
 
     <script>

@@ -1,3 +1,7 @@
+---
+import { urlWhatsApp } from "@/config.js";
+---
+
 <footer class="bg-black">
     <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col gap-10">
         <div
@@ -50,7 +54,7 @@
                 <ul class="flex flex-col gap-2 text-secondary text-sm">
                     <li>
                         <a
-                            href="https://wa.me/5491125322786"
+                            href={urlWhatsApp()}
                             target="_blank"
                             rel="noopener noreferrer"
                             class="hover:text-primary transition-all duration-300"

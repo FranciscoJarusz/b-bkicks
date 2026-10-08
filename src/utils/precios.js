@@ -1,3 +1,13 @@
+import { RECARGO_LISTA } from "@/config.js";
+
+/**
+ * El sitio muestra el precio de lista (efectivo/transferencia + recargo) como
+ * precio general, y el precio base como descuento por pago en efectivo.
+ */
+export function precioDeLista(precioBase) {
+    return Math.round(Number(precioBase ?? 0) * RECARGO_LISTA);
+}
+
 /**
  * Precio por talle. La tienda cobra el precio de la fila producto_talle; el
  * precio_base del producto solo se usa como respaldo (productos sin talles

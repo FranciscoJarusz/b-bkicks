@@ -1,8 +1,9 @@
 ---
-const WHATSAPP_NUMERO = "5491125322786";
+import { urlWhatsApp } from "@/config.js";
+
 const mensaje =
     "*Nuevo mensaje desde la tienda online* \n\n¡Hola B&B KICKS! Quería hacerles una consulta.";
-const href = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+const href = urlWhatsApp(mensaje);
 ---
 
 <a

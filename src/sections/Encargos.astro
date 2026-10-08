@@ -1,3 +1,7 @@
+---
+import { WHATSAPP_NUMERO } from "@/config.js";
+---
+
 <section id="encargos" class="bg-primary h-auto py-16">
     <div
         class="flex flex-col items-start justify-center text-start px-6 max-w-7xl mx-auto gap-6"
@@ -7,13 +11,17 @@
         </h2>
 
         <div
-            class="flex flex-col gap-2 text-sm md:text-md lg:text-lg max-w-md md:max-w-2xl text-secondary"
+            class="flex flex-col gap-4 text-sm md:text-md lg:text-lg max-w-md md:max-w-2xl text-secondary"
         >
-            <p></p>Envianos el nombre o foto del producto que buscás y te lo
-            cotizamos al instante.
-            <p></p>Recordá que el tiempo estimado de entrega es de 15 a 20 días.
-            <p></p>Compramos solo en retailers oficiales para garantizar la
-            autenticidad total de tus sneakers.
+            <p>
+                Envianos el nombre o foto del producto que buscás y te lo
+                cotizamos al instante.
+            </p>
+            <p>Recordá que el tiempo estimado de entrega es de 15 a 20 días.</p>
+            <p>
+                Compramos solo en retailers oficiales para garantizar la
+                autenticidad total de tus sneakers.
+            </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -48,11 +56,12 @@
     </div>
 </section>
 
-<script is:inline>
+<script is:inline define:vars={{ numero: WHATSAPP_NUMERO }}>
     const mensaje = `*Nuevo mensaje desde la tienda online* \n\n¡Hola B&B KICKS, estoy interesado en realizar un encargo!\n\n*Producto:* \n*Talle:* \n*Consulta:* `;
-    const WHATSAPP_NUMERO = "91125322786";
-    function enviarWhatsApp() {
-        const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+    // define:vars encierra el script en una funcion: lo colgamos de window
+    // para que lo encuentre el onclick del boton.
+    window.enviarWhatsApp = function () {
+        const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
         window.open(url, "_blank");
-    }
+    };
 </script>

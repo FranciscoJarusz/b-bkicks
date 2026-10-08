@@ -3,8 +3,7 @@
 // normalizados: en minusculas, sin espacios ni simbolos, y el telefono en
 // formato internacional.
 
-// Mismo id con el que se inicializa el pixel en src/layouts/Layout.astro.
-export const META_PIXEL_ID = "917173001433329";
+export { META_PIXEL_ID } from "@/config.js";
 
 // Los telefonos argentinos se escriben de mil formas ("11 5555-4444",
 // "+54 9 11...", "011 15 5555 4444"). Meta los quiere como 549XXXXXXXXXX.
@@ -56,8 +55,7 @@ export function datosCoincidenciaAvanzada({ nombre, telefono, email }) {
 // salgan con coincidencias avanzadas: el snippet inline de
 // src/layouts/Layout.astro los lee antes del fbq("init").
 //
-// OJO: si cambias la clave o la vigencia, hay que tocarlas tambien alla; un
-// script `is:inline` no puede importar este modulo.
+// El layout recibe la clave y la vigencia por `define:vars`.
 export const CLAVE_AM = "meta-am";
 export const VIGENCIA_AM = 60 * 24 * 60 * 60 * 1000;
 
