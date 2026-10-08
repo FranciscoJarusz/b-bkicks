@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useId } from "react";
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
+import { buscarProductos } from "@/utils/busqueda.js";
 
 /** @param {{ productos: object[] }} props */
 export default function BuscadorHeader({ productos = [] }) {
@@ -50,20 +51,7 @@ export default function BuscadorHeader({ productos = [] }) {
     const sugerencias =
         busqueda.trim().length < 1
             ? []
-            : dedupeProducts(productos)
-                  .filter((p) => {
-                      const q = normalizeText(busqueda);
-                      return (
-                          normalizeText(p.name).includes(q) ||
-                          (Array.isArray(p.marca)
-                              ? p.marca.some((m) =>
-                                    normalizeText(m).includes(q)
-                                )
-                              : normalizeText(p.marca).includes(q)) ||
-                          normalizeText(p.category).includes(q)
-                      );
-                  })
-                  .slice(0, 6);
+            : buscarProductos(dedupeProducts(productos), busqueda).slice(0, 6);
 
     function handleInput(e) {
         const valor = e.target.value;

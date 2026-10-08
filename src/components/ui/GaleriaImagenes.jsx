@@ -1,11 +1,34 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 export default function GaleriaImagenes({ images, alt }) {
     const [seleccionada, setSeleccionada] = useState(0);
 
+    const inicioToque = useRef(null);
+
     function cambiar(nuevo) {
         setSeleccionada(nuevo);
+    }
+
+    // Swipe en mobile. Solo cuenta si el gesto es mas horizontal que vertical,
+    // para no robarle el scroll de la pagina a quien desliza hacia abajo.
+    function alTocar(evento) {
+        const toque = evento.touches[0];
+        inicioToque.current = { x: toque.clientX, y: toque.clientY };
+    }
+
+    function alSoltar(evento) {
+        const inicio = inicioToque.current;
+        inicioToque.current = null;
+        if (!inicio || images.length < 2) return;
+
+        const toque = evento.changedTouches[0];
+        const dx = toque.clientX - inicio.x;
+        const dy = toque.clientY - inicio.y;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+
+        const paso = dx < 0 ? 1 : -1;
+        cambiar((seleccionada + paso + images.length) % images.length);
     }
 
     if (!images || images.length === 0) {
@@ -14,14 +37,22 @@ export default function GaleriaImagenes({ images, alt }) {
 
     return (
         <div className="flex flex-col gap-3">
-            <div className="rounded-2xl overflow-hidden aspect-square w-full relative group">
+            <div
+                className="rounded-2xl overflow-hidden aspect-square w-full relative group"
+                onTouchStart={alTocar}
+                onTouchEnd={alSoltar}
+            >
                 {images.map((img, i) => (
                     <img
                         key={i}
                         src={cloudinaryUrl(img, { width: 800, height: 800 })}
                         alt={alt}
                         className={`absolute inset-0 object-cover h-full w-full transition-opacity duration-500 ${i === seleccionada ? "opacity-100" : "opacity-0"}`}
-                        fetchPriority="high"
+                        // Las fotos estan apiladas y todas "en pantalla", asi
+                        // que lazy no las frenaria: priorizamos la primera y
+                        // las demas bajan despues.
+                        fetchPriority={i === 0 ? "high" : "low"}
+                        decoding="async"
                     />
                 ))}
 
@@ -78,6 +109,36 @@ export default function GaleriaImagenes({ images, alt }) {
                     </>
                 )}
             </div>
+
+            {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {images.map((img, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => cambiar(i)}
+                            aria-label={`Ver foto ${i + 1} de ${images.length}`}
+                            aria-current={i === seleccionada}
+                            className={`h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 md:h-20 md:w-20 ${
+                                i === seleccionada
+                                    ? "border-primary"
+                                    : "border-transparent opacity-60 hover:opacity-100"
+                            }`}
+                        >
+                            <img
+                                src={cloudinaryUrl(img, {
+                                    width: 160,
+                                    height: 160,
+                                })}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                className="h-full w-full object-cover"
+                            />
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

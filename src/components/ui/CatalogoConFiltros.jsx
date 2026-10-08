@@ -6,15 +6,17 @@ import {
     formatearTalle,
     normalizarTalles,
 } from "@/utils/talles.js";
+import { precioDeLista } from "@/utils/precios.js";
+import { buscarProductos } from "@/utils/busqueda.js";
 
 /** El precio que ve el usuario en la card es el base con el recargo aplicado. */
 function getPrecioMostrado(producto) {
-    return Math.round(Number(producto.price ?? 0) * 1.25);
+    return precioDeLista(producto.price);
 }
 
 /** El techo del rango, para productos que valen distinto segun el talle. */
 function getPrecioMaximo(producto) {
-    return Math.round(Number(producto.priceMax ?? producto.price ?? 0) * 1.25);
+    return precioDeLista(producto.priceMax ?? producto.price);
 }
 
 function getTallesDisponibles(producto, mostrarTodosLosTalles = false) {
@@ -98,25 +100,8 @@ export default function CatalogoConFiltros({
     const productosUnicos = dedupeProducts(productos);
     const query = normalizeText(q);
 
-    const porBusqueda =
-        query.length === 0
-            ? productosUnicos
-            : (() => {
-                  const porMarca = productosUnicos.filter((p) =>
-                      normalizeText(p.marca).includes(query)
-                  );
-
-                  if (porMarca.length > 0) {
-                      return porMarca;
-                  }
-
-                  return productosUnicos.filter(
-                      (p) =>
-                          normalizeText(p.name).includes(query) ||
-                          normalizeText(p.marca).includes(query) ||
-                          normalizeText(p.category).includes(query)
-                  );
-              })();
+    // Misma busqueda que las sugerencias del header (src/utils/busqueda.js).
+    const porBusqueda = buscarProductos(productosUnicos, q);
 
     // Las opciones salen de lo que devolvio la busqueda, no del catalogo entero,
     // para no ofrecer filtros que dejarian la grilla vacia.
