@@ -140,7 +140,31 @@ export function getRangoDePrecios(talles = [], precioBase = 0) {
     return { priceMin: Math.min(...precios), priceMax: Math.max(...precios) };
 }
 
-async function getProductosFromSupabase() {
+// Una misma pagina pide el catalogo mas de una vez (el header y la pagina en
+// si), y una funcion de Vercel atiende varias visitas seguidas. Reusamos la
+// consulta unos segundos; el CDN igual cachea la pagina entera (ver
+// src/middleware.ts), asi que esto solo ahorra consultas repetidas.
+const VIGENCIA_CACHE = 30 * 1000;
+/** @type {{ desde: number, promesa: ReturnType<typeof consultarProductos> } | null} */
+let cacheProductos = null;
+
+function getProductosFromSupabase() {
+    const ahora = Date.now();
+    if (cacheProductos && ahora - cacheProductos.desde < VIGENCIA_CACHE) {
+        return cacheProductos.promesa;
+    }
+
+    const promesa = consultarProductos();
+    cacheProductos = { desde: ahora, promesa };
+    // Si la consulta falla no la dejamos cacheada: la proxima visita reintenta.
+    promesa.catch(() => {
+        if (cacheProductos?.promesa === promesa) cacheProductos = null;
+    });
+
+    return promesa;
+}
+
+async function consultarProductos() {
     const { data, error } = await supabase
         .from("producto")
         .select(
@@ -176,7 +200,66 @@ async function getProductosFromSupabase() {
         throw error;
     }
 
-    return normalizeSupabaseProducts(data ?? []);
+    return desambiguarSlugs(normalizeSupabaseProducts(data ?? []));
+}
+
+/**
+ * El slug sale del nombre, asi que dos productos que se llaman igual chocan y
+ * el segundo queda inaccesible. Al repetido le sumamos el id. Recorremos del
+ * mas viejo al mas nuevo para que el que ya estaba publicado conserve su URL,
+ * y separamos catalogo de encargos porque viven en rutas distintas.
+ *
+ * @template {{ id: number, slug: string, esEncargo: boolean }} T
+ * @param {T[]} productos
+ * @returns {T[]}
+ */
+export function desambiguarSlugs(productos) {
+    const usados = new Set();
+    const porAntiguedad = [...productos].sort(
+        (a, b) => Number(a.id ?? 0) - Number(b.id ?? 0)
+    );
+
+    for (const producto of porAntiguedad) {
+        const clave = `${producto.esEncargo}:${producto.slug}`;
+        if (usados.has(clave)) {
+            producto.slug = `${producto.slug}-${producto.id}`;
+        }
+        usados.add(`${producto.esEncargo}:${producto.slug}`);
+    }
+
+    return productos;
+}
+
+/**
+ * Lo que necesita la grilla con filtros (busqueda y encargos). Viaja como props
+ * de una isla en el HTML: sin la galeria completa ni campos que no muestra.
+ */
+export function paraCatalogo(productos) {
+    return productos.map(
+        ({
+            id,
+            slug,
+            name,
+            marca,
+            category,
+            image,
+            price,
+            priceMax,
+            stock,
+            specs,
+        }) => ({
+            id,
+            slug,
+            name,
+            marca,
+            category,
+            image,
+            price,
+            priceMax,
+            stock,
+            specs,
+        })
+    );
 }
 
 export async function getProductosAgrupados() {

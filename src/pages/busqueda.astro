@@ -2,7 +2,8 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import ResultadosBusqueda from "@/components/ui/ResultadosBusqueda.jsx";
-import { getProductosAgrupados } from "@/utils/productos.js";
+import { getProductosAgrupados, paraCatalogo } from "@/utils/productos.js";
+import { cloudinaryUrl } from "@/utils/cloudinary.js";
 
 const productos = await getProductosAgrupados();
 ---
@@ -17,12 +18,15 @@ const productos = await getProductosAgrupados();
                 slot="head"
                 rel="preload"
                 as="image"
-                href={productos[0].image}
+                href={cloudinaryUrl(productos[0].image, {
+                    width: 500,
+                    height: 667,
+                })}
                 fetchpriority="high"
             />
         )
     }
     <Header />
 
-    <ResultadosBusqueda productos={productos} client:load />
+    <ResultadosBusqueda productos={paraCatalogo(productos)} client:load />
 </Layout>

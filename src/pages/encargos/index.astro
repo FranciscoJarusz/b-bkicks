@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import CatalogoConFiltros from "@/components/ui/CatalogoConFiltros.jsx";
-import { getEncargos } from "@/utils/productos.js";
+import { getEncargos, paraCatalogo } from "@/utils/productos.js";
 
 const encargos = await getEncargos();
 ---
@@ -16,7 +16,7 @@ const encargos = await getEncargos();
     {
         encargos.length > 0 ? (
             <CatalogoConFiltros
-                productos={encargos}
+                productos={paraCatalogo(encargos)}
                 basePath="/encargos"
                 titulo="Todos los productos para encargo"
                 mostrarTodosLosTalles

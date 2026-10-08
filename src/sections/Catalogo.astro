@@ -19,7 +19,9 @@ const productos = await getProductosAgrupados();
                 productos
                     .filter((p) => p.stock > 0)
                     .slice(0, 12)
-                    .map((producto) => <Card producto={producto} client:load />)
+                    // Sin client:load: la card no tiene interaccion, alcanza
+                    // con el HTML del servidor y nos ahorramos hidratar 12 islas.
+                    .map((producto) => <Card producto={producto} />)
             }
         </div>
 

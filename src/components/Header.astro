@@ -5,6 +5,21 @@ import BuscadorHeader from "@/components/ui/BuscadorHeader.jsx";
 import { getProductosAgrupados } from "@/utils/productos.js";
 
 const productos = await getProductosAgrupados();
+
+// El buscador se monta dos veces (mobile y desktop) y cada isla viaja con sus
+// props en el HTML: le pasamos solo lo que muestra, no el catalogo entero.
+const productosBuscador = productos.map(
+    ({ id, slug, name, marca, category, image, price }) => ({
+        id,
+        slug,
+        name,
+        marca,
+        category,
+        image,
+        price,
+    })
+);
+
 const marcas = [
     ...new Set(productos.map((producto) => producto.marca).filter(Boolean)),
 ].sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
@@ -66,7 +81,10 @@ const marcas = [
                         </div>
 
                         <div class="mt-5">
-                            <BuscadorHeader productos={productos} client:load />
+                            <BuscadorHeader
+                                productos={productosBuscador}
+                                client:load
+                            />
                         </div>
 
                         <div class="mt-6 flex flex-col overflow-y-auto pb-6">
@@ -117,7 +135,10 @@ const marcas = [
 
                 <div class="flex items-center gap-4">
                     <div class="w-[20rem] lg:w-[24rem]">
-                        <BuscadorHeader productos={productos} client:load />
+                        <BuscadorHeader
+                            productos={productosBuscador}
+                            client:load
+                        />
                     </div>
                     <Carrito client:load />
                 </div>

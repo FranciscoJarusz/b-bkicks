@@ -6,6 +6,10 @@
     src: url("/fonts/Franklin Gothic Extra Condensed.otf") format("opentype");
     font-weight: 400;
     font-style: normal;
+    /* Mientras carga se ve el texto con la fuente de respaldo en vez de
+       quedar invisible. La fuente se precarga en el layout, asi que el cambio
+       casi no llega a notarse. */
+    font-display: swap;
 }
 
 @theme {

@@ -5,11 +5,8 @@ import JsonLd from "@/components/JsonLd.astro";
 import ProductoDetalle from "@/components/ProductoDetalle.astro";
 import ProductosSimilares from "@/components/ui/ProductosSimilares.jsx";
 import { getProductosAgrupados } from "@/utils/productos.js";
-import {
-    buildProductSchema,
-    buildBreadcrumbSchema,
-    precioDeLista,
-} from "@/utils/schema.js";
+import { buildProductSchema, buildBreadcrumbSchema } from "@/utils/schema.js";
+import { precioDeLista } from "@/utils/precios.js";
 
 const todosLosProductos = await getProductosAgrupados();
 const producto = todosLosProductos.find(
@@ -19,6 +16,14 @@ const producto = todosLosProductos.find(
 if (!producto) {
     Astro.response.status = 404;
 }
+
+// "Productos similares" solo sortea entre los de la misma marca: no hace falta
+// mandarle el catalogo entero al navegador.
+const mismaMarca = producto
+    ? todosLosProductos.filter(
+          (item) => item.slug !== producto.slug && item.marca === producto.marca
+      )
+    : [];
 
 const productTitle = producto?.name ?? "Producto no encontrado";
 const productDescription = producto
@@ -58,7 +63,7 @@ const schema = producto
                 <ProductoDetalle producto={producto} />
                 <ProductosSimilares
                     producto={producto}
-                    productos={todosLosProductos}
+                    productos={mismaMarca}
                     client:load
                 />
             </>
