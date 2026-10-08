@@ -88,7 +88,7 @@ export default function AgregarAlCarrito({ producto }) {
                     content_category: producto.category,
                     contents: [{ id: producto.slug, quantity: cantidad }],
                     value: precio * cantidad,
-                    currency: "ARS",
+                    currency: "USD",
                 });
             }
 

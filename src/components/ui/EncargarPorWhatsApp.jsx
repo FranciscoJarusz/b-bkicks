@@ -9,8 +9,7 @@ import {
     precioDelTalle,
     publicarTalleSeleccionado,
 } from "@/utils/precios.js";
-
-const WHATSAPP_NUMERO = "5491125322786";
+import { urlWhatsApp } from "@/config.js";
 
 export default function EncargarPorWhatsApp({ producto }) {
     const talles = ordenarTalles(normalizarTalles(producto.specs?.talle));
@@ -37,11 +36,11 @@ export default function EncargarPorWhatsApp({ producto }) {
                 content_name: producto.name,
                 content_category: producto.category,
                 value: precio * cantidad,
-                currency: "ARS",
+                currency: "USD",
             });
         }
 
-        const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+        const url = urlWhatsApp(mensaje);
         window.open(url, "_blank", "noopener,noreferrer");
     }
 

@@ -5,52 +5,27 @@ import {
     restarDelCarrito,
     quitarDelCarrito,
     vaciarCarrito,
+    actualizarPreciosCarrito,
     getDatosCheckout,
     guardarDatosCheckout,
     limpiarDatosCheckout,
 } from "@/utils/carrito.js";
 import { formatearTalle } from "@/utils/talles.js";
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
+import { META_PIXEL_ID, urlWhatsApp } from "@/config.js";
 import {
-    META_PIXEL_ID,
+    DATOS_INICIALES,
+    ENTREGAS,
+    MEDIOS_DE_PAGO,
+    armarMensajePedido,
+    calcularTotales,
+    validarCheckout,
+} from "@/utils/pedido.js";
+import CheckoutFormulario from "@/components/ui/CheckoutFormulario.jsx";
+import {
     datosCoincidenciaAvanzada,
     guardarCoincidenciaAvanzada,
 } from "@/utils/meta.js";
-
-const WHATSAPP_NUMERO = "5491125322786";
-
-const MEDIOS_DE_PAGO = [
-    { id: "mercadopago", icono: "💳", label: "MercadoPago" },
-    { id: "transferencia", icono: "🏦", label: "Transferencia" },
-    { id: "efectivo", icono: "💵", label: "Efectivo" },
-];
-
-const ENTREGAS = [
-    { id: "envio", label: "Envío" },
-    { id: "coordinar", label: "Coordinar entrega" },
-];
-
-const DATOS_INICIALES = {
-    nombre: "",
-    telefono: "",
-    email: "",
-    entrega: "",
-    direccion: "",
-    codigoPostal: "",
-    dni: "",
-    pago: "",
-};
-
-// Las tarjetas de entrega y de medio de pago comparten el mismo estilo. El
-// padding vertical lo pone cada grupo: las de pago llevan emoji y necesitan
-// mas alto que las de entrega, que son solo texto.
-function claseTarjeta(activa) {
-    return `flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border px-3 text-sm font-semibold transition-all duration-300 ${
-        activa
-            ? "border-primary bg-primary/15 text-secondary"
-            : "border-secondary/15 bg-white/2 text-secondary/75 hover:border-primary/60 hover:text-secondary"
-    }`;
-}
 
 export default function Carrito() {
     const [abierto, setAbierto] = useState(false);
@@ -66,6 +41,8 @@ export default function Carrito() {
 
     useEffect(() => {
         sincronizar();
+        // Si el precio cambio en el admin desde que se agrego el producto.
+        actualizarPreciosCarrito();
         window.addEventListener("carrito-actualizado", sincronizar);
         // El evento "carrito-actualizado" no cruza documentos: si Chrome
         // prerenderizo esta pagina antes de que el usuario tocara el carrito,
@@ -145,7 +122,10 @@ export default function Carrito() {
         };
     }, [abierto]);
 
-    const total = items.reduce((acc, i) => acc + i.price * i.cantidad, 0);
+    const { total, totalLista, totalAPagar } = calcularTotales(
+        items,
+        datos.pago
+    );
     const cantidad = items.reduce((acc, i) => acc + i.cantidad, 0);
 
     const enCheckout = vista === "checkout";
@@ -164,7 +144,7 @@ export default function Carrito() {
                 })),
                 num_items: cantidad,
                 value: total,
-                currency: "ARS",
+                currency: "USD",
             });
         }
 
@@ -172,56 +152,7 @@ export default function Carrito() {
     }
 
     function validar() {
-        const nuevos = {};
-
-        if (!datos.nombre.trim()) {
-            nuevos.nombre = "Ingresá tu nombre completo.";
-        }
-
-        const telefono = datos.telefono.replace(/\D/g, "");
-        if (!telefono) {
-            nuevos.telefono = "Ingresá tu teléfono.";
-        } else if (telefono.length < 8) {
-            nuevos.telefono = "El teléfono no parece válido.";
-        }
-
-        const email = datos.email.trim();
-        if (!email) {
-            nuevos.email = "Ingresá tu email.";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            nuevos.email = "El email no parece válido.";
-        }
-
-        if (!datos.entrega) {
-            nuevos.entrega = "Elegí cómo querés recibir el pedido.";
-        }
-
-        // Coordinando la entrega no hace falta ninguno de estos datos.
-        if (datos.entrega === "envio") {
-            if (!datos.direccion.trim()) {
-                nuevos.direccion = "Ingresá tu dirección de envío.";
-            }
-
-            const dni = datos.dni.replace(/\D/g, "");
-            if (!dni) {
-                nuevos.dni = "Ingresá tu DNI.";
-            } else if (dni.length < 7 || dni.length > 8) {
-                nuevos.dni = "El DNI no parece válido.";
-            }
-
-            const codigoPostal = datos.codigoPostal.trim();
-            if (!codigoPostal) {
-                nuevos.codigoPostal = "Ingresá tu código postal.";
-                // Sirven tanto el viejo (1714) como el actual (B1714XYZ).
-            } else if (!/^[A-Za-z]?\d{4}[A-Za-z]{0,3}$/.test(codigoPostal)) {
-                nuevos.codigoPostal = "El código postal no parece válido.";
-            }
-        }
-
-        if (!datos.pago) {
-            nuevos.pago = "Elegí un medio de pago.";
-        }
-
+        const nuevos = validarCheckout(datos);
         setErrores(nuevos);
         return Object.keys(nuevos).length === 0;
     }
@@ -230,40 +161,7 @@ export default function Carrito() {
         evento.preventDefault();
         if (!validar()) return;
 
-        const lineas = items.map(
-            (i) =>
-                `- *${i.name}*${i.talle ? ` (Talle: *${formatearTalle(i.talle)}*)` : ""} *x${i.cantidad}* — $*${(i.price * i.cantidad).toLocaleString("es-AR")}*`
-        );
-
-        const medioDePago = MEDIOS_DE_PAGO.find(
-            (m) => m.id === datos.pago
-        )?.label;
-
-        const entrega = ENTREGAS.find((e) => e.id === datos.entrega)?.label;
-
-        const misDatos = [
-            `- *Nombre:* ${datos.nombre.trim()}`,
-            `- *Teléfono:* ${datos.telefono.trim()}`,
-            `- *Email:* ${datos.email.trim()}`,
-            `- *Entrega:* ${entrega}`,
-            // Coordinando la entrega estos datos no se piden.
-            ...(datos.entrega === "envio"
-                ? [
-                      `- *Dirección:* ${datos.direccion.trim()}`,
-                      `- *Código postal:* ${datos.codigoPostal.trim().toUpperCase()}`,
-                      `- *DNI:* ${datos.dni.trim()}`,
-                  ]
-                : []),
-            `- *Medio de pago:* ${medioDePago}`,
-        ];
-
-        const mensaje =
-            `*Nuevo pedido a través de la tienda online:*\n\n` +
-            `¡Hola B&B KICKS! Acabo de elegir estos productos en la web:\n\n` +
-            lineas.join("\n") +
-            `\n\n*Total: $${total.toLocaleString("es-AR")}*` +
-            `\n\n*Mis datos:*\n\n` +
-            misDatos.join("\n");
+        const mensaje = armarMensajePedido(items, datos);
 
         // Las visitas siguientes arrancan el pixel con estos datos.
         guardarCoincidenciaAvanzada(datos);
@@ -279,25 +177,33 @@ export default function Carrito() {
                     quantity: i.cantidad,
                 })),
                 num_items: cantidad,
-                value: total,
-                currency: "ARS",
+                value: totalAPagar,
+                currency: "USD",
             });
         }
 
-        const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, "_blank", "noopener,noreferrer");
+        const url = urlWhatsApp(mensaje);
 
-        // El pedido ya salio: vaciamos el carrito, borramos el borrador y
-        // volvemos al inicio. La conversacion sigue en WhatsApp.
+        // Sin "noopener" en las features: con esa opcion window.open devuelve
+        // siempre null y no podriamos saber si la pestaña se abrio. El opener
+        // lo cortamos a mano.
+        const pestaña = window.open(url, "_blank");
+
+        // El pedido ya salio: vaciamos el carrito y borramos el borrador. La
+        // conversacion sigue en WhatsApp.
         vaciarCarrito();
         limpiarDatosCheckout();
-        window.location.href = "/";
-    }
 
-    const claseInput =
-        "w-full rounded-xl border border-secondary/15 bg-white/2 px-4 py-3 text-sm text-secondary outline-none transition-colors duration-300 placeholder:text-secondary/30 focus:border-primary";
-    const claseLabel =
-        "text-[0.7rem] font-semibold uppercase text-secondary/45";
+        if (pestaña) {
+            pestaña.opener = null;
+            window.location.href = "/";
+        } else {
+            // Los navegadores internos de Instagram y Facebook a veces bloquean
+            // la pestaña nueva: abrimos WhatsApp en esta misma para que el
+            // pedido no se pierda.
+            window.location.href = url;
+        }
+    }
 
     return (
         <>
@@ -409,347 +315,14 @@ export default function Carrito() {
                 </div>
 
                 {enCheckout ? (
-                    <form
+                    <CheckoutFormulario
+                        items={items}
+                        datos={datos}
+                        errores={errores}
+                        actualizarDato={actualizarDato}
                         onSubmit={confirmarCompra}
-                        noValidate
-                        data-lenis-prevent
-                        className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6"
-                    >
-                        <div className="flex flex-col gap-1">
-                            <h3 className="text-4xl uppercase font-accent">
-                                Finalizar compra
-                            </h3>
-
-                            <p className="text-sm text-secondary/55">
-                                Completá tus datos para continuar.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col gap-3 rounded-2xl bg-white/4 p-4">
-                            <p className={claseLabel}>Resumen</p>
-
-                            <div className="flex flex-col gap-2">
-                                {items.map((item) => (
-                                    <div
-                                        key={`${item.slug}-${item.talle}`}
-                                        className="flex items-baseline justify-between gap-3 text-sm"
-                                    >
-                                        <span className="min-w-0 truncate text-secondary/85">
-                                            {item.name}
-                                            {item.talle
-                                                ? ` (${formatearTalle(item.talle)})`
-                                                : ""}{" "}
-                                            ×{item.cantidad}
-                                        </span>
-
-                                        <span className="shrink-0 font-bold text-secondary">
-                                            $
-                                            {(
-                                                item.price * item.cantidad
-                                            ).toLocaleString("es-AR")}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="flex items-center justify-between border-t border-secondary/10 pt-3">
-                                <span className="text-2xl uppercase text-secondary font-accent">
-                                    Total
-                                </span>
-
-                                <span className="text-2xl font-bold">
-                                    ${total.toLocaleString("es-AR")}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label
-                                htmlFor="checkout-nombre"
-                                className={claseLabel}
-                            >
-                                Nombre completo{" "}
-                                <span className="text-primary">*</span>
-                            </label>
-
-                            <input
-                                id="checkout-nombre"
-                                type="text"
-                                autoComplete="name"
-                                placeholder="Tu nombre"
-                                value={datos.nombre}
-                                onChange={(e) =>
-                                    actualizarDato("nombre", e.target.value)
-                                }
-                                className={claseInput}
-                            />
-
-                            {errores.nombre && (
-                                <p className="text-xs text-primary">
-                                    {errores.nombre}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-2">
-                                <label
-                                    htmlFor="checkout-telefono"
-                                    className={claseLabel}
-                                >
-                                    Teléfono{" "}
-                                    <span className="text-primary">*</span>
-                                </label>
-
-                                <input
-                                    id="checkout-telefono"
-                                    type="tel"
-                                    inputMode="tel"
-                                    autoComplete="tel"
-                                    placeholder="11 1111 1111"
-                                    value={datos.telefono}
-                                    onChange={(e) =>
-                                        actualizarDato(
-                                            "telefono",
-                                            e.target.value
-                                        )
-                                    }
-                                    className={claseInput}
-                                />
-
-                                {errores.telefono && (
-                                    <p className="text-xs text-primary">
-                                        {errores.telefono}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <label
-                                    htmlFor="checkout-email"
-                                    className={claseLabel}
-                                >
-                                    Email{" "}
-                                    <span className="text-primary">*</span>
-                                </label>
-
-                                <input
-                                    id="checkout-email"
-                                    type="email"
-                                    inputMode="email"
-                                    autoComplete="email"
-                                    placeholder="tuemail@gmail.com"
-                                    value={datos.email}
-                                    onChange={(e) =>
-                                        actualizarDato("email", e.target.value)
-                                    }
-                                    className={claseInput}
-                                />
-
-                                {errores.email && (
-                                    <p className="text-xs text-primary">
-                                        {errores.email}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <p className={claseLabel}>
-                                Entrega <span className="text-primary">*</span>
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                {ENTREGAS.map((opcion) => (
-                                    <button
-                                        key={opcion.id}
-                                        type="button"
-                                        onClick={() =>
-                                            actualizarDato("entrega", opcion.id)
-                                        }
-                                        aria-pressed={
-                                            datos.entrega === opcion.id
-                                        }
-                                        className={`${claseTarjeta(
-                                            datos.entrega === opcion.id
-                                        )} py-3`}
-                                    >
-                                        {opcion.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {errores.entrega && (
-                                <p className="text-xs text-primary">
-                                    {errores.entrega}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Coordinando la entrega no hace falta pedir nada de esto. */}
-                        {datos.entrega === "envio" && (
-                            <>
-                                <div className="flex flex-col gap-2">
-                                    <label
-                                        htmlFor="checkout-direccion"
-                                        className={claseLabel}
-                                    >
-                                        Dirección de envío{" "}
-                                        <span className="text-primary">*</span>
-                                    </label>
-
-                                    <input
-                                        id="checkout-direccion"
-                                        type="text"
-                                        autoComplete="street-address"
-                                        placeholder="Av. Corrientes 1234"
-                                        value={datos.direccion}
-                                        onChange={(e) =>
-                                            actualizarDato(
-                                                "direccion",
-                                                e.target.value
-                                            )
-                                        }
-                                        className={claseInput}
-                                    />
-
-                                    {errores.direccion && (
-                                        <p className="text-xs text-primary">
-                                            {errores.direccion}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex flex-col gap-2">
-                                        <label
-                                            htmlFor="checkout-dni"
-                                            className={claseLabel}
-                                        >
-                                            DNI{" "}
-                                            <span className="text-primary">
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <input
-                                            id="checkout-dni"
-                                            type="text"
-                                            inputMode="numeric"
-                                            placeholder="12345678"
-                                            value={datos.dni}
-                                            onChange={(e) =>
-                                                actualizarDato(
-                                                    "dni",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className={claseInput}
-                                        />
-
-                                        {errores.dni && (
-                                            <p className="text-xs text-primary">
-                                                {errores.dni}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-col gap-2">
-                                        <label
-                                            htmlFor="checkout-codigo-postal"
-                                            className={claseLabel}
-                                        >
-                                            Código postal{" "}
-                                            <span className="text-primary">
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <input
-                                            id="checkout-codigo-postal"
-                                            type="text"
-                                            autoComplete="postal-code"
-                                            placeholder="1714"
-                                            value={datos.codigoPostal}
-                                            onChange={(e) =>
-                                                actualizarDato(
-                                                    "codigoPostal",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className={claseInput}
-                                        />
-
-                                        {errores.codigoPostal && (
-                                            <p className="text-xs text-primary">
-                                                {errores.codigoPostal}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-                        <div className="flex flex-col gap-2">
-                            <p className={claseLabel}>
-                                Medio de pago{" "}
-                                <span className="text-primary">*</span>
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                {MEDIOS_DE_PAGO.map((medio, indice) => (
-                                    <button
-                                        key={medio.id}
-                                        type="button"
-                                        onClick={() =>
-                                            actualizarDato("pago", medio.id)
-                                        }
-                                        aria-pressed={datos.pago === medio.id}
-                                        className={`${claseTarjeta(
-                                            datos.pago === medio.id
-                                        )} py-4 ${
-                                            // Con una cantidad impar de medios, el ultimo
-                                            // queda solo: que ocupe toda la fila.
-                                            indice ===
-                                                MEDIOS_DE_PAGO.length - 1 &&
-                                            MEDIOS_DE_PAGO.length % 2 !== 0
-                                                ? "col-span-2"
-                                                : ""
-                                        }`}
-                                    >
-                                        <span aria-hidden="true">
-                                            {medio.icono}
-                                        </span>
-
-                                        {medio.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {errores.pago && (
-                                <p className="text-xs text-primary">
-                                    {errores.pago}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="flex flex-col gap-3">
-                            <button
-                                type="submit"
-                                className="w-full cursor-pointer rounded-xl bg-primary py-3.5 text-2xl uppercase text-secondary font-accent transition-all duration-300 hover:bg-primary-accent"
-                            >
-                                Confirmar y pagar
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setVista("carrito")}
-                                className="w-full cursor-pointer rounded-xl border border-secondary/15 py-3 text-sm text-secondary/65 transition-all duration-300 hover:border-secondary/30 hover:text-secondary"
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
+                        onCancelar={() => setVista("carrito")}
+                    />
                 ) : (
                     <div
                         data-lenis-prevent
@@ -931,10 +504,22 @@ export default function Carrito() {
 
                 {!enCheckout && items.length > 0 && (
                     <div className="flex flex-col gap-3 border-t border-secondary/10 px-6 py-5">
-                        <div className="flex items-center justify-between text-xl font-bold text-secondary">
-                            <span>Total:</span>
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center justify-between text-xl font-bold text-secondary">
+                                <span>Total:</span>
 
-                            <span>${total.toLocaleString("es-AR")}</span>
+                                <span>
+                                    ${totalLista.toLocaleString("es-AR")}
+                                </span>
+                            </div>
+
+                            <p className="text-right text-xs text-secondary/60">
+                                ($
+                                <span className="font-bold">
+                                    {total.toLocaleString("es-AR")}
+                                </span>{" "}
+                                en efectivo o transferencia)
+                            </p>
                         </div>
 
                         <button
