@@ -3,14 +3,25 @@ import { supabase } from "@/lib/supabase.js";
 import { CATEGORIAS, getEtiquetaCategoria } from "@/utils/categorias.js";
 import { cloudinaryUrl, cloudinaryPublicId } from "@/utils/cloudinary.js";
 import SelectMenu from "@/components/ui/SelectMenu.jsx";
+import LoginAdmin from "@/components/admin/LoginAdmin.jsx";
+import {
+    resumenDePrecio,
+    precioSugerido,
+    sortSizes,
+} from "@/components/admin/lib/formato.js";
+import {
+    deleteFromCloudinary,
+    uploadFiles,
+} from "@/components/admin/lib/imagenes.js";
+import {
+    getOrCreateBrand,
+    getOrCreateSize,
+    replaceProductImages,
+    appendProductImages,
+} from "@/components/admin/lib/datos.js";
 
 const ADMIN_EMAIL =
     import.meta.env.PUBLIC_ADMIN_EMAIL?.trim().toLowerCase() ?? "";
-const CLOUDINARY_CLOUD_NAME =
-    import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME?.trim() ?? "";
-const CLOUDINARY_UPLOAD_PRESET =
-    import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET?.trim() ?? "";
-const CLOUDINARY_FOLDER = "productos";
 
 const initialProductForm = {
     nombre: "",
@@ -26,306 +37,8 @@ const initialVariantForm = {
     stock: "",
 };
 
-function formatMoney(value) {
-    const number = Number(value ?? 0);
-    return Number.isFinite(number) ? number.toLocaleString("es-AR") : "0";
-}
-
-/**
- * El precio que muestra la tarjeta. La tienda cobra el precio de cada talle,
- * asi que resumimos el rango real en vez del precio_base, que quedaria fijo en
- * lo que se cargo al crear el producto.
- */
-function resumenDePrecio(producto) {
-    const precios = (producto.producto_talle ?? [])
-        .map((variante) => Number(variante.precio ?? 0))
-        .filter((precio) => precio > 0);
-
-    if (precios.length === 0) return `$${formatMoney(producto.precio_base)}`;
-
-    const min = Math.min(...precios);
-    const max = Math.max(...precios);
-
-    return min === max
-        ? `$${formatMoney(min)}`
-        : `$${formatMoney(min)} - $${formatMoney(max)}`;
-}
-
-/** El precio con el que arranca un talle nuevo: el que ya tienen los demas. */
-function precioSugerido(producto) {
-    const precios = (producto.producto_talle ?? [])
-        .map((variante) => Number(variante.precio ?? 0))
-        .filter((precio) => precio > 0);
-
-    return precios.length > 0
-        ? Math.min(...precios)
-        : Number(producto.precio_base ?? 0);
-}
-
-function sortSizes(a, b) {
-    return (a.talle?.nombre ?? "").localeCompare(b.talle?.nombre ?? "", "es", {
-        numeric: true,
-        sensitivity: "base",
-    });
-}
-
-function slugify(value) {
-    return String(value ?? "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-}
-
-const WEBP_QUALITY = 0.75;
-const MAX_WIDTH = 1200;
-const BYPASS_WEBP_TYPES = new Set(["image/gif", "image/svg+xml"]);
-
-function loadImageFromFile(file) {
-    return new Promise((resolve, reject) => {
-        const objectUrl = URL.createObjectURL(file);
-        const image = new Image();
-
-        image.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            resolve(image);
-        };
-
-        image.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error(`No pudimos procesar la imagen ${file.name}.`));
-        };
-
-        image.src = objectUrl;
-    });
-}
-
-function canvasToBlob(canvas, type, quality) {
-    return new Promise((resolve, reject) => {
-        canvas.toBlob(
-            (blob) => {
-                if (!blob) {
-                    reject(
-                        new Error(
-                            "No pudimos convertir la imagen antes de subirla."
-                        )
-                    );
-                    return;
-                }
-
-                resolve(blob);
-            },
-            type,
-            quality
-        );
-    });
-}
-
-async function convertImageToWebp(file) {
-    if (!file?.type?.startsWith("image/")) return file;
-    if (BYPASS_WEBP_TYPES.has(file.type) || file.type === "image/webp")
-        return file;
-
-    const image = await loadImageFromFile(file);
-    const canvas = document.createElement("canvas");
-
-    let width = image.naturalWidth || image.width;
-    let height = image.naturalHeight || image.height;
-
-    if (width > MAX_WIDTH) {
-        const ratio = MAX_WIDTH / width;
-        width = MAX_WIDTH;
-        height = height * ratio;
-    }
-
-    canvas.width = width;
-    canvas.height = height;
-
-    const context = canvas.getContext("2d");
-    if (!context) {
-        throw new Error("No pudimos preparar la optimizacion de la imagen.");
-    }
-    context.drawImage(image, 0, 0, width, height);
-
-    const blob = await canvasToBlob(canvas, "image/webp", WEBP_QUALITY);
-    const originalName =
-        file.name.replace(/\.[^.]+$/, "") || `imagen-${Date.now()}`;
-
-    return new File([blob], `${originalName}.webp`, {
-        type: "image/webp",
-        lastModified: Date.now(),
-    });
-}
-
-async function deleteFromCloudinary(publicIds, accessToken) {
-    if (!publicIds || publicIds.length === 0) return;
-
-    const response = await fetch("/api/cloudinary-delete", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ publicIds }),
-    });
-
-    if (!response.ok) {
-        const detail = await response.text().catch(() => "");
-        throw new Error(
-            `No pudimos borrar las imagenes en Cloudinary. ${detail}`.trim()
-        );
-    }
-}
-
-async function getOrCreateBrand(nombre) {
-    const trimmed = nombre.trim();
-    const { data: existing, error: readError } = await supabase
-        .from("marca")
-        .select("id_marca")
-        .eq("nombre", trimmed)
-        .maybeSingle();
-
-    if (readError) throw readError;
-    if (existing) return existing.id_marca;
-
-    const { data, error } = await supabase
-        .from("marca")
-        .insert({ nombre: trimmed })
-        .select("id_marca")
-        .single();
-
-    if (error) throw error;
-    return data.id_marca;
-}
-
-async function getOrCreateSize(nombre) {
-    const trimmed = nombre.trim();
-    const { data: existing, error: readError } = await supabase
-        .from("talle")
-        .select("id_talle")
-        .eq("nombre", trimmed)
-        .maybeSingle();
-
-    if (readError) throw readError;
-    if (existing) return existing.id_talle;
-
-    const { data, error } = await supabase
-        .from("talle")
-        .insert({ nombre: trimmed })
-        .select("id_talle")
-        .single();
-
-    if (error) throw error;
-    return data.id_talle;
-}
-
-async function uploadToCloudinary(file, folder) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-    if (folder) formData.append("folder", folder);
-
-    const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: formData }
-    );
-
-    if (!response.ok) {
-        const detail = await response.text().catch(() => "");
-        throw new Error(
-            `Cloudinary rechazo la subida (${response.status}). ${detail}`.trim()
-        );
-    }
-
-    const data = await response.json();
-    if (!data.secure_url) {
-        throw new Error("Cloudinary no devolvio la URL de la imagen.");
-    }
-
-    return data.secure_url;
-}
-
-async function uploadFiles(productName, files) {
-    if (!files || files.length === 0) return [];
-
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-        throw new Error(
-            "Faltan PUBLIC_CLOUDINARY_CLOUD_NAME y PUBLIC_CLOUDINARY_UPLOAD_PRESET en el entorno."
-        );
-    }
-
-    const uploaded = [];
-    const folder = `${CLOUDINARY_FOLDER}/${slugify(productName) || `producto-${Date.now()}`}`;
-
-    for (const file of files) {
-        const optimizedFile = await convertImageToWebp(file);
-        const url = await uploadToCloudinary(optimizedFile, folder);
-        uploaded.push(url);
-    }
-
-    return uploaded;
-}
-
-async function replaceProductImages(productId, imageUrls) {
-    const { error: deleteError } = await supabase
-        .from("producto_imagen")
-        .delete()
-        .eq("id_producto", productId);
-
-    if (deleteError) throw deleteError;
-
-    if (imageUrls.length > 0) {
-        const payload = imageUrls.map((url, orden) => ({
-            id_producto: productId,
-            url,
-            orden,
-        }));
-
-        const { error: insertError } = await supabase
-            .from("producto_imagen")
-            .insert(payload);
-        if (insertError) throw insertError;
-    }
-
-    const { error: updateError } = await supabase
-        .from("producto")
-        .update({ imagen_url: imageUrls[0] ?? null })
-        .eq("id_producto", productId);
-
-    if (updateError) throw updateError;
-}
-
-async function appendProductImages(producto, imageUrls) {
-    if (imageUrls.length === 0) return;
-
-    const existing = [...(producto.producto_imagen ?? [])].sort(
-        (a, b) => (a.orden ?? 0) - (b.orden ?? 0)
-    );
-    const payload = imageUrls.map((url, index) => ({
-        id_producto: producto.id_producto,
-        url,
-        orden: existing.length + index,
-    }));
-
-    const { error } = await supabase.from("producto_imagen").insert(payload);
-    if (error) throw error;
-
-    if (!producto.imagen_url) {
-        const { error: updateError } = await supabase
-            .from("producto")
-            .update({ imagen_url: imageUrls[0] })
-            .eq("id_producto", producto.id_producto);
-
-        if (updateError) throw updateError;
-    }
-}
-
 export default function AdminPanel() {
     const [session, setSession] = useState(null);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [authError, setAuthError] = useState("");
     const [status, setStatus] = useState("Cargando panel...");
     const [productos, setProductos] = useState([]);
     const [pendingKey, setPendingKey] = useState("");
@@ -388,7 +101,7 @@ export default function AdminPanel() {
 
     useEffect(() => {
         if (!session) return;
-        if (ADMIN_EMAIL && session.user.email?.toLowerCase() !== ADMIN_EMAIL) {
+        if (!ADMIN_EMAIL || session.user.email?.toLowerCase() !== ADMIN_EMAIL) {
             setStatus("Esta cuenta no esta habilitada para el panel.");
             setProductos([]);
             return;
@@ -445,33 +158,6 @@ export default function AdminPanel() {
         setStatus(
             normalized.length > 0 ? "" : "No hay productos cargados todavia."
         );
-    }
-
-    async function handleLogin(event) {
-        event.preventDefault();
-        setAuthError("");
-        setStatus("Entrando...");
-
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (error) {
-            setAuthError(error.message);
-            setStatus("Ingresa con tu cuenta para administrar el stock.");
-            return;
-        }
-
-        if (ADMIN_EMAIL && data.user.email?.toLowerCase() !== ADMIN_EMAIL) {
-            await supabase.auth.signOut();
-            setAuthError("Esta cuenta no esta autorizada para el panel.");
-            setStatus("Ingresa con tu cuenta para administrar el stock.");
-            return;
-        }
-
-        setPassword("");
-        setStatus("");
     }
 
     async function handleLogout() {
@@ -619,6 +305,26 @@ export default function AdminPanel() {
         }
     }
 
+    // Best effort: si tambien falla la limpieza, el error original es el que
+    // importa mostrar; lo que quede se puede borrar a mano desde el panel.
+    async function deshacerAltaIncompleta(productId, imageUrls) {
+        if (productId) {
+            const { error } = await supabase
+                .from("producto")
+                .delete()
+                .eq("id_producto", productId);
+            if (error) console.error("No pudimos deshacer el producto:", error);
+        }
+
+        const publicIds = imageUrls.map(cloudinaryPublicId).filter(Boolean);
+        if (publicIds.length > 0) {
+            await deleteFromCloudinary(publicIds, session?.access_token).catch(
+                (error) =>
+                    console.error("No pudimos borrar las imagenes:", error)
+            );
+        }
+    }
+
     async function handleCreateProduct(event) {
         event.preventDefault();
 
@@ -629,12 +335,18 @@ export default function AdminPanel() {
 
         setPendingKey("new-product");
 
+        // Lo que ya quedo creado, para deshacerlo si un paso posterior falla:
+        // sin esto quedaba un producto sin talles o imagenes huerfanas.
+        let uploadedUrls = [];
+        let createdProductId = null;
+
         try {
             // Subimos las imagenes primero: si Cloudinary falla, no queda un producto
             // a medio crear (sin imagen ni talles) en la base.
-            const uploadedUrls = await uploadFiles(
+            uploadedUrls = await uploadFiles(
                 productForm.nombre,
-                productFiles
+                productFiles,
+                session?.access_token
             );
 
             const brandId = await getOrCreateBrand(productForm.marca);
@@ -652,6 +364,7 @@ export default function AdminPanel() {
                 .single();
 
             if (productError) throw productError;
+            createdProductId = product.id_producto;
 
             await replaceProductImages(product.id_producto, uploadedUrls);
 
@@ -678,6 +391,7 @@ export default function AdminPanel() {
             await loadProductos();
         } catch (error) {
             console.error("Error al crear producto:", error);
+            await deshacerAltaIncompleta(createdProductId, uploadedUrls);
             setStatus(
                 error?.message?.includes("storage")
                     ? `No pudimos subir las imagenes al bucket. ${error.message}`
@@ -700,7 +414,11 @@ export default function AdminPanel() {
         setPendingKey(key);
 
         try {
-            const uploadedUrls = await uploadFiles(producto.nombre, files);
+            const uploadedUrls = await uploadFiles(
+                producto.nombre,
+                files,
+                session?.access_token
+            );
             await appendProductImages(producto, uploadedUrls);
 
             setProductImageFiles((prev) => ({
@@ -869,91 +587,14 @@ export default function AdminPanel() {
         );
     }
 
+    // Sin PUBLIC_ADMIN_EMAIL no habilitamos a nadie, igual que la API.
     const isAuthorized =
         session &&
-        (!ADMIN_EMAIL || session.user.email?.toLowerCase() === ADMIN_EMAIL);
+        Boolean(ADMIN_EMAIL) &&
+        session.user.email?.toLowerCase() === ADMIN_EMAIL;
 
     if (!session || !isAuthorized) {
-        return (
-            <section className="flex min-h-screen items-center justify-center bg-secondary px-6 py-12 text-secondary">
-                <div className="mx-auto grid w-full max-w-6xl items-center gap-20 lg:gap-60 lg:grid-cols-[1.1fr_0.9fr]">
-                    <div className="flex flex-col justify-center">
-                        <span className="text-xs uppercase tracking-[0.35em] text-black">
-                            Admin B&B KICKS
-                        </span>
-                        <h1 className="mt-4 max-w-xl font-accent text-5xl uppercase leading-none text-primary">
-                            Controla stock, talles y productos desde un solo
-                            lugar.
-                        </h1>
-                        <p className="mt-6 max-w-xl text-sm leading-6 text-black">
-                            Este panel trabaja directo contra Supabase. Para que
-                            quede realmente seguro, necesitas policies RLS y
-                            permisos del bucket para escribir solo al admin
-                            autenticado.
-                        </p>
-                    </div>
-
-                    <form
-                        onSubmit={handleLogin}
-                        className="flex flex-col gap-5 rounded-4xl border border-black/10 p-8 shadow-2xl shadow-black/20"
-                    >
-                        <div className="flex flex-col items-start">
-                            <h2 className="text-2xl font-bold text-black">
-                                Iniciar Sesión
-                            </h2>
-                            <p className="mt-2 text-sm text-black/50">
-                                {status}
-                            </p>
-                        </div>
-
-                        <label className="text-sm flex flex-col gap-2">
-                            <span className="font-semibold text-primary text-lg">
-                                Email
-                            </span>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(event) =>
-                                    setEmail(event.target.value)
-                                }
-                                className="w-full rounded-2xl border-2 border-black/10 px-4 py-3 text-black outline-none transition-all duration-300 focus:border-primary"
-                                placeholder="admin@tudominio.com"
-                                required
-                            />
-                        </label>
-
-                        <label className="text-sm flex flex-col gap-2">
-                            <span className="font-semibold text-primary text-lg">
-                                Contraseña
-                            </span>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(event) =>
-                                    setPassword(event.target.value)
-                                }
-                                className="w-full rounded-2xl border-2 border-black/10 px-4 py-3 text-black outline-none transition-all duration-300 focus:border-primary"
-                                placeholder="********"
-                                required
-                            />
-                        </label>
-
-                        {authError && (
-                            <p className="mt-4 text-sm text-red-300">
-                                {authError}
-                            </p>
-                        )}
-
-                        <button
-                            type="submit"
-                            className="mt-10 lg:mt-20 w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent cursor-pointer"
-                        >
-                            Entrar al panel
-                        </button>
-                    </form>
-                </div>
-            </section>
-        );
+        return <LoginAdmin status={status} setStatus={setStatus} />;
     }
 
     return (
