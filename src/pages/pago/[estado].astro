@@ -1,0 +1,94 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import { urlWhatsApp } from "@/config.js";
+
+const ESTADOS = {
+    exito: {
+        titulo: "¡PAGO RECIBIDO!",
+        texto: "Gracias por tu compra. Ya tenemos tu pedido y te vamos a escribir para coordinar la entrega.",
+    },
+    pendiente: {
+        titulo: "PAGO PENDIENTE",
+        texto: "Tu pago todavía se está acreditando. Apenas se confirme, tomamos tu pedido.",
+    },
+    error: {
+        titulo: "NO SE PUDO PAGAR",
+        texto: "El pago no se completó y no se te cobró. Podés volver a intentarlo o elegir otro medio de pago.",
+    },
+} as const;
+
+const { estado } = Astro.params;
+const contenido = ESTADOS[estado as keyof typeof ESTADOS];
+if (!contenido) return Astro.redirect("/404");
+---
+
+<Layout
+    title="Estado del pago"
+    description="Estado de tu pago en B&B KICKS."
+    noindex={true}
+    hideCurrencyPopup={true}
+>
+    <Header />
+
+    <section
+        class="mx-auto flex min-h-[calc(100dvh-9rem)] max-w-3xl flex-col justify-center px-6 py-16 sm:px-8"
+        data-estado={estado}
+    >
+        <h1 class="font-accent text-5xl leading-[0.9] text-primary sm:text-6xl">
+            {contenido.titulo}
+        </h1>
+
+        <p class="mt-6 text-base leading-8 text-black/70 sm:text-lg">
+            {contenido.texto}
+        </p>
+
+        <div class="mt-8 flex flex-col gap-4 sm:flex-row">
+            <a
+                href="/"
+                class="inline-flex min-h-13 items-center justify-center rounded-full bg-primary px-7 text-base font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent"
+            >
+                Volver al inicio
+            </a>
+
+            <a
+                href={urlWhatsApp()}
+                class="inline-flex min-h-13 items-center justify-center rounded-full border border-black/15 px-7 text-base font-semibold text-black transition-all duration-300 hover:border-primary hover:text-primary"
+            >
+                Hablar por WhatsApp
+            </a>
+        </div>
+    </section>
+</Layout>
+
+<script>
+    import { vaciarCarrito, limpiarDatosCheckout } from "@/utils/carrito.js";
+    import { CLAVE_COMPRA_PENDIENTE } from "@/utils/meta.js";
+
+    // Recien con el pago aprobado se vacia el carrito: si algo falla, el
+    // cliente vuelve y lo encuentra como lo dejo.
+    const estado =
+        document.querySelector<HTMLElement>("[data-estado]")?.dataset.estado;
+    const params = new URLSearchParams(location.search);
+    const aprobado =
+        (params.get("status") ?? params.get("collection_status")) ===
+        "approved";
+
+    if (estado === "exito" && aprobado) {
+        vaciarCarrito();
+        limpiarDatosCheckout();
+
+        // Se borra al leerla: recargar esta pagina no cuenta otra compra.
+        try {
+            const compra = sessionStorage.getItem(CLAVE_COMPRA_PENDIENTE);
+            sessionStorage.removeItem(CLAVE_COMPRA_PENDIENTE);
+
+            const fbq = (window as any).fbq;
+            if (compra && typeof fbq === "function") {
+                fbq("track", "Purchase", JSON.parse(compra));
+            }
+        } catch {
+            // Sin storage o con datos rotos: no hay Purchase.
+        }
+    }
+</script>

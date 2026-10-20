@@ -19,15 +19,19 @@ function claseTarjeta(activa) {
 /** El formulario de datos del checkout, dentro del panel del carrito. */
 export default function CheckoutFormulario({
     items,
+    cotizacion,
+    enviando,
+    errorEnvio,
     datos,
     errores,
     actualizarDato,
     onSubmit,
     onCancelar,
 }) {
-    const { total, totalAPagar, precioSegunPago } = calcularTotales(
+    const { total, totalAPagar, totalARS, precioSegunPago } = calcularTotales(
         items,
-        datos.pago
+        datos.pago,
+        cotizacion
     );
 
     return (
@@ -83,6 +87,16 @@ export default function CheckoutFormulario({
                         ${totalAPagar.toLocaleString("es-AR")}
                     </span>
                 </div>
+
+                {totalARS && (
+                    <p className="text-right text-sm text-secondary/75">
+                        ≈{" "}
+                        <span className="font-bold text-secondary">
+                            ${totalARS.toLocaleString("es-AR")} ARS
+                        </span>{" "}
+                        (dólar a ${cotizacion.toLocaleString("es-AR")})
+                    </p>
+                )}
 
                 {!datos.pago && (
                     <p className="text-right text-xs text-secondary/60">
@@ -320,11 +334,16 @@ export default function CheckoutFormulario({
             </div>
 
             <div className="flex flex-col gap-3">
+                {errorEnvio && (
+                    <p className="text-sm text-primary">{errorEnvio}</p>
+                )}
+
                 <button
                     type="submit"
-                    className="w-full cursor-pointer rounded-xl bg-primary py-3.5 text-2xl uppercase text-secondary font-accent transition-all duration-300 hover:bg-primary-accent"
+                    disabled={enviando}
+                    className="w-full cursor-pointer rounded-xl bg-primary py-3.5 text-2xl uppercase text-secondary font-accent transition-all duration-300 hover:bg-primary-accent disabled:cursor-wait disabled:opacity-60"
                 >
-                    Confirmar y pagar
+                    {enviando ? "Un momento..." : "Confirmar y pagar"}
                 </button>
 
                 <button

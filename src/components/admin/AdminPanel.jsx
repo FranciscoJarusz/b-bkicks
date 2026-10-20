@@ -5,6 +5,7 @@ import { cloudinaryUrl, cloudinaryPublicId } from "@/utils/cloudinary.js";
 import SelectMenu from "@/components/ui/SelectMenu.jsx";
 import LoginAdmin from "@/components/admin/LoginAdmin.jsx";
 import ReelsAdmin from "@/components/admin/ReelsAdmin.jsx";
+import PedidosAdmin from "@/components/admin/PedidosAdmin.jsx";
 import {
     resumenDePrecio,
     precioSugerido,
@@ -642,6 +643,7 @@ export default function AdminPanel() {
                             { id: "catalogo", label: "Catalogo" },
                             { id: "encargos", label: "Encargos" },
                             { id: "reels", label: "Reels" },
+                            { id: "pedidos", label: "Pedidos" },
                         ].map((item) => (
                             <button
                                 key={item.id}
@@ -661,6 +663,8 @@ export default function AdminPanel() {
 
                 {tab === "reels" ? (
                     <ReelsAdmin />
+                ) : tab === "pedidos" ? (
+                    <PedidosAdmin />
                 ) : (
                     <>
                         <form onSubmit={handleCreateProduct}>
