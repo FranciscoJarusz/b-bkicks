@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import JsonLd from "@/components/JsonLd.astro";
 import ProductoDetalle from "@/components/ProductoDetalle.astro";
+import RegistrarVisto from "@/components/RegistrarVisto.astro";
 import { getEncargos } from "@/utils/productos.js";
 import { buildProductSchema, buildBreadcrumbSchema } from "@/utils/schema.js";
 import { precioDeLista } from "@/utils/precios.js";
@@ -48,7 +49,10 @@ const schema = producto
     <Header />
     {
         producto ? (
-            <ProductoDetalle producto={producto} modo="encargo" />
+            <>
+                <ProductoDetalle producto={producto} modo="encargo" />
+                <RegistrarVisto id={producto.id} />
+            </>
         ) : (
             <section class="mx-auto max-w-6xl px-6 py-20">
                 <p class="text-sm uppercase tracking-[0.35em] text-black/45">

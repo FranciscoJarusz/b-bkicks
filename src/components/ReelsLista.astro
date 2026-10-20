@@ -1,0 +1,34 @@
+---
+import ReelCargando from "@/components/ReelCargando.astro";
+import { linkDeReel } from "@/reels";
+import { leerReels } from "@/servidor/contenido";
+
+const reels = await leerReels();
+---
+
+{
+    reels.length ? (
+        reels.map((codigo) => (
+            <div class="group relative aspect-9/16 w-81.5 shrink-0 snap-center rounded-2xl sm:w-85 data-listo:aspect-auto [&_iframe]:transition-opacity [&_iframe]:duration-500 [&:not([data-listo])]:overflow-hidden [&:not([data-listo])_iframe]:opacity-0">
+                <blockquote
+                    class="instagram-media"
+                    data-instgrm-permalink={linkDeReel(codigo)}
+                    data-instgrm-version="14"
+                    style="margin: 0; width: 100%; min-width: 0;"
+                >
+                    <a
+                        href={linkDeReel(codigo)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="sr-only"
+                    >
+                        Ver este reel en Instagram
+                    </a>
+                </blockquote>
+                <ReelCargando class="pointer-events-none absolute inset-0 transition-opacity duration-500 group-data-listo:opacity-0" />
+            </div>
+        ))
+    ) : (
+        <style is:inline>#reels {display: none}</style>
+    )
+}

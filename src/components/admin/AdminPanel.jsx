@@ -4,6 +4,7 @@ import { CATEGORIAS, getEtiquetaCategoria } from "@/utils/categorias.js";
 import { cloudinaryUrl, cloudinaryPublicId } from "@/utils/cloudinary.js";
 import SelectMenu from "@/components/ui/SelectMenu.jsx";
 import LoginAdmin from "@/components/admin/LoginAdmin.jsx";
+import ReelsAdmin from "@/components/admin/ReelsAdmin.jsx";
 import {
     resumenDePrecio,
     precioSugerido,
@@ -640,6 +641,7 @@ export default function AdminPanel() {
                         {[
                             { id: "catalogo", label: "Catalogo" },
                             { id: "encargos", label: "Encargos" },
+                            { id: "reels", label: "Reels" },
                         ].map((item) => (
                             <button
                                 key={item.id}
@@ -657,638 +659,691 @@ export default function AdminPanel() {
                     </div>
                 </div>
 
-                <form onSubmit={handleCreateProduct}>
-                    <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-                        <div>
-                            <span className="text-xs uppercase tracking-[0.3em] text-black/50">
-                                {esTabEncargos
-                                    ? "Nuevo encargo"
-                                    : "Nuevo producto"}
-                            </span>
-                            <h2 className="mt-2 text-3xl font-semibold text-black">
-                                {esTabEncargos
-                                    ? "Cargar nuevo producto para encargar"
-                                    : "Cargar nuevo producto"}
-                            </h2>
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={pendingKey === "new-product"}
-                            className="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
-                        >
-                            {pendingKey === "new-product"
-                                ? "Creando..."
-                                : "Crear producto"}
-                        </button>
-                    </div>
-
-                    <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                        <input
-                            value={productForm.nombre}
-                            onChange={(event) =>
-                                setProductForm((prev) => ({
-                                    ...prev,
-                                    nombre: event.target.value,
-                                }))
-                            }
-                            className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-                            placeholder="Nombre"
-                            required
-                        />
-                        <input
-                            value={productForm.marca}
-                            onChange={(event) =>
-                                setProductForm((prev) => ({
-                                    ...prev,
-                                    marca: event.target.value,
-                                }))
-                            }
-                            className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-                            placeholder="Marca"
-                            required
-                        />
-                        <SelectMenu
-                            value={productForm.categoria}
-                            options={CATEGORIAS}
-                            onChange={(categoria) =>
-                                setProductForm((prev) => ({
-                                    ...prev,
-                                    categoria,
-                                }))
-                            }
-                            placeholder="Categoria (opcional)"
-                            ariaLabel="Categoria del producto"
-                            size="lg"
-                        />
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={productForm.precioBase}
-                            onChange={(event) =>
-                                setProductForm((prev) => ({
-                                    ...prev,
-                                    precioBase: event.target.value,
-                                }))
-                            }
-                            className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-                            placeholder="Precio base"
-                            required
-                        />
-                        <input
-                            value={productForm.talle}
-                            onChange={(event) =>
-                                setProductForm((prev) => ({
-                                    ...prev,
-                                    talle: event.target.value,
-                                }))
-                            }
-                            className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-                            placeholder="Primer talle opcional"
-                        />
-                        {!esTabEncargos && (
-                            <input
-                                type="number"
-                                min="0"
-                                value={productForm.stock}
-                                onChange={(event) =>
-                                    setProductForm((prev) => ({
-                                        ...prev,
-                                        stock: event.target.value,
-                                    }))
-                                }
-                                className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-                                placeholder="Stock inicial"
-                            />
-                        )}
-                        <label className="flex min-h-28 flex-col justify-center rounded-2xl ring ring-black/50 px-4 py-3 text-sm text-black cursor-pointer">
-                            <span className="text-black/50">
-                                Subir imagenes del producto
-                            </span>
-                            <input
-                                key={productFilesKey}
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={(event) =>
-                                    setProductFiles(
-                                        Array.from(event.target.files ?? [])
-                                    )
-                                }
-                                className="sr-only"
-                            />
-                            <span className="mt-3 font-semibold text-black">
-                                {productFiles.length > 0
-                                    ? `${productFiles.length} archivo(s) seleccionados`
-                                    : "Elegir archivos"}
-                            </span>
-                            <span className="mt-2 text-xs text-black/50">
-                                {productFiles.length > 0
-                                    ? "Listos para subir"
-                                    : "Todavia no seleccionaste archivos"}
-                            </span>
-                        </label>
-                    </div>
-                </form>
-
-                <div className="mt-6 overflow-hidden ring-1 ring-black/10">
-                    <div className="flex items-center justify-between gap-4 border-b border-black/10 bg-secondary px-4 py-3">
-                        <label className="flex items-center gap-3 text-sm font-medium text-black">
-                            <input
-                                type="checkbox"
-                                checked={
-                                    productosVisibles.length > 0 &&
-                                    selectedProductIds.length ===
-                                        productosVisibles.length
-                                }
-                                onChange={toggleSelectAllProducts}
-                                className="h-4 w-4 accent-primary cursor-pointer"
-                            />
-                            <span>
-                                {selectedProductIds.length > 0
-                                    ? `${selectedProductIds.length} seleccionado(s)`
-                                    : "Seleccionar productos"}
-                            </span>
-                        </label>
-
-                        <button
-                            type="button"
-                            disabled={
-                                selectedProductIds.length === 0 ||
-                                pendingKey === "delete-selected-products"
-                            }
-                            onClick={handleDeleteSelectedProducts}
-                            className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
-                        >
-                            {pendingKey === "delete-selected-products"
-                                ? "Borrando..."
-                                : "Borrar seleccionados"}
-                        </button>
-                    </div>
-
-                    <div className="hidden grid-cols-[32px_minmax(0,1.6fr)_130px_120px_120px_140px] items-center gap-4 bg-primary px-5 py-3 text-xs font-semibold uppercase text-secondary md:grid">
-                        <span></span>
-                        <span>Producto</span>
-                        <span>Categoria</span>
-                        <span>Estado</span>
-                        <span>{esTabEncargos ? "Talles" : "Stock"}</span>
-                    </div>
-
-                    {productosVisibles.length === 0 && (
-                        <p className="border-t border-black/10 bg-secondary px-5 py-6 text-sm text-black/50">
-                            {esTabEncargos
-                                ? "No hay productos para encargar cargados todavia."
-                                : "No hay productos del catalogo cargados todavia."}
-                        </p>
-                    )}
-
-                    {productosVisibles.map((producto) => {
-                        const orderedImages = [
-                            ...(producto.producto_imagen ?? []),
-                        ]
-                            .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
-                            .map((item) => item.url);
-                        const image = orderedImages[0] ?? producto.imagen_url;
-                        const newVariant =
-                            newVariantForms[producto.id_producto] ??
-                            initialVariantForm;
-                        const imageInputKey =
-                            productImageKeys[producto.id_producto] ?? 0;
-                        const queuedFiles =
-                            productImageFiles[producto.id_producto] ?? [];
-                        const totalStock = (
-                            producto.producto_talle ?? []
-                        ).reduce(
-                            (sum, item) => sum + Number(item.stock ?? 0),
-                            0
-                        );
-                        const isExpanded =
-                            expandedProductId === producto.id_producto;
-
-                        return (
-                            <div
-                                key={producto.id_producto}
-                                className="border-t border-black/10 bg-secondary first:border-t-0"
-                            >
-                                <div className="grid gap-3 px-4 py-4 md:grid-cols-[32px_minmax(0,1.6fr)_130px_120px_120px_140px] md:items-center">
-                                    <div className="flex items-center justify-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedProductIds.includes(
-                                                producto.id_producto
-                                            )}
-                                            onChange={() =>
-                                                toggleProductSelection(
-                                                    producto.id_producto
-                                                )
-                                            }
-                                            className="h-4 w-4 accent-primary"
-                                        />
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-black/10 ring-1 ring-black/10">
-                                            {image ? (
-                                                <img
-                                                    src={cloudinaryUrl(image, {
-                                                        width: 100,
-                                                        height: 100,
-                                                    })}
-                                                    alt={producto.nombre}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[11px] text-black/50">
-                                                    Sin img
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="min-w-0">
-                                            <p className="truncate text-[11px] uppercase tracking-[0.22em] text-black/50">
-                                                {producto.marca?.nombre ??
-                                                    "Sin marca"}
-                                            </p>
-                                            <h2 className="truncate text-lg font-bold text-black">
-                                                {producto.nombre}
-                                            </h2>
-                                            <p className="text-sm font-semibold text-primary">
-                                                {resumenDePrecio(producto)}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        {producto.categoria ? (
-                                            <span className="inline-flex rounded-full bg-black/5 px-2.5 py-1 text-xs font-medium text-black">
-                                                {getEtiquetaCategoria(
-                                                    producto.categoria
-                                                )}
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
-                                                Sin categoria
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        {esTabEncargos ? (
-                                            <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                                                A pedido
-                                            </span>
-                                        ) : (
-                                            <span
-                                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}
-                                            >
-                                                {totalStock > 0
-                                                    ? "Disponible"
-                                                    : "Sin stock"}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="text-sm font-semibold text-black">
-                                        {!esTabEncargos && <p>{totalStock}</p>}
-                                        <p className="text-xs text-black/50">
-                                            {producto.producto_talle.length}{" "}
-                                            talle/s
-                                        </p>
-                                    </div>
-
-                                    <div className="flex gap-2 md:justify-end">
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setExpandedProductId(
-                                                    isExpanded
-                                                        ? null
-                                                        : producto.id_producto
-                                                )
-                                            }
-                                            className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-secondary transition-all duration-300 hover:bg-primary cursor-pointer"
-                                        >
-                                            {isExpanded ? "Cerrar" : "Editar"}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                pendingKey ===
-                                                `delete-product-${producto.id_producto}`
-                                            }
-                                            onClick={() =>
-                                                handleDeleteProduct(producto)
-                                            }
-                                            className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
-                                        >
-                                            {pendingKey ===
-                                            `delete-product-${producto.id_producto}`
-                                                ? "Borrando..."
-                                                : "Borrar"}
-                                        </button>
-                                    </div>
+                {tab === "reels" ? (
+                    <ReelsAdmin />
+                ) : (
+                    <>
+                        <form onSubmit={handleCreateProduct}>
+                            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                                <div>
+                                    <span className="text-xs uppercase tracking-[0.3em] text-black/50">
+                                        {esTabEncargos
+                                            ? "Nuevo encargo"
+                                            : "Nuevo producto"}
+                                    </span>
+                                    <h2 className="mt-2 text-3xl font-semibold text-black">
+                                        {esTabEncargos
+                                            ? "Cargar nuevo producto para encargar"
+                                            : "Cargar nuevo producto"}
+                                    </h2>
                                 </div>
+                                <button
+                                    type="submit"
+                                    disabled={pendingKey === "new-product"}
+                                    className="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
+                                >
+                                    {pendingKey === "new-product"
+                                        ? "Creando..."
+                                        : "Crear producto"}
+                                </button>
+                            </div>
 
-                                {isExpanded && (
-                                    <div className="border-t border-black/10 px-4 py-4">
-                                        <div className="mb-4 flex flex-col gap-2 md:max-w-xs">
-                                            <p className="text-sm font-semibold text-black">
-                                                Categoria
-                                            </p>
-                                            <SelectMenu
-                                                value={producto.categoria ?? ""}
-                                                options={CATEGORIAS}
-                                                disabled={
-                                                    pendingKey ===
-                                                    `categoria-${producto.id_producto}`
-                                                }
-                                                onChange={(categoria) =>
-                                                    saveCategoria(
-                                                        producto.id_producto,
-                                                        categoria
-                                                    )
-                                                }
-                                                placeholder="Sin categoria"
-                                                ariaLabel="Categoria del producto"
-                                            />
+                            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                <input
+                                    value={productForm.nombre}
+                                    onChange={(event) =>
+                                        setProductForm((prev) => ({
+                                            ...prev,
+                                            nombre: event.target.value,
+                                        }))
+                                    }
+                                    className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
+                                    placeholder="Nombre"
+                                    required
+                                />
+                                <input
+                                    value={productForm.marca}
+                                    onChange={(event) =>
+                                        setProductForm((prev) => ({
+                                            ...prev,
+                                            marca: event.target.value,
+                                        }))
+                                    }
+                                    className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
+                                    placeholder="Marca"
+                                    required
+                                />
+                                <SelectMenu
+                                    value={productForm.categoria}
+                                    options={CATEGORIAS}
+                                    onChange={(categoria) =>
+                                        setProductForm((prev) => ({
+                                            ...prev,
+                                            categoria,
+                                        }))
+                                    }
+                                    placeholder="Categoria (opcional)"
+                                    ariaLabel="Categoria del producto"
+                                    size="lg"
+                                />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={productForm.precioBase}
+                                    onChange={(event) =>
+                                        setProductForm((prev) => ({
+                                            ...prev,
+                                            precioBase: event.target.value,
+                                        }))
+                                    }
+                                    className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
+                                    placeholder="Precio base"
+                                    required
+                                />
+                                <input
+                                    value={productForm.talle}
+                                    onChange={(event) =>
+                                        setProductForm((prev) => ({
+                                            ...prev,
+                                            talle: event.target.value,
+                                        }))
+                                    }
+                                    className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
+                                    placeholder="Primer talle opcional"
+                                />
+                                {!esTabEncargos && (
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={productForm.stock}
+                                        onChange={(event) =>
+                                            setProductForm((prev) => ({
+                                                ...prev,
+                                                stock: event.target.value,
+                                            }))
+                                        }
+                                        className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
+                                        placeholder="Stock inicial"
+                                    />
+                                )}
+                                <label className="flex min-h-28 flex-col justify-center rounded-2xl ring ring-black/50 px-4 py-3 text-sm text-black cursor-pointer">
+                                    <span className="text-black/50">
+                                        Subir imagenes del producto
+                                    </span>
+                                    <input
+                                        key={productFilesKey}
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={(event) =>
+                                            setProductFiles(
+                                                Array.from(
+                                                    event.target.files ?? []
+                                                )
+                                            )
+                                        }
+                                        className="sr-only"
+                                    />
+                                    <span className="mt-3 font-semibold text-black">
+                                        {productFiles.length > 0
+                                            ? `${productFiles.length} archivo(s) seleccionados`
+                                            : "Elegir archivos"}
+                                    </span>
+                                    <span className="mt-2 text-xs text-black/50">
+                                        {productFiles.length > 0
+                                            ? "Listos para subir"
+                                            : "Todavia no seleccionaste archivos"}
+                                    </span>
+                                </label>
+                            </div>
+                        </form>
+
+                        <div className="mt-6 overflow-hidden ring-1 ring-black/10">
+                            <div className="flex items-center justify-between gap-4 border-b border-black/10 bg-secondary px-4 py-3">
+                                <label className="flex items-center gap-3 text-sm font-medium text-black">
+                                    <input
+                                        type="checkbox"
+                                        checked={
+                                            productosVisibles.length > 0 &&
+                                            selectedProductIds.length ===
+                                                productosVisibles.length
+                                        }
+                                        onChange={toggleSelectAllProducts}
+                                        className="h-4 w-4 accent-primary cursor-pointer"
+                                    />
+                                    <span>
+                                        {selectedProductIds.length > 0
+                                            ? `${selectedProductIds.length} seleccionado(s)`
+                                            : "Seleccionar productos"}
+                                    </span>
+                                </label>
+
+                                <button
+                                    type="button"
+                                    disabled={
+                                        selectedProductIds.length === 0 ||
+                                        pendingKey ===
+                                            "delete-selected-products"
+                                    }
+                                    onClick={handleDeleteSelectedProducts}
+                                    className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
+                                >
+                                    {pendingKey === "delete-selected-products"
+                                        ? "Borrando..."
+                                        : "Borrar seleccionados"}
+                                </button>
+                            </div>
+
+                            <div className="hidden grid-cols-[32px_minmax(0,1.6fr)_130px_120px_120px_140px] items-center gap-4 bg-primary px-5 py-3 text-xs font-semibold uppercase text-secondary md:grid">
+                                <span></span>
+                                <span>Producto</span>
+                                <span>Categoria</span>
+                                <span>Estado</span>
+                                <span>
+                                    {esTabEncargos ? "Talles" : "Stock"}
+                                </span>
+                            </div>
+
+                            {productosVisibles.length === 0 && (
+                                <p className="border-t border-black/10 bg-secondary px-5 py-6 text-sm text-black/50">
+                                    {esTabEncargos
+                                        ? "No hay productos para encargar cargados todavia."
+                                        : "No hay productos del catalogo cargados todavia."}
+                                </p>
+                            )}
+
+                            {productosVisibles.map((producto) => {
+                                const orderedImages = [
+                                    ...(producto.producto_imagen ?? []),
+                                ]
+                                    .sort(
+                                        (a, b) =>
+                                            (a.orden ?? 0) - (b.orden ?? 0)
+                                    )
+                                    .map((item) => item.url);
+                                const image =
+                                    orderedImages[0] ?? producto.imagen_url;
+                                const newVariant =
+                                    newVariantForms[producto.id_producto] ??
+                                    initialVariantForm;
+                                const imageInputKey =
+                                    productImageKeys[producto.id_producto] ?? 0;
+                                const queuedFiles =
+                                    productImageFiles[producto.id_producto] ??
+                                    [];
+                                const totalStock = (
+                                    producto.producto_talle ?? []
+                                ).reduce(
+                                    (sum, item) =>
+                                        sum + Number(item.stock ?? 0),
+                                    0
+                                );
+                                const isExpanded =
+                                    expandedProductId === producto.id_producto;
+
+                                return (
+                                    <div
+                                        key={producto.id_producto}
+                                        className="border-t border-black/10 bg-secondary first:border-t-0"
+                                    >
+                                        <div className="grid gap-3 px-4 py-4 md:grid-cols-[32px_minmax(0,1.6fr)_130px_120px_120px_140px] md:items-center">
+                                            <div className="flex items-center justify-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedProductIds.includes(
+                                                        producto.id_producto
+                                                    )}
+                                                    onChange={() =>
+                                                        toggleProductSelection(
+                                                            producto.id_producto
+                                                        )
+                                                    }
+                                                    className="h-4 w-4 accent-primary"
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-black/10 ring-1 ring-black/10">
+                                                    {image ? (
+                                                        <img
+                                                            src={cloudinaryUrl(
+                                                                image,
+                                                                {
+                                                                    width: 100,
+                                                                    height: 100,
+                                                                }
+                                                            )}
+                                                            alt={
+                                                                producto.nombre
+                                                            }
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center text-[11px] text-black/50">
+                                                            Sin img
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-[11px] uppercase tracking-[0.22em] text-black/50">
+                                                        {producto.marca
+                                                            ?.nombre ??
+                                                            "Sin marca"}
+                                                    </p>
+                                                    <h2 className="truncate text-lg font-bold text-black">
+                                                        {producto.nombre}
+                                                    </h2>
+                                                    <p className="text-sm font-semibold text-primary">
+                                                        {resumenDePrecio(
+                                                            producto
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                {producto.categoria ? (
+                                                    <span className="inline-flex rounded-full bg-black/5 px-2.5 py-1 text-xs font-medium text-black">
+                                                        {getEtiquetaCategoria(
+                                                            producto.categoria
+                                                        )}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                                                        Sin categoria
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                {esTabEncargos ? (
+                                                    <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                                        A pedido
+                                                    </span>
+                                                ) : (
+                                                    <span
+                                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}
+                                                    >
+                                                        {totalStock > 0
+                                                            ? "Disponible"
+                                                            : "Sin stock"}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="text-sm font-semibold text-black">
+                                                {!esTabEncargos && (
+                                                    <p>{totalStock}</p>
+                                                )}
+                                                <p className="text-xs text-black/50">
+                                                    {
+                                                        producto.producto_talle
+                                                            .length
+                                                    }{" "}
+                                                    talle/s
+                                                </p>
+                                            </div>
+
+                                            <div className="flex gap-2 md:justify-end">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setExpandedProductId(
+                                                            isExpanded
+                                                                ? null
+                                                                : producto.id_producto
+                                                        )
+                                                    }
+                                                    className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-secondary transition-all duration-300 hover:bg-primary cursor-pointer"
+                                                >
+                                                    {isExpanded
+                                                        ? "Cerrar"
+                                                        : "Editar"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={
+                                                        pendingKey ===
+                                                        `delete-product-${producto.id_producto}`
+                                                    }
+                                                    onClick={() =>
+                                                        handleDeleteProduct(
+                                                            producto
+                                                        )
+                                                    }
+                                                    className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
+                                                >
+                                                    {pendingKey ===
+                                                    `delete-product-${producto.id_producto}`
+                                                        ? "Borrando..."
+                                                        : "Borrar"}
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <div className="overflow-x-auto">
-                                            <table className="min-w-full">
-                                                <thead>
-                                                    <tr className="text-left text-[11px] font-semibold uppercase tracking-[0.22em] text-black/50">
-                                                        <th className="px-3 pb-2">
-                                                            Talle
-                                                        </th>
-                                                        {!esTabEncargos && (
-                                                            <th className="px-3 pb-2">
-                                                                Stock
-                                                            </th>
-                                                        )}
-                                                        <th className="px-3 pb-2">
-                                                            Precio
-                                                        </th>
-                                                        <th className="px-3 pb-2 text-right">
-                                                            Acciones
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {producto.producto_talle.map(
-                                                        (variante) => {
-                                                            const rowKey = `${producto.id_producto}-${variante.id_talle}`;
-                                                            return (
-                                                                <tr
-                                                                    key={rowKey}
-                                                                    className="bg-secondary"
-                                                                >
-                                                                    <td className="rounded-l-2xl px-3 py-3 font-semibold text-black">
-                                                                        {variante
-                                                                            .talle
-                                                                            ?.nombre ??
-                                                                            "Sin talle"}
-                                                                    </td>
-                                                                    {!esTabEncargos && (
-                                                                        <td className="px-3 py-3">
-                                                                            <input
-                                                                                type="number"
-                                                                                min="0"
-                                                                                value={
-                                                                                    variante.stock ??
-                                                                                    0
-                                                                                }
-                                                                                onChange={(
-                                                                                    event
-                                                                                ) =>
-                                                                                    updateVariante(
-                                                                                        producto.id_producto,
-                                                                                        variante.id_talle,
-                                                                                        "stock",
+                                        {isExpanded && (
+                                            <div className="border-t border-black/10 px-4 py-4">
+                                                <div className="mb-4 flex flex-col gap-2 md:max-w-xs">
+                                                    <p className="text-sm font-semibold text-black">
+                                                        Categoria
+                                                    </p>
+                                                    <SelectMenu
+                                                        value={
+                                                            producto.categoria ??
+                                                            ""
+                                                        }
+                                                        options={CATEGORIAS}
+                                                        disabled={
+                                                            pendingKey ===
+                                                            `categoria-${producto.id_producto}`
+                                                        }
+                                                        onChange={(categoria) =>
+                                                            saveCategoria(
+                                                                producto.id_producto,
+                                                                categoria
+                                                            )
+                                                        }
+                                                        placeholder="Sin categoria"
+                                                        ariaLabel="Categoria del producto"
+                                                    />
+                                                </div>
+
+                                                <div className="overflow-x-auto">
+                                                    <table className="min-w-full">
+                                                        <thead>
+                                                            <tr className="text-left text-[11px] font-semibold uppercase tracking-[0.22em] text-black/50">
+                                                                <th className="px-3 pb-2">
+                                                                    Talle
+                                                                </th>
+                                                                {!esTabEncargos && (
+                                                                    <th className="px-3 pb-2">
+                                                                        Stock
+                                                                    </th>
+                                                                )}
+                                                                <th className="px-3 pb-2">
+                                                                    Precio
+                                                                </th>
+                                                                <th className="px-3 pb-2 text-right">
+                                                                    Acciones
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {producto.producto_talle.map(
+                                                                (variante) => {
+                                                                    const rowKey = `${producto.id_producto}-${variante.id_talle}`;
+                                                                    return (
+                                                                        <tr
+                                                                            key={
+                                                                                rowKey
+                                                                            }
+                                                                            className="bg-secondary"
+                                                                        >
+                                                                            <td className="rounded-l-2xl px-3 py-3 font-semibold text-black">
+                                                                                {variante
+                                                                                    .talle
+                                                                                    ?.nombre ??
+                                                                                    "Sin talle"}
+                                                                            </td>
+                                                                            {!esTabEncargos && (
+                                                                                <td className="px-3 py-3">
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        min="0"
+                                                                                        value={
+                                                                                            variante.stock ??
+                                                                                            0
+                                                                                        }
+                                                                                        onChange={(
+                                                                                            event
+                                                                                        ) =>
+                                                                                            updateVariante(
+                                                                                                producto.id_producto,
+                                                                                                variante.id_talle,
+                                                                                                "stock",
+                                                                                                event
+                                                                                                    .target
+                                                                                                    .value
+                                                                                            )
+                                                                                        }
+                                                                                        className="h-11 w-full min-w-27.5 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
+                                                                                    />
+                                                                                </td>
+                                                                            )}
+                                                                            <td className="px-3 py-3">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    min="0"
+                                                                                    step="0.01"
+                                                                                    value={
+                                                                                        variante.precio ??
+                                                                                        producto.precio_base ??
+                                                                                        0
+                                                                                    }
+                                                                                    onChange={(
+                                                                                        event
+                                                                                    ) =>
+                                                                                        updateVariante(
+                                                                                            producto.id_producto,
+                                                                                            variante.id_talle,
+                                                                                            "precio",
+                                                                                            event
+                                                                                                .target
+                                                                                                .value
+                                                                                        )
+                                                                                    }
+                                                                                    className="h-11 w-full min-w-35 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
+                                                                                />
+                                                                            </td>
+                                                                            <td className="rounded-r-2xl px-3 py-3">
+                                                                                <div className="flex justify-end gap-2">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        disabled={
+                                                                                            pendingKey ===
+                                                                                            rowKey
+                                                                                        }
+                                                                                        onClick={() =>
+                                                                                            saveVariante(
+                                                                                                producto.id_producto,
+                                                                                                variante.id_talle,
+                                                                                                variante.stock,
+                                                                                                variante.precio ??
+                                                                                                    producto.precio_base ??
+                                                                                                    0
+                                                                                            )
+                                                                                        }
+                                                                                        className="h-11 rounded-xl bg-black px-4 text-sm font-medium text-secondary transition-all duration-300 hover:bg-primary disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
+                                                                                    >
+                                                                                        {pendingKey ===
+                                                                                        rowKey
+                                                                                            ? "Guardando..."
+                                                                                            : "Guardar"}
+                                                                                    </button>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        disabled={
+                                                                                            Number(
+                                                                                                variante.stock ??
+                                                                                                    0
+                                                                                            ) !==
+                                                                                                0 ||
+                                                                                            pendingKey ===
+                                                                                                `delete-${producto.id_producto}-${variante.id_talle}`
+                                                                                        }
+                                                                                        onClick={() =>
+                                                                                            deleteVariante(
+                                                                                                producto.id_producto,
+                                                                                                variante.id_talle,
+                                                                                                variante.stock
+                                                                                            )
+                                                                                        }
+                                                                                        className="h-11 rounded-xl bg-red-50 px-4 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:border-red-100 disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
+                                                                                        title={
+                                                                                            Number(
+                                                                                                variante.stock ??
+                                                                                                    0
+                                                                                            ) ===
+                                                                                            0
+                                                                                                ? "Eliminar talle"
+                                                                                                : "Pon el stock en 0 para borrarlo"
+                                                                                        }
+                                                                                    >
+                                                                                        {pendingKey ===
+                                                                                        `delete-${producto.id_producto}-${variante.id_talle}`
+                                                                                            ? "Borrando..."
+                                                                                            : "Borrar"}
+                                                                                    </button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                }
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                                                    <div>
+                                                        <p className="mb-3 text-sm font-semibold text-black">
+                                                            Agregar talle nuevo
+                                                        </p>
+                                                        <div
+                                                            className={`grid gap-3 ${esTabEncargos ? "md:grid-cols-[1fr_140px]" : "md:grid-cols-[1fr_140px_140px]"}`}
+                                                        >
+                                                            <input
+                                                                value={
+                                                                    newVariant.talle
+                                                                }
+                                                                onChange={(
+                                                                    event
+                                                                ) =>
+                                                                    updateNewVariantForm(
+                                                                        producto.id_producto,
+                                                                        "talle",
+                                                                        event
+                                                                            .target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
+                                                                placeholder="Ej: 10 US"
+                                                            />
+                                                            {!esTabEncargos && (
+                                                                <input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={
+                                                                        newVariant.stock
+                                                                    }
+                                                                    onChange={(
+                                                                        event
+                                                                    ) =>
+                                                                        updateNewVariantForm(
+                                                                            producto.id_producto,
+                                                                            "stock",
+                                                                            event
+                                                                                .target
+                                                                                .value
+                                                                        )
+                                                                    }
+                                                                    className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
+                                                                    placeholder="Stock"
+                                                                />
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                disabled={
+                                                                    pendingKey ===
+                                                                    `new-${producto.id_producto}`
+                                                                }
+                                                                onClick={() =>
+                                                                    handleAddVariant(
+                                                                        producto
+                                                                    )
+                                                                }
+                                                                className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
+                                                            >
+                                                                {pendingKey ===
+                                                                `new-${producto.id_producto}`
+                                                                    ? "Agregando..."
+                                                                    : "Agregar"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="mb-3 text-sm font-semibold text-black">
+                                                            Agregar imagenes
+                                                        </p>
+                                                        <div className="grid gap-3 md:grid-cols-[1fr_180px] md:items-end">
+                                                            <label className="flex h-11 items-center rounded-xl ring ring-black/10 px-3 text-sm text-black cursor-pointer">
+                                                                <input
+                                                                    key={
+                                                                        imageInputKey
+                                                                    }
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    multiple
+                                                                    onChange={(
+                                                                        event
+                                                                    ) =>
+                                                                        setProductImageFiles(
+                                                                            (
+                                                                                prev
+                                                                            ) => ({
+                                                                                ...prev,
+                                                                                [producto.id_producto]:
+                                                                                    Array.from(
                                                                                         event
                                                                                             .target
-                                                                                            .value
-                                                                                    )
-                                                                                }
-                                                                                className="h-11 w-full min-w-27.5 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
-                                                                            />
-                                                                        </td>
-                                                                    )}
-                                                                    <td className="px-3 py-3">
-                                                                        <input
-                                                                            type="number"
-                                                                            min="0"
-                                                                            step="0.01"
-                                                                            value={
-                                                                                variante.precio ??
-                                                                                producto.precio_base ??
-                                                                                0
-                                                                            }
-                                                                            onChange={(
-                                                                                event
-                                                                            ) =>
-                                                                                updateVariante(
-                                                                                    producto.id_producto,
-                                                                                    variante.id_talle,
-                                                                                    "precio",
-                                                                                    event
-                                                                                        .target
-                                                                                        .value
-                                                                                )
-                                                                            }
-                                                                            className="h-11 w-full min-w-35 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
-                                                                        />
-                                                                    </td>
-                                                                    <td className="rounded-r-2xl px-3 py-3">
-                                                                        <div className="flex justify-end gap-2">
-                                                                            <button
-                                                                                type="button"
-                                                                                disabled={
-                                                                                    pendingKey ===
-                                                                                    rowKey
-                                                                                }
-                                                                                onClick={() =>
-                                                                                    saveVariante(
-                                                                                        producto.id_producto,
-                                                                                        variante.id_talle,
-                                                                                        variante.stock,
-                                                                                        variante.precio ??
-                                                                                            producto.precio_base ??
-                                                                                            0
-                                                                                    )
-                                                                                }
-                                                                                className="h-11 rounded-xl bg-black px-4 text-sm font-medium text-secondary transition-all duration-300 hover:bg-primary disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
-                                                                            >
-                                                                                {pendingKey ===
-                                                                                rowKey
-                                                                                    ? "Guardando..."
-                                                                                    : "Guardar"}
-                                                                            </button>
-                                                                            <button
-                                                                                type="button"
-                                                                                disabled={
-                                                                                    Number(
-                                                                                        variante.stock ??
-                                                                                            0
-                                                                                    ) !==
-                                                                                        0 ||
-                                                                                    pendingKey ===
-                                                                                        `delete-${producto.id_producto}-${variante.id_talle}`
-                                                                                }
-                                                                                onClick={() =>
-                                                                                    deleteVariante(
-                                                                                        producto.id_producto,
-                                                                                        variante.id_talle,
-                                                                                        variante.stock
-                                                                                    )
-                                                                                }
-                                                                                className="h-11 rounded-xl bg-red-50 px-4 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:border-red-100 disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
-                                                                                title={
-                                                                                    Number(
-                                                                                        variante.stock ??
-                                                                                            0
-                                                                                    ) ===
-                                                                                    0
-                                                                                        ? "Eliminar talle"
-                                                                                        : "Pon el stock en 0 para borrarlo"
-                                                                                }
-                                                                            >
-                                                                                {pendingKey ===
-                                                                                `delete-${producto.id_producto}-${variante.id_talle}`
-                                                                                    ? "Borrando..."
-                                                                                    : "Borrar"}
-                                                                            </button>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        }
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        <div className="mt-4 grid gap-4 xl:grid-cols-2">
-                                            <div>
-                                                <p className="mb-3 text-sm font-semibold text-black">
-                                                    Agregar talle nuevo
-                                                </p>
-                                                <div
-                                                    className={`grid gap-3 ${esTabEncargos ? "md:grid-cols-[1fr_140px]" : "md:grid-cols-[1fr_140px_140px]"}`}
-                                                >
-                                                    <input
-                                                        value={newVariant.talle}
-                                                        onChange={(event) =>
-                                                            updateNewVariantForm(
-                                                                producto.id_producto,
-                                                                "talle",
-                                                                event.target
-                                                                    .value
-                                                            )
-                                                        }
-                                                        className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
-                                                        placeholder="Ej: 10 US"
-                                                    />
-                                                    {!esTabEncargos && (
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            value={
-                                                                newVariant.stock
-                                                            }
-                                                            onChange={(event) =>
-                                                                updateNewVariantForm(
-                                                                    producto.id_producto,
-                                                                    "stock",
-                                                                    event.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                            className="h-11 rounded-xl ring ring-black/10 px-3 outline-none transition-all duration-300 focus:ring-primary"
-                                                            placeholder="Stock"
-                                                        />
-                                                    )}
-                                                    <button
-                                                        type="button"
-                                                        disabled={
-                                                            pendingKey ===
-                                                            `new-${producto.id_producto}`
-                                                        }
-                                                        onClick={() =>
-                                                            handleAddVariant(
-                                                                producto
-                                                            )
-                                                        }
-                                                        className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
-                                                    >
-                                                        {pendingKey ===
-                                                        `new-${producto.id_producto}`
-                                                            ? "Agregando..."
-                                                            : "Agregar"}
-                                                    </button>
+                                                                                            .files ??
+                                                                                            []
+                                                                                    ),
+                                                                            })
+                                                                        )
+                                                                    }
+                                                                    className="sr-only"
+                                                                />
+                                                                <span className="truncate font-semibold text-black">
+                                                                    {queuedFiles.length >
+                                                                    0
+                                                                        ? `${queuedFiles.length} archivo(s) seleccionados`
+                                                                        : "Elegir archivos"}
+                                                                </span>
+                                                            </label>
+                                                            <button
+                                                                type="button"
+                                                                disabled={
+                                                                    pendingKey ===
+                                                                    `images-${producto.id_producto}`
+                                                                }
+                                                                onClick={() =>
+                                                                    handleAddImages(
+                                                                        producto
+                                                                    )
+                                                                }
+                                                                className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
+                                                            >
+                                                                {pendingKey ===
+                                                                `images-${producto.id_producto}`
+                                                                    ? "Subiendo..."
+                                                                    : "Agregar imagenes"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <div>
-                                                <p className="mb-3 text-sm font-semibold text-black">
-                                                    Agregar imagenes
-                                                </p>
-                                                <div className="grid gap-3 md:grid-cols-[1fr_180px] md:items-end">
-                                                    <label className="flex h-11 items-center rounded-xl ring ring-black/10 px-3 text-sm text-black cursor-pointer">
-                                                        <input
-                                                            key={imageInputKey}
-                                                            type="file"
-                                                            accept="image/*"
-                                                            multiple
-                                                            onChange={(event) =>
-                                                                setProductImageFiles(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        [producto.id_producto]:
-                                                                            Array.from(
-                                                                                event
-                                                                                    .target
-                                                                                    .files ??
-                                                                                    []
-                                                                            ),
-                                                                    })
-                                                                )
-                                                            }
-                                                            className="sr-only"
-                                                        />
-                                                        <span className="truncate font-semibold text-black">
-                                                            {queuedFiles.length >
-                                                            0
-                                                                ? `${queuedFiles.length} archivo(s) seleccionados`
-                                                                : "Elegir archivos"}
-                                                        </span>
-                                                    </label>
-                                                    <button
-                                                        type="button"
-                                                        disabled={
-                                                            pendingKey ===
-                                                            `images-${producto.id_producto}`
-                                                        }
-                                                        onClick={() =>
-                                                            handleAddImages(
-                                                                producto
-                                                            )
-                                                        }
-                                                        className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
-                                                    >
-                                                        {pendingKey ===
-                                                        `images-${producto.id_producto}`
-                                                            ? "Subiendo..."
-                                                            : "Agregar imagenes"}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                                );
+                            })}
+                        </div>
+                    </>
+                )}
             </div>
         </section>
     );

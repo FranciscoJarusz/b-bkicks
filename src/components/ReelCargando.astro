@@ -1,0 +1,40 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+    class?: string;
+}
+
+const { class: clase } = Astro.props;
+---
+
+<div
+    aria-hidden="true"
+    class:list={[
+        "flex flex-col overflow-hidden rounded-2xl border border-primary/30 bg-white",
+        clase,
+    ]}
+>
+    <div class="flex items-center gap-3 p-3">
+        <div class="brillo size-8 rounded-full"></div>
+        <div class="flex flex-1 flex-col gap-1.5">
+            <div class="brillo h-2.5 w-1/2 rounded-full"></div>
+            <div class="brillo h-2 w-1/3 rounded-full"></div>
+        </div>
+    </div>
+    <div class="brillo relative grid flex-1 place-items-center">
+        <div class="flex flex-col items-center gap-3 text-primary">
+            <Icon
+                name="simple-icons:instagram"
+                class="size-10 animate-pulse motion-reduce:animate-none"
+            />
+            <span class="text-xs font-light tracking-wide text-black/60">
+                Cargando reel…
+            </span>
+        </div>
+    </div>
+    <div class="flex flex-col gap-1.5 p-3">
+        <div class="brillo h-2.5 w-3/4 rounded-full"></div>
+        <div class="brillo h-2 w-1/2 rounded-full"></div>
+    </div>
+</div>

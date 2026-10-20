@@ -1,0 +1,169 @@
+---
+import ReelCargando from "@/components/ReelCargando.astro";
+import ReelsLista from "@/components/ReelsLista.astro";
+---
+
+<section
+    id="reels"
+    class="mx-auto w-full bg-white max-w-7xl px-4 py-16 lg:gap-14 lg:px-6"
+>
+    <div
+        data-reels
+        class="relative -mx-6 flex snap-x snap-mandatory justify-between gap-6 overflow-x-auto scroll-smooth px-6 scrollbar-none md:mx-0 md:px-0 motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden"
+    >
+        <ReelsLista server:defer>
+            <Fragment slot="fallback">
+                {
+                    [1, 2, 3].map(() => (
+                        <ReelCargando class="aspect-9/16 w-81.5 shrink-0 sm:w-85" />
+                    ))
+                }
+            </Fragment>
+        </ReelsLista>
+    </div>
+    <div data-puntos hidden class="mt-6 flex justify-center gap-2"></div>
+</section>
+
+<script>
+    const seccion = document.querySelector<HTMLElement>("#reels");
+    const contenedor = seccion?.querySelector<HTMLElement>("[data-reels]");
+    const puntos = seccion?.querySelector<HTMLElement>("[data-puntos]");
+
+    const ESPERA_MAXIMA = 15000;
+
+    function ocultarSiNoCargo() {
+        if (!contenedor?.querySelector("[data-listo]"))
+            seccion?.classList.add("hidden");
+    }
+
+    const esperas = new Map<Element, number>();
+    const tamano = new ResizeObserver((entradas) => {
+        for (const { target } of entradas) {
+            clearTimeout(esperas.get(target));
+            esperas.set(
+                target,
+                window.setTimeout(() => {
+                    if ((target as HTMLElement).offsetHeight < 100) return;
+                    target.parentElement?.setAttribute("data-listo", "");
+                    tamano.unobserve(target);
+                }, 300)
+            );
+        }
+    });
+
+    function vigilarIframes() {
+        contenedor
+            ?.querySelectorAll("iframe:not([data-vigilado])")
+            .forEach((iframe) => {
+                iframe.setAttribute("data-vigilado", "");
+                tamano.observe(iframe);
+            });
+    }
+
+    let pedido = false;
+
+    function cargarEmbeds() {
+        if (pedido || !contenedor?.querySelector(".instagram-media")) return;
+        pedido = true;
+
+        const { instgrm } = window as {
+            instgrm?: { Embeds: { process(): void } };
+        };
+        if (instgrm) {
+            instgrm.Embeds.process();
+        } else {
+            const script = document.createElement("script");
+            script.src = "https://www.instagram.com/embed.js";
+            script.async = true;
+            script.onerror = ocultarSiNoCargo;
+            document.body.append(script);
+        }
+
+        setTimeout(ocultarSiNoCargo, ESPERA_MAXIMA);
+    }
+
+    const reels = () =>
+        contenedor ? [...contenedor.querySelectorAll(":scope > div")] : [];
+
+    function reelActual() {
+        const lista = reels();
+        if (!contenedor || !lista.length) return 0;
+        const { scrollLeft, scrollWidth, clientWidth } = contenedor;
+        if (scrollLeft <= 2) return 0;
+        if (scrollLeft + clientWidth >= scrollWidth - 2)
+            return lista.length - 1;
+        const centro = scrollLeft + clientWidth / 2;
+        let mejor = 0;
+        lista.forEach((reel, i) => {
+            const distancia = (el: Element) =>
+                Math.abs(
+                    (el as HTMLElement).offsetLeft +
+                        (el as HTMLElement).offsetWidth / 2 -
+                        centro
+                );
+            if (distancia(reel) < distancia(lista[mejor])) mejor = i;
+        });
+        return mejor;
+    }
+
+    function marcarPunto() {
+        const actual = reelActual();
+        puntos?.querySelectorAll("button").forEach((punto, i) => {
+            punto.toggleAttribute("data-activo", i === actual);
+            punto.setAttribute("aria-current", String(i === actual));
+        });
+    }
+
+    function armarPuntos() {
+        if (!contenedor || !puntos) return;
+        const lista = reels();
+        puntos.hidden = contenedor.scrollWidth <= contenedor.clientWidth + 2;
+        if (puntos.childElementCount !== lista.length) {
+            puntos.replaceChildren(
+                ...lista.map((_, i) => {
+                    const punto = document.createElement("button");
+                    punto.type = "button";
+                    punto.ariaLabel = `Ver reel ${i + 1}`;
+                    punto.className =
+                        "h-2 w-2 cursor-pointer rounded-full bg-black/20 transition-all duration-300 hover:bg-black/40 data-activo:w-6 data-activo:bg-primary";
+                    punto.addEventListener("click", () => {
+                        const reel = reels()[i] as HTMLElement | undefined;
+                        if (!reel) return;
+                        contenedor.scrollTo({
+                            left:
+                                reel.offsetLeft -
+                                (contenedor.clientWidth - reel.offsetWidth) / 2,
+                        });
+                    });
+                    return punto;
+                })
+            );
+        }
+        marcarPunto();
+    }
+
+    if (contenedor) {
+        let enPantalla = false;
+
+        contenedor.addEventListener("scroll", marcarPunto, { passive: true });
+        new ResizeObserver(armarPuntos).observe(contenedor);
+
+        new MutationObserver(() => {
+            armarPuntos();
+            vigilarIframes();
+            if (enPantalla) cargarEmbeds();
+        }).observe(contenedor, { childList: true, subtree: true });
+
+        const visible = new IntersectionObserver(
+            ([entrada]) => {
+                if (!entrada.isIntersecting) return;
+                visible.disconnect();
+                enPantalla = true;
+                cargarEmbeds();
+            },
+            { rootMargin: "600px 0px" }
+        );
+
+        visible.observe(contenedor);
+    }
+</script>
