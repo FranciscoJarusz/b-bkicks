@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     DATOS_INICIALES,
+    MEDIOS_DE_PAGO,
     armarMensajePedido,
     calcularTotales,
     validarCheckout,
@@ -36,6 +37,30 @@ describe("calcularTotales", () => {
     it("MercadoPago paga el precio de lista", () => {
         expect(calcularTotales(ITEMS, "mercadopago").totalAPagar).toBe(2624);
     });
+
+    it("transferencia en dolares, efectivo y USDT pagan el precio con descuento", () => {
+        for (const medio of ["transferencia-usd", "efectivo", "usdt"]) {
+            expect(calcularTotales(ITEMS, medio).totalAPagar).toBe(2099);
+        }
+    });
+
+    it("convierte a pesos solo los medios en ARS y solo con cotizacion", () => {
+        expect(calcularTotales(ITEMS, "mercadopago", 1500).totalARS).toBe(
+            2624 * 1500
+        );
+        expect(calcularTotales(ITEMS, "transferencia", 1500).totalARS).toBe(
+            2099 * 1500
+        );
+        expect(calcularTotales(ITEMS, "usdt", 1500).totalARS).toBeNull();
+        expect(calcularTotales(ITEMS, "mercadopago").totalARS).toBeNull();
+    });
+
+    it("PayPal se ofrece y paga el precio de lista, como tarjeta", () => {
+        expect(MEDIOS_DE_PAGO.some((m) => m.id === "paypal")).toBe(true);
+        expect(calcularTotales(ITEMS, "paypal").totalAPagar).toBe(
+            calcularTotales(ITEMS, "mercadopago").totalAPagar
+        );
+    });
 });
 
 describe("validarCheckout", () => {
@@ -43,6 +68,13 @@ describe("validarCheckout", () => {
         expect(Object.keys(validarCheckout(DATOS_INICIALES)).sort()).toEqual(
             ["email", "entrega", "nombre", "pago", "telefono"].sort()
         );
+    });
+
+    it("no deja pagar en pesos sin cotizacion", () => {
+        const datos = { ...DATOS_COMPLETOS, pago: "mercadopago" };
+        expect(Object.keys(validarCheckout(datos, null))).toEqual(["pago"]);
+        expect(validarCheckout(datos, 1500)).toEqual({});
+        expect(validarCheckout({ ...datos, pago: "usdt" }, null)).toEqual({});
     });
 
     it("coordinando la entrega no pide domicilio ni DNI", () => {
@@ -73,9 +105,21 @@ describe("armarMensajePedido", () => {
         expect(mensaje).toContain(
             "*Dunk Low* (Talle: *10 US*) *x2* — $*2.500*"
         );
-        expect(mensaje).toContain("*Total: $2.624*");
+        expect(mensaje).toContain("*Total: USD 2.624*");
         expect(mensaje).toContain("*Medio de pago:* MercadoPago");
         expect(mensaje).not.toContain("DNI");
+    });
+
+    it("con un medio en pesos agrega el total convertido", () => {
+        const mensaje = armarMensajePedido(
+            ITEMS,
+            { ...DATOS_COMPLETOS, pago: "transferencia" },
+            1500
+        );
+        expect(mensaje).toContain("*Total: USD 2.099*");
+        expect(mensaje).toContain(
+            "*Total en pesos: $3.148.500* (dólar a $1.500)"
+        );
     });
 
     it("con efectivo usa el precio con descuento", () => {
@@ -83,7 +127,7 @@ describe("armarMensajePedido", () => {
             ...DATOS_COMPLETOS,
             pago: "efectivo",
         });
-        expect(mensaje).toContain("*Total: $2.099*");
+        expect(mensaje).toContain("*Total: USD 2.099*");
     });
 });
 

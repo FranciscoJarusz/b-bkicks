@@ -271,3 +271,27 @@ export async function getEncargos() {
     const productos = await getProductosFromSupabase();
     return productos.filter((producto) => producto.esEncargo);
 }
+
+/**
+ * Los ultimos productos que abrio cualquier visitante, de catalogo y de
+ * encargos, con los datos actuales (precio, imagen) del producto. La tabla
+ * guarda como mucho 24: si cambias el limite, cambialo tambien en
+ * supabase/vistos-limite-migration.sql.
+ */
+export async function getVistosRecientes(limite = 24) {
+    const { data, error } = await supabase
+        .from("producto_visto")
+        .select("id_producto")
+        .order("visto", { ascending: false })
+        .limit(limite);
+
+    if (error) throw error;
+
+    const productos = await getProductosFromSupabase();
+    const porId = new Map(productos.map((p) => [p.id, p]));
+
+    return (data ?? []).flatMap(({ id_producto }) => {
+        const producto = porId.get(id_producto);
+        return producto ? [producto] : [];
+    });
+}

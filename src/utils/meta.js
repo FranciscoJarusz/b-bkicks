@@ -51,6 +51,10 @@ export function datosCoincidenciaAvanzada({ nombre, telefono, email }) {
     return avanzados;
 }
 
+// sessionStorage: el carrito que se fue a pagar a MercadoPago, para mandar el
+// Purchase cuando vuelve con el pago aprobado.
+export const CLAVE_COMPRA_PENDIENTE = "meta-compra-pendiente";
+
 // Guardamos los datos ya normalizados para que las visitas siguientes tambien
 // salgan con coincidencias avanzadas: el snippet inline de
 // src/layouts/Layout.astro los lee antes del fbq("init").

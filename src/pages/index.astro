@@ -6,6 +6,7 @@ import Hero from "@/sections/Hero.astro";
 import Info from "@/sections/Info.astro";
 import Catalogo from "@/sections/Catalogo.astro";
 import Encargos from "@/sections/Encargos.astro";
+import Reels from "@/sections/Reels.astro";
 import { buildOrganizationSchema } from "@/utils/schema.js";
 
 const siteUrl = (Astro.site ?? new URL("https://www.bybkicks.com")).href;
@@ -20,5 +21,6 @@ const siteUrl = (Astro.site ?? new URL("https://www.bybkicks.com")).href;
     <Hero />
     <Info />
     <Catalogo />
+    <Reels />
     <Encargos />
 </Layout>

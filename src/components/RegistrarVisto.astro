@@ -1,0 +1,40 @@
+---
+// Anota la visita al producto para la pagina /vistos. No muestra nada.
+interface Props {
+    id: number;
+}
+
+const { id } = Astro.props;
+---
+
+<span hidden data-registrar-visto={id}></span>
+
+<script>
+    const marca = document.querySelector<HTMLElement>("[data-registrar-visto]");
+    const id = Number(marca?.dataset.registrarVisto);
+
+    function registrar() {
+        fetch("/api/visto", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+            keepalive: true,
+        }).catch(() => {});
+    }
+
+    // Si Chrome prerenderiza la pagina, la visita cuenta recien cuando el
+    // usuario la abre de verdad (igual que el pixel en Layout.astro).
+    const { prerendering } = document as Document & {
+        prerendering?: boolean;
+    };
+
+    if (id) {
+        if (prerendering) {
+            document.addEventListener("prerenderingchange", registrar, {
+                once: true,
+            });
+        } else {
+            registrar();
+        }
+    }
+</script>

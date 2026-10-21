@@ -1,0 +1,69 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Card from "@/components/ui/Card.jsx";
+import { getVistosRecientes } from "@/utils/productos.js";
+
+// Si la tabla todavia no existe (o Supabase falla) la pagina queda vacia en
+// vez de dar error.
+const vistos = await getVistosRecientes().catch(() => []);
+---
+
+<Layout
+    title="Vistos recientemente"
+    description="Los productos que más se están mirando en B&B KICKS, de entrega inmediata y para encargar."
+>
+    <Header />
+
+    <section class="py-16">
+        <div class="mx-auto flex max-w-7xl flex-col gap-8 px-6 lg:gap-12">
+            <div>
+                <h1
+                    class="font-accent text-4xl uppercase text-primary lg:text-6xl"
+                >
+                    Vistos recientemente
+                </h1>
+                <p class="mt-1 text-sm text-black">
+                    Lo último que miraron otros clientes, de entrega inmediata y
+                    para encargar.
+                </p>
+            </div>
+
+            {
+                vistos.length === 0 ? (
+                    <p class="text-black/60">
+                        Todavía no hay productos vistos.
+                    </p>
+                ) : (
+                    <div class="grid grid-cols-2 gap-10 lg:grid-cols-3 lg:gap-16">
+                        {vistos.map((producto) => (
+                            <div class="relative">
+                                <span
+                                    class:list={[
+                                        "pointer-events-none absolute left-2 top-2 z-10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white lg:text-xs",
+                                        producto.esEncargo
+                                            ? "bg-black"
+                                            : "bg-emerald-600",
+                                    ]}
+                                >
+                                    {producto.esEncargo
+                                        ? "Encargo"
+                                        : "Entrega inmediata"}
+                                </span>
+                                <Card
+                                    producto={producto}
+                                    basePath={
+                                        producto.esEncargo
+                                            ? "/encargos"
+                                            : "/productos"
+                                    }
+                                    mostrarTodosLosTalles={producto.esEncargo}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )
+            }
+        </div>
+    </section>
+</Layout>

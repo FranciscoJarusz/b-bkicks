@@ -4,6 +4,7 @@ import Header from "@/components/Header.astro";
 import JsonLd from "@/components/JsonLd.astro";
 import ProductoDetalle from "@/components/ProductoDetalle.astro";
 import ProductosSimilares from "@/components/ui/ProductosSimilares.jsx";
+import RegistrarVisto from "@/components/RegistrarVisto.astro";
 import { getProductosAgrupados } from "@/utils/productos.js";
 import { buildProductSchema, buildBreadcrumbSchema } from "@/utils/schema.js";
 import { precioDeLista } from "@/utils/precios.js";
@@ -66,6 +67,7 @@ const schema = producto
                     productos={mismaMarca}
                     client:load
                 />
+                <RegistrarVisto id={producto.id} />
             </>
         ) : (
             <section class="mx-auto max-w-6xl px-6 py-20">
