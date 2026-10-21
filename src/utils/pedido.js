@@ -57,6 +57,15 @@ const TODOS_LOS_MEDIOS = [
         moneda: "USD",
         recargo: RECARGO_PAYPAL,
     },
+    {
+        // El medio de pago se arregla por WhatsApp: precio de lista, sin
+        // descuento, hasta que se acuerde.
+        id: "whatsapp",
+        icono: "💬",
+        label: "Coordinar por WhatsApp",
+        precio: "lista",
+        moneda: "USD",
+    },
 ];
 
 // PayPal se oculta poniendo RECARGO_PAYPAL en null.

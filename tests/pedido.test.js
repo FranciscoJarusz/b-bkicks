@@ -61,6 +61,13 @@ describe("calcularTotales", () => {
             calcularTotales(ITEMS, "mercadopago").totalAPagar
         );
     });
+
+    it("coordinar por WhatsApp se ofrece y paga el precio de lista", () => {
+        expect(MEDIOS_DE_PAGO.some((m) => m.id === "whatsapp")).toBe(true);
+        expect(calcularTotales(ITEMS, "whatsapp").totalAPagar).toBe(
+            calcularTotales(ITEMS, "paypal").totalAPagar
+        );
+    });
 });
 
 describe("validarCheckout", () => {
@@ -106,7 +113,7 @@ describe("armarMensajePedido", () => {
             "*Dunk Low* (Talle: *10 US*) *x2* — $*2.500*"
         );
         expect(mensaje).toContain("*Total: USD 2.624*");
-        expect(mensaje).toContain("*Medio de pago:* MercadoPago");
+        expect(mensaje).toContain("*Medio de pago:* Mercado Pago");
         expect(mensaje).not.toContain("DNI");
     });
 
