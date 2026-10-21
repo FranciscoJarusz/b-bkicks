@@ -3,14 +3,18 @@ import { respuestaJson } from "@/lib/http";
 import { getCotizacion } from "@/lib/cotizacion";
 import { crearPreferencia, mercadoPagoConfigurado } from "@/lib/mercadopago";
 import { supabaseServidor } from "@/lib/supabase-servidor";
+import { EMAIL_DUEÑO, enviarEmail } from "@/lib/email";
+import { DATOS_DE_PAGO } from "@/config.js";
 import { getProductosAgrupados } from "@/utils/productos.js";
 import { precioDelTalle } from "@/utils/precios.js";
 import {
     DATOS_INICIALES,
     calcularTotales,
+    getMedioDePago,
     validarCheckout,
 } from "@/utils/pedido.js";
 import { itemsDePreferencia, totalDePreferencia } from "@/utils/mercadopago.js";
+import { emailPedidoRecibido } from "@/utils/emails.js";
 
 const CAMPOS_DATOS = [
     "nombre",
@@ -32,22 +36,30 @@ class ErrorDePedido extends Error {
 }
 
 /**
- * Arranca un pago con MercadoPago. El navegador manda solo que quiere (slug,
- * talle y cantidad) y sus datos: precios, stock y cotizacion se resuelven
- * aca, asi nadie puede pagar un monto distinto. Guarda el pedido como
- * "pendiente" y devuelve el link de pago; el webhook lo pasa a "pagado".
+ * Guarda el pedido, con cualquier medio de pago. El navegador manda solo que
+ * quiere (slug, talle y cantidad) y sus datos: precios, stock y cotizacion se
+ * resuelven aca, asi nadie puede pagar un monto distinto. Todos los pedidos
+ * nacen "pendiente". Responde segun el medio:
+ *
+ * - MercadoPago: `{ url }` al checkout de MercadoPago; el webhook lo pasa a
+ *   "pagado".
+ * - Transferencia o cripto (DATOS_DE_PAGO): `{ url }` a /pedido/<id>, con los
+ *   datos para pagar y la subida del comprobante.
+ * - El resto (efectivo): `{ pedido }`; se sigue por WhatsApp.
+ *
+ * Fuera de MercadoPago, el pedido lo pasa a "pagado" el admin, y al cliente le
+ * llega un mail con el pedido (y el link para pagar, si paga en la web).
  */
 export const POST: APIRoute = async ({ request }) => {
-    if (!mercadoPagoConfigurado || !supabaseServidor) {
+    if (!supabaseServidor) {
         return respuestaJson(
-            { error: "El pago con MercadoPago no está disponible." },
+            { error: "No pudimos tomar el pedido. Escribinos por WhatsApp." },
             503
         );
     }
 
     try {
-        const url = await iniciarPago(request);
-        return respuestaJson({ url });
+        return respuestaJson(await crearPedido(request));
     } catch (error) {
         if (error instanceof ErrorDePedido) {
             return respuestaJson({ error: error.message }, error.status);
@@ -55,15 +67,24 @@ export const POST: APIRoute = async ({ request }) => {
 
         console.error("checkout:", error);
         return respuestaJson(
-            { error: "No pudimos iniciar el pago. Probá de nuevo." },
+            { error: "No pudimos tomar el pedido. Probá de nuevo." },
             502
         );
     }
 };
 
-async function iniciarPago(request: Request) {
+async function crearPedido(request: Request) {
     const db = supabaseServidor!;
     const body = await request.json().catch(() => null);
+
+    const medio = getMedioDePago(body?.datos?.pago);
+    if (!medio) throw new ErrorDePedido("Elegí un medio de pago.");
+    if (medio.id === "mercadopago" && !mercadoPagoConfigurado) {
+        throw new ErrorDePedido(
+            "El pago con MercadoPago no está disponible. Elegí otro medio.",
+            503
+        );
+    }
 
     const pedidos: { slug: string; talle: string | null; cantidad: number }[] =
         (Array.isArray(body?.items) ? body.items : [])
@@ -84,26 +105,75 @@ async function iniciarPago(request: Request) {
         cliente[campo] = typeof valor === "string" ? valor.slice(0, 200) : "";
     }
 
-    const cotizacion = await getCotizacion();
-    if (!cotizacion) {
+    // Solo lo que se paga en pesos necesita cotizacion: si dolarapi no
+    // responde, los medios en dolares siguen andando.
+    const cotizacion = medio.moneda === "ARS" ? await getCotizacion() : null;
+
+    const errores = validarCheckout(
+        { ...DATOS_INICIALES, ...cliente, pago: medio.id },
+        cotizacion?.venta ?? null
+    );
+    const primerError = Object.values(errores)[0];
+    if (primerError) {
         throw new ErrorDePedido(
-            "No pudimos obtener la cotización del dólar. Probá de nuevo.",
-            503
+            primerError as string,
+            medio.moneda === "ARS" && !cotizacion ? 503 : 400
         );
     }
 
-    const errores = validarCheckout(
-        { ...DATOS_INICIALES, ...cliente, pago: "mercadopago" },
-        cotizacion.venta
+    const items = await resolverItems(pedidos);
+    const { totalAPagar, totalARS } = calcularTotales(
+        items,
+        medio.id,
+        cotizacion?.venta ?? null
     );
-    const primerError = Object.values(errores)[0];
-    if (primerError) throw new ErrorDePedido(primerError as string);
 
-    // Precio y stock de ahora, de la base: lo que diga el navegador no cuenta.
+    // MercadoPago cobra la suma de sus items redondeados por unidad: el total
+    // en pesos tiene que ser exactamente ese.
+    const itemsMP =
+        medio.id === "mercadopago"
+            ? itemsDePreferencia(items, cotizacion!.venta)
+            : null;
+
+    const { data: pedido, error } = await db
+        .from("pedido")
+        .insert({
+            medio_pago: medio.id,
+            cliente,
+            items,
+            total_usd: totalAPagar,
+            cotizacion: cotizacion?.venta ?? null,
+            total_ars: itemsMP ? totalDePreferencia(itemsMP) : totalARS,
+        })
+        .select("id, medio_pago, cliente, items, total_usd, total_ars")
+        .single();
+    if (error || !pedido) throw error ?? new Error("No se guardó el pedido");
+
+    if (itemsMP) {
+        return {
+            url: await preferenciaDePago(request, pedido.id, itemsMP, cliente),
+        };
+    }
+
+    await enviarEmail({
+        para: cliente.email,
+        ...emailPedidoRecibido(pedido, new URL(request.url).origin),
+        responderA: EMAIL_DUEÑO,
+    });
+
+    if (medio.id in DATOS_DE_PAGO) return { url: `/pedido/${pedido.id}` };
+
+    return { pedido: pedido.id };
+}
+
+/** Precio y stock de ahora, de la base: lo que diga el navegador no cuenta. */
+async function resolverItems(
+    pedidos: { slug: string; talle: string | null; cantidad: number }[]
+) {
     const productos = await getProductosAgrupados();
     const porSlug = new Map(productos.map((p: any) => [p.slug, p]));
 
-    const items = pedidos.map(({ slug, talle, cantidad }) => {
+    return pedidos.map(({ slug, talle, cantidad }) => {
         const producto: any = porSlug.get(slug);
         if (!producto) {
             throw new ErrorDePedido(
@@ -132,7 +202,7 @@ async function iniciarPago(request: Request) {
         }
 
         // El id es el de la fila de la base: con el se descuenta el stock al
-        // aprobarse el pago (marcar_pedido_pagado).
+        // pasar el pedido a pagado (marcar_pedido_pagado).
         return {
             id: producto.id as number,
             slug,
@@ -142,25 +212,14 @@ async function iniciarPago(request: Request) {
             price,
         };
     });
+}
 
-    const itemsMP = itemsDePreferencia(items, cotizacion.venta);
-    const totalARS = totalDePreferencia(itemsMP);
-    const { totalAPagar } = calcularTotales(items, "mercadopago");
-
-    const { data: pedido, error } = await db
-        .from("pedido")
-        .insert({
-            medio_pago: "mercadopago",
-            cliente,
-            items,
-            total_usd: totalAPagar,
-            cotizacion: cotizacion.venta,
-            total_ars: totalARS,
-        })
-        .select("id")
-        .single();
-    if (error || !pedido) throw error ?? new Error("No se guardó el pedido");
-
+async function preferenciaDePago(
+    request: Request,
+    pedidoId: string,
+    itemsMP: ReturnType<typeof itemsDePreferencia>,
+    cliente: Record<string, string>
+) {
     // MercadoPago no acepta back_urls ni webhooks en http (desarrollo local).
     const { origin } = new URL(request.url);
     const publico = origin.startsWith("https://");
@@ -169,7 +228,7 @@ async function iniciarPago(request: Request) {
         return await crearPreferencia({
             items: itemsMP,
             payer: { name: cliente.nombre, email: cliente.email },
-            external_reference: pedido.id,
+            external_reference: pedidoId,
             statement_descriptor: "B&B KICKS",
             back_urls: {
                 success: `${origin}/pago/exito`,
@@ -183,10 +242,10 @@ async function iniciarPago(request: Request) {
         });
     } catch (error) {
         // El cliente nunca llego a MercadoPago: no queda un pedido colgado.
-        await db
+        await supabaseServidor!
             .from("pedido")
             .update({ estado: "cancelado" })
-            .eq("id", pedido.id);
+            .eq("id", pedidoId);
         throw error;
     }
 }

@@ -58,7 +58,7 @@ const TODOS_LOS_MEDIOS = [
     },
 ];
 
-// PayPal queda oculto hasta que se confirme su recargo.
+// PayPal se oculta poniendo RECARGO_PAYPAL en null.
 export const MEDIOS_DE_PAGO = TODOS_LOS_MEDIOS.filter(
     (medio) => medio.id !== "paypal" || RECARGO_PAYPAL != null
 );
@@ -232,31 +232,10 @@ export function armarMensajePedido(items, datos, cotizacion = null) {
     );
 }
 
-/**
- * El WhatsApp que le llega al dueño cuando se aprueba un pago. Va por un
- * servicio de terceros: sin DNI ni direccion, eso se ve en el admin.
- *
- * @param {{ cliente: { nombre: string, entrega: string }, items: { name: string, talle: string | null, cantidad: number }[], total_usd: number, total_ars: number | null }} pedido
- * @param {string} urlAdmin
- */
-export function armarAvisoPedidoPagado(pedido, urlAdmin) {
-    const entrega = ENTREGAS.find(
-        (e) => e.id === pedido.cliente.entrega
-    )?.label;
-    const lineas = pedido.items.map(
-        (i) =>
-            `- ${i.name}${i.talle ? ` (Talle ${formatearTalle(i.talle)})` : ""} x${i.cantidad}`
-    );
-    const total = pedido.total_ars
-        ? `$${Number(pedido.total_ars).toLocaleString("es-AR")} (USD ${Number(pedido.total_usd).toLocaleString("es-AR")})`
-        : `USD ${Number(pedido.total_usd).toLocaleString("es-AR")}`;
-
-    return (
-        `*Nuevo pedido PAGADO con MercadoPago*\n\n` +
-        `${pedido.cliente.nombre}\n` +
-        lineas.join("\n") +
-        `\n\n*Total:* ${total}` +
-        (entrega ? `\n*Entrega:* ${entrega}` : "") +
-        `\n\nDatos completos en ${urlAdmin}`
-    );
+/** "$585.000 (USD 375)" si se paga en pesos, "USD 375" si en dolares. */
+export function formatearTotalPedido(pedido) {
+    const usd = `USD ${Number(pedido.total_usd).toLocaleString("es-AR")}`;
+    return pedido.total_ars
+        ? `$${Number(pedido.total_ars).toLocaleString("es-AR")} (${usd})`
+        : usd;
 }

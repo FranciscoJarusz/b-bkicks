@@ -1,0 +1,194 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import PagoPedido from "@/components/ui/PagoPedido.jsx";
+import { supabaseServidor } from "@/lib/supabase-servidor";
+import { DATOS_DE_PAGO, HORAS_RESERVA, urlWhatsApp } from "@/config.js";
+import { formatearTalle } from "@/utils/talles.js";
+import { getMedioDePago } from "@/utils/pedido.js";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// El link del pedido es lo unico que lo protege (un uuid no se adivina): no
+// lo puede guardar el CDN ni indexar un buscador.
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+const { id } = Astro.params;
+if (!id || !UUID.test(id) || !supabaseServidor) return Astro.redirect("/404");
+
+const { data: pedido } = await supabaseServidor
+    .from("pedido")
+    .select(
+        "id, creado, estado, medio_pago, items, total_usd, total_ars, cotizacion, comprobante_subido"
+    )
+    .eq("id", id)
+    .maybeSingle();
+if (!pedido) return Astro.redirect("/404");
+
+const medio = getMedioDePago(pedido.medio_pago);
+const pago = DATOS_DE_PAGO[pedido.medio_pago as keyof typeof DATOS_DE_PAGO];
+
+const monto =
+    medio?.moneda === "ARS" && pedido.total_ars
+        ? `$${Number(pedido.total_ars).toLocaleString("es-AR")}`
+        : `${pedido.medio_pago === "usdt" ? "USDT" : "USD"} ${Number(pedido.total_usd).toLocaleString("es-AR")}`;
+
+const reservaHasta = new Date(
+    new Date(pedido.creado).getTime() + HORAS_RESERVA * 60 * 60 * 1000
+).toLocaleString("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+});
+
+const numero = pedido.id.slice(0, 8).toUpperCase();
+const whatsapp = urlWhatsApp(
+    `¡Hola B&B KICKS! Te escribo por mi pedido #${numero}.`
+);
+
+const TITULOS: Record<string, string> = {
+    pagado: "¡PAGO CONFIRMADO!",
+    entregado: "¡PEDIDO ENTREGADO!",
+    cancelado: "PEDIDO CANCELADO",
+};
+const esperandoPago = pedido.estado === "pendiente" && Boolean(pago);
+const titulo = esperandoPago
+    ? pago!.titulo.toUpperCase()
+    : (TITULOS[pedido.estado] ?? "PEDIDO RECIBIDO");
+---
+
+<Layout
+    title={`Pedido #${numero}`}
+    description="Tu pedido en B&B KICKS."
+    noindex={true}
+    hideCurrencyPopup={true}
+>
+    <Header />
+
+    <!-- 12rem es lo que ocupa el header: en desktop todo entra sin scroll. -->
+    <section
+        class="mx-auto flex min-h-[calc(100svh-12rem)] w-full max-w-5xl items-center px-4 py-8 sm:px-8"
+    >
+        <div
+            class:list={[
+                "grid w-full gap-8",
+                esperandoPago
+                    ? "lg:grid-cols-2 lg:items-center lg:gap-14"
+                    : "mx-auto max-w-md",
+            ]}
+        >
+            <div class="flex flex-col gap-5">
+                <div class="flex flex-col gap-2">
+                    <p
+                        class="text-xs font-semibold uppercase tracking-[0.3em] text-black/45"
+                    >
+                        Pedido #{numero}
+                    </p>
+
+                    <h1
+                        class="font-accent text-5xl leading-[0.9] text-primary sm:text-6xl"
+                    >
+                        {titulo}
+                    </h1>
+
+                    {
+                        esperandoPago && (
+                            <p class="text-sm text-black/60">
+                                Te reservamos el pedido hasta el {reservaHasta}.
+                            </p>
+                        )
+                    }
+                </div>
+
+                <div
+                    class="flex flex-col gap-2 rounded-2xl bg-black/4 p-4 text-sm"
+                >
+                    {
+                        pedido.items.map((item: any) => (
+                            <p class="truncate text-black/80">
+                                {item.name}
+                                {item.talle
+                                    ? ` (${formatearTalle(item.talle)})`
+                                    : ""}{" "}
+                                ×{item.cantidad}
+                            </p>
+                        ))
+                    }
+
+                    <div
+                        class="mt-1 flex items-center justify-between border-t border-black/10 pt-3 text-black"
+                    >
+                        <span class="font-accent text-2xl uppercase">
+                            {esperandoPago ? "A transferir" : "Total"}
+                        </span>
+                        <span class="text-2xl font-bold">{monto}</span>
+                    </div>
+
+                    {
+                        esperandoPago &&
+                            pedido.total_ars &&
+                            pedido.cotizacion && (
+                                <p class="text-right text-xs text-black/50">
+                                    USD{" "}
+                                    {Number(pedido.total_usd).toLocaleString(
+                                        "es-AR"
+                                    )}{" "}
+                                    con el dólar a $
+                                    {Number(pedido.cotizacion).toLocaleString(
+                                        "es-AR"
+                                    )}
+                                </p>
+                            )
+                    }
+                </div>
+
+                {
+                    !esperandoPago && (
+                        <p class="text-sm leading-6 text-black/70">
+                            {pedido.estado === "pagado" &&
+                                "Ya confirmamos tu pago. Te escribimos para coordinar la entrega."}
+                            {pedido.estado === "entregado" &&
+                                "¡Que lo disfrutes! Gracias por comprar en B&B KICKS."}
+                            {pedido.estado === "cancelado" &&
+                                "Este pedido se canceló. Si querés retomarlo, escribinos."}
+                            {pedido.estado === "pendiente" &&
+                                "Ya tenemos tu pedido. Te escribimos para coordinar el pago y la entrega."}
+                        </p>
+                    )
+                }
+
+                <a
+                    href={whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-sm text-black/60 underline-offset-4 transition-all duration-300 hover:text-primary hover:underline"
+                >
+                    ¿Dudas? Escribinos por WhatsApp
+                </a>
+            </div>
+
+            {
+                esperandoPago && (
+                    <div class="flex flex-col gap-3">
+                        <PagoPedido
+                            client:load
+                            pedido={pedido.id}
+                            datos={pago!.datos}
+                            aviso={"aviso" in pago! ? pago!.aviso : null}
+                            comprobanteSubido={Boolean(
+                                pedido.comprobante_subido
+                            )}
+                        />
+
+                        <p class="text-xs text-black/45">
+                            Guardá este link: desde acá podés volver a ver los
+                            datos y subir el comprobante.
+                        </p>
+                    </div>
+                )
+            }
+        </div>
+    </section>
+</Layout>

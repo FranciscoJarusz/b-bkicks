@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 import { obtenerPago } from "@/lib/mercadopago";
 import { supabaseServidor } from "@/lib/supabase-servidor";
-import { avisarAlDueño } from "@/lib/aviso";
-import { armarAvisoPedidoPagado } from "@/utils/pedido.js";
+import { EMAIL_DUEÑO, enviarEmails } from "@/lib/email";
+import { emailPagoConfirmado, emailPedidoPagado } from "@/utils/emails.js";
 
 const ID_NUMERICO = /^\d+$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -68,10 +68,22 @@ export const POST: APIRoute = async ({ request, url }) => {
         );
         if (errorPagado) throw errorPagado;
 
-        if (pagados?.length) {
-            await avisarAlDueño(
-                armarAvisoPedidoPagado(pagados[0], `${url.origin}/admin`)
-            );
+        const pagado = pagados?.[0];
+        if (pagado) {
+            await enviarEmails([
+                {
+                    para: EMAIL_DUEÑO,
+                    ...emailPedidoPagado(pagado, url.origin),
+                    responderA: pagado.cliente.email,
+                    clave: `pagado-dueño-${pagado.id}`,
+                },
+                {
+                    para: pagado.cliente.email,
+                    ...emailPagoConfirmado(pagado, url.origin),
+                    responderA: EMAIL_DUEÑO,
+                    clave: `pagado-cliente-${pagado.id}`,
+                },
+            ]);
         }
 
         return ok();

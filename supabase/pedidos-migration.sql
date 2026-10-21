@@ -6,7 +6,7 @@
 -- publico no puede leer ni escribir. El servidor entra con la secret key
 -- (SUPABASE_SECRET_KEY, se saltea RLS) y el admin con las policies de abajo.
 --
--- Reemplaza admin@tu-dominio.com por el mail real del dueño, igual que en
+-- Reemplaza bautistabrey2006@gmail.com por el mail real del dueño, igual que en
 -- admin-policies.sql.
 
 CREATE TABLE public.pedido (
@@ -71,11 +71,11 @@ CREATE POLICY "admin read pedido"
 ON public.pedido
 FOR SELECT
 TO authenticated
-USING (auth.jwt()->>'email' = 'admin@tu-dominio.com');
+USING (auth.jwt()->>'email' = 'bautistabrey2006@gmail.com');
 
 CREATE POLICY "admin update pedido"
 ON public.pedido
 FOR UPDATE
 TO authenticated
-USING (auth.jwt()->>'email' = 'admin@tu-dominio.com')
-WITH CHECK (auth.jwt()->>'email' = 'admin@tu-dominio.com');
+USING (auth.jwt()->>'email' = 'bautistabrey2006@gmail.com')
+WITH CHECK (auth.jwt()->>'email' = 'bautistabrey2006@gmail.com');

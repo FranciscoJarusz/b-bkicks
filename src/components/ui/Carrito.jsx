@@ -12,7 +12,7 @@ import {
 } from "@/utils/carrito.js";
 import { formatearTalle } from "@/utils/talles.js";
 import { cloudinaryUrl } from "@/utils/cloudinary.js";
-import { META_PIXEL_ID, urlWhatsApp } from "@/config.js";
+import { DATOS_DE_PAGO, META_PIXEL_ID, urlWhatsApp } from "@/config.js";
 import {
     DATOS_INICIALES,
     ENTREGAS,
@@ -192,7 +192,23 @@ export default function Carrito() {
         return Object.keys(nuevos).length === 0;
     }
 
-    async function pagarConMercadoPago() {
+    function cuerpoDelPedido() {
+        return JSON.stringify({
+            items: items.map(({ slug, talle, cantidad }) => ({
+                slug,
+                talle,
+                cantidad,
+            })),
+            datos,
+        });
+    }
+
+    /**
+     * MercadoPago, transferencia y cripto: el servidor guarda el pedido y
+     * devuelve a donde seguir (MercadoPago o /pedido/<id> con los datos para
+     * pagar).
+     */
+    async function enviarPedido() {
         setEnviando(true);
         setErrorEnvio("");
 
@@ -200,19 +216,21 @@ export default function Carrito() {
             const res = await fetch("/api/checkout", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    items: items.map(({ slug, talle, cantidad }) => ({
-                        slug,
-                        talle,
-                        cantidad,
-                    })),
-                    datos,
-                }),
+                body: cuerpoDelPedido(),
             });
             const cuerpo = await res.json().catch(() => null);
 
             if (!res.ok || !cuerpo?.url) {
                 throw new Error(cuerpo?.error);
+            }
+
+            if (datos.pago !== "mercadopago") {
+                // El pedido ya esta guardado y su pagina tiene todo: el
+                // carrito no hace mas falta.
+                vaciarCarrito();
+                limpiarDatosCheckout();
+                window.location.href = cuerpo.url;
+                return;
             }
 
             // El Purchase del pixel sale en /pago/exito, cuando ya no tenemos
@@ -239,7 +257,7 @@ export default function Carrito() {
             window.location.href = cuerpo.url;
         } catch (error) {
             setErrorEnvio(
-                error?.message || "No pudimos iniciar el pago. Probá de nuevo."
+                error?.message || "No pudimos tomar el pedido. Probá de nuevo."
             );
             setEnviando(false);
         }
@@ -268,10 +286,21 @@ export default function Carrito() {
             });
         }
 
-        if (datos.pago === "mercadopago") {
-            pagarConMercadoPago();
+        if (datos.pago === "mercadopago" || datos.pago in DATOS_DE_PAGO) {
+            enviarPedido();
             return;
         }
+
+        // Efectivo: sigue por WhatsApp. El pedido se guarda igual para que
+        // quede en el admin, pero sin esperar la respuesta: window.open
+        // despues de un await lo bloquean los navegadores. keepalive hace que
+        // el envio termine aunque esta pagina se cierre o navegue.
+        fetch("/api/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: cuerpoDelPedido(),
+            keepalive: true,
+        }).catch(() => {});
 
         const mensaje = armarMensajePedido(items, datos, cotizacion);
 

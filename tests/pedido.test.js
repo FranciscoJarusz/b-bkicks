@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
     DATOS_INICIALES,
     MEDIOS_DE_PAGO,
-    armarAvisoPedidoPagado,
     armarMensajePedido,
     calcularTotales,
     validarCheckout,
@@ -56,8 +55,11 @@ describe("calcularTotales", () => {
         expect(calcularTotales(ITEMS, "mercadopago").totalARS).toBeNull();
     });
 
-    it("PayPal no se ofrece mientras no haya recargo confirmado", () => {
-        expect(MEDIOS_DE_PAGO.some((m) => m.id === "paypal")).toBe(false);
+    it("PayPal se ofrece y paga el precio de lista, como tarjeta", () => {
+        expect(MEDIOS_DE_PAGO.some((m) => m.id === "paypal")).toBe(true);
+        expect(calcularTotales(ITEMS, "paypal").totalAPagar).toBe(
+            calcularTotales(ITEMS, "mercadopago").totalAPagar
+        );
     });
 });
 
@@ -167,31 +169,5 @@ describe("aplicarPreciosActuales", () => {
                 { slug: "dunk", talle: "10", existe: false },
             ])
         ).toBeNull();
-    });
-});
-
-describe("armarAvisoPedidoPagado", () => {
-    const pedido = {
-        cliente: {
-            nombre: "Juan Perez",
-            entrega: "envio",
-            dni: "30111222",
-            direccion: "Av. Siempre Viva 742",
-        },
-        items: [{ name: "Dunk Low", talle: "10", cantidad: 2 }],
-        total_usd: 250,
-        total_ars: 375000,
-    };
-
-    it("resume el pedido sin datos sensibles", () => {
-        const aviso = armarAvisoPedidoPagado(pedido, "https://x.com/admin");
-
-        expect(aviso).toContain("Juan Perez");
-        expect(aviso).toContain("- Dunk Low (Talle 10 US) x2");
-        expect(aviso).toContain("*Total:* $375.000 (USD 250)");
-        expect(aviso).toContain("*Entrega:* Envío");
-        expect(aviso).toContain("https://x.com/admin");
-        expect(aviso).not.toContain("30111222");
-        expect(aviso).not.toContain("Siempre Viva");
     });
 });

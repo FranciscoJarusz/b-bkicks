@@ -9,7 +9,7 @@ const reels = await leerReels();
 {
     reels.length ? (
         reels.map((codigo) => (
-            <div class="group relative aspect-9/16 w-81.5 shrink-0 snap-center rounded-2xl sm:w-85 data-listo:aspect-auto [&_iframe]:transition-opacity [&_iframe]:duration-500 [&:not([data-listo])]:overflow-hidden [&:not([data-listo])_iframe]:opacity-0">
+            <div class="group relative aspect-9/16 w-81.5 shrink-0 snap-center rounded-2xl sm:w-85 data-listo:aspect-auto [&_iframe]:transition-all [&_iframe]:duration-500 [&:not([data-listo])]:overflow-hidden [&:not([data-listo])_iframe]:opacity-0">
                 <blockquote
                     class="instagram-media"
                     data-instgrm-permalink={linkDeReel(codigo)}
@@ -25,7 +25,7 @@ const reels = await leerReels();
                         Ver este reel en Instagram
                     </a>
                 </blockquote>
-                <ReelCargando class="pointer-events-none absolute inset-0 transition-opacity duration-500 group-data-listo:opacity-0" />
+                <ReelCargando class="pointer-events-none absolute inset-0 transition-all duration-500 group-data-listo:opacity-0" />
             </div>
         ))
     ) : (
