@@ -324,6 +324,7 @@ export default function CheckoutFormulario({
                             <span aria-hidden="true">{medio.icono}</span>
 
                             {medio.label}
+                            {medio.aclaracion && ` ${medio.aclaracion}`}
                         </button>
                     ))}
                 </div>

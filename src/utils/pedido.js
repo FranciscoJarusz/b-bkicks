@@ -16,7 +16,8 @@ const TODOS_LOS_MEDIOS = [
     {
         id: "mercadopago",
         icono: "💳",
-        label: "MercadoPago",
+        label: "Mercado Pago",
+        aclaracion: "(cuotas)",
         precio: "lista",
         moneda: "ARS",
     },
