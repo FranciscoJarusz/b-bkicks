@@ -9,7 +9,7 @@ const reels = await leerReels();
 {
     reels.length ? (
         reels.map((codigo) => (
-            <div class="group relative aspect-9/16 w-81.5 shrink-0 snap-center rounded-2xl sm:w-85 data-listo:aspect-auto [&_iframe]:transition-all [&_iframe]:duration-500 [&:not([data-listo])]:overflow-hidden [&:not([data-listo])_iframe]:opacity-0">
+            <div class="group relative aspect-9/16 w-81.5 shrink-0 snap-center md:w-[calc((100%-1.5rem)/2)] md:snap-start xl:w-[calc((100%-3rem)/3)] rounded-2xl data-listo:aspect-auto [&_iframe]:transition-all [&_iframe]:duration-500 [&:not([data-listo])]:overflow-hidden [&:not([data-listo])_iframe]:opacity-0">
                 <blockquote
                     class="instagram-media"
                     data-instgrm-permalink={linkDeReel(codigo)}

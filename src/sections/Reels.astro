@@ -9,25 +9,76 @@ import ReelsLista from "@/components/ReelsLista.astro";
 >
     <div
         data-reels
-        class="relative -mx-6 flex snap-x snap-mandatory justify-between gap-6 overflow-x-auto scroll-smooth px-6 scrollbar-none md:mx-0 md:px-0 motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden"
+        class="relative -mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-6 scrollbar-none md:mx-0 md:px-0 motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden"
     >
         <ReelsLista server:defer>
             <Fragment slot="fallback">
                 {
                     [1, 2, 3].map(() => (
-                        <ReelCargando class="aspect-9/16 w-81.5 shrink-0 sm:w-85" />
+                        <ReelCargando class="aspect-9/16 w-81.5 shrink-0 snap-center md:w-[calc((100%-1.5rem)/2)] md:snap-start xl:w-[calc((100%-3rem)/3)]" />
                     ))
                 }
             </Fragment>
         </ReelsLista>
     </div>
-    <div data-puntos hidden class="mt-6 flex justify-center gap-2"></div>
+    <div
+        data-controles
+        hidden
+        class="mt-6 flex items-center justify-center gap-4"
+    >
+        <button
+            type="button"
+            data-anterior
+            aria-label="Reels anteriores"
+            class="grid size-10 cursor-pointer place-items-center rounded-full text-black ring ring-black/20 transition-all duration-300 hover:bg-primary hover:text-white hover:ring-primary disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-black disabled:hover:ring-black/20"
+        >
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="size-5"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 19.5L8.25 12l7.5-7.5"></path>
+            </svg>
+        </button>
+        <div data-puntos class="flex items-center gap-2"></div>
+        <button
+            type="button"
+            data-siguiente
+            aria-label="Reels siguientes"
+            class="grid size-10 cursor-pointer place-items-center rounded-full text-black ring ring-black/20 transition-all duration-300 hover:bg-primary hover:text-white hover:ring-primary disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-black disabled:hover:ring-black/20"
+        >
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="size-5"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
+            </svg>
+        </button>
+    </div>
 </section>
 
 <script>
     const seccion = document.querySelector<HTMLElement>("#reels");
     const contenedor = seccion?.querySelector<HTMLElement>("[data-reels]");
+    const controles = seccion?.querySelector<HTMLElement>("[data-controles]");
     const puntos = seccion?.querySelector<HTMLElement>("[data-puntos]");
+    const anterior =
+        seccion?.querySelector<HTMLButtonElement>("[data-anterior]");
+    const siguiente =
+        seccion?.querySelector<HTMLButtonElement>("[data-siguiente]");
 
     const ESPERA_MAXIMA = 15000;
 
@@ -85,39 +136,51 @@ import ReelsLista from "@/components/ReelsLista.astro";
     const reels = () =>
         contenedor ? [...contenedor.querySelectorAll(":scope > div")] : [];
 
-    function reelActual() {
-        const lista = reels();
-        if (!contenedor || !lista.length) return 0;
-        const { scrollLeft, scrollWidth, clientWidth } = contenedor;
-        if (scrollLeft <= 2) return 0;
-        if (scrollLeft + clientWidth >= scrollWidth - 2)
-            return lista.length - 1;
-        const centro = scrollLeft + clientWidth / 2;
-        let mejor = 0;
-        lista.forEach((reel, i) => {
-            const distancia = (el: Element) =>
-                Math.abs(
-                    (el as HTMLElement).offsetLeft +
-                        (el as HTMLElement).offsetWidth / 2 -
-                        centro
-                );
-            if (distancia(reel) < distancia(lista[mejor])) mejor = i;
+    // Los reels que se ven enteros (o casi): en la compu son 2 o 3 a la vez,
+    // y sus puntos se marcan juntos para que se entienda que parte se ve.
+    function reelsVisibles() {
+        if (!contenedor) return [];
+        const { scrollLeft, clientWidth } = contenedor;
+        return reels().flatMap((reel, i) => {
+            const { offsetLeft, offsetWidth } = reel as HTMLElement;
+            const centro = offsetLeft + offsetWidth / 2;
+            return centro >= scrollLeft && centro <= scrollLeft + clientWidth
+                ? [i]
+                : [];
         });
-        return mejor;
     }
 
     function marcarPunto() {
-        const actual = reelActual();
+        if (!contenedor) return;
+        const visibles = reelsVisibles();
         puntos?.querySelectorAll("button").forEach((punto, i) => {
-            punto.toggleAttribute("data-activo", i === actual);
-            punto.setAttribute("aria-current", String(i === actual));
+            const activo = visibles.includes(i);
+            punto.toggleAttribute("data-activo", activo);
+            punto.setAttribute("aria-current", String(activo));
         });
+        const { scrollLeft, scrollWidth, clientWidth } = contenedor;
+        if (anterior) anterior.disabled = scrollLeft <= 2;
+        if (siguiente)
+            siguiente.disabled = scrollLeft + clientWidth >= scrollWidth - 2;
+    }
+
+    // Avanza de a una "pagina": tantos reels como entran en pantalla.
+    function pasar(direccion: number) {
+        const [primero, segundo] = reels() as HTMLElement[];
+        if (!contenedor || !primero) return;
+        const paso = segundo
+            ? segundo.offsetLeft - primero.offsetLeft
+            : primero.offsetWidth;
+        const porPantalla = Math.max(1, reelsVisibles().length);
+        contenedor.scrollBy({ left: direccion * paso * porPantalla });
     }
 
     function armarPuntos() {
         if (!contenedor || !puntos) return;
         const lista = reels();
-        puntos.hidden = contenedor.scrollWidth <= contenedor.clientWidth + 2;
+        if (controles)
+            controles.hidden =
+                contenedor.scrollWidth <= contenedor.clientWidth + 2;
         if (puntos.childElementCount !== lista.length) {
             puntos.replaceChildren(
                 ...lista.map((_, i) => {
@@ -146,6 +209,8 @@ import ReelsLista from "@/components/ReelsLista.astro";
         let enPantalla = false;
 
         contenedor.addEventListener("scroll", marcarPunto, { passive: true });
+        anterior?.addEventListener("click", () => pasar(-1));
+        siguiente?.addEventListener("click", () => pasar(1));
         new ResizeObserver(armarPuntos).observe(contenedor);
 
         new MutationObserver(() => {
