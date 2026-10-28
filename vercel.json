@@ -5,7 +5,7 @@
             "headers": [
                 {
                     "key": "Content-Security-Policy",
-                    "value": "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel-scripts.com https://connect.facebook.net; frame-ancestors 'none';"
+                    "value": "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel-scripts.com https://connect.facebook.net https://www.instagram.com; frame-ancestors 'none';"
                 },
                 {
                     "key": "X-Frame-Options",

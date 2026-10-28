@@ -4,6 +4,8 @@ import { formatearTalle } from "@/utils/talles.js";
 import { normalizarTelefono } from "@/utils/meta.js";
 import { DATOS_DE_PAGO } from "@/config.js";
 import { ENTREGAS, getMedioDePago } from "@/utils/pedido.js";
+import Encabezado from "@/components/admin/Encabezado.jsx";
+import { BOTON as ESTILO, TARJETA } from "@/components/admin/lib/estilos.js";
 
 // "Por confirmar" primero: hay alguien esperando que se revise su
 // transferencia. Despues lo que hay que preparar.
@@ -28,11 +30,14 @@ const HORAS_SIN_PAGAR = 48;
 
 const LIMITE = 100;
 
+const TITULO_BLOQUE =
+    "text-xs font-semibold uppercase tracking-[0.2em] text-black/50";
+
 // Cada boton tiene el color de lo que hace: verde confirma la plata, azul
 // cierra la entrega (como la etiqueta "Entregado"), rojo borra. Los de
 // consulta van con contorno.
 const claseBase =
-    "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 hover:scale-102 active:scale-97 disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100 cursor-pointer";
+    "inline-flex flex-1 items-center justify-center gap-2 rounded-xl sm:flex-none px-4 py-2 text-sm font-semibold transition-all duration-300 hover:scale-102 active:scale-97 disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100 cursor-pointer";
 const BOTONES = {
     confirmar: `${claseBase} bg-green-600 text-white hover:bg-green-700`,
     entregar: `${claseBase} bg-blue-600 text-white hover:bg-blue-700`,
@@ -133,6 +138,7 @@ export default function PedidosAdmin() {
     const [pedidos, setPedidos] = useState([]);
     const [status, setStatus] = useState("Cargando pedidos...");
     const [actualizando, setActualizando] = useState("");
+    const [recarga, setRecarga] = useState(0);
 
     useEffect(() => {
         let vigente = true;
@@ -153,7 +159,7 @@ export default function PedidosAdmin() {
         return () => {
             vigente = false;
         };
-    }, [filtro]);
+    }, [filtro, recarga]);
 
     // Con un filtro puesto, un pedido que cambio de estado ya no pertenece a
     // esta lista.
@@ -271,19 +277,24 @@ export default function PedidosAdmin() {
 
     return (
         <div className="flex flex-col gap-6">
-            <div>
-                <span className="text-xs uppercase tracking-[0.3em] text-black/50">
-                    Tienda
-                </span>
-                <h2 className="mt-2 text-3xl font-semibold text-black">
-                    Pedidos
-                </h2>
-                <p className="mt-2 text-sm text-black/50">
-                    Los pagos con MercadoPago se confirman solos. Las
-                    transferencias, revisá que haya entrado la plata y
-                    confirmalas: recién ahí se descuenta el stock.
-                </p>
-            </div>
+            <Encabezado
+                antetitulo="Tienda"
+                titulo="Pedidos"
+                acciones={
+                    <button
+                        type="button"
+                        disabled={status === "Cargando pedidos..."}
+                        onClick={() => setRecarga((n) => n + 1)}
+                        className={ESTILO.contorno}
+                    >
+                        Actualizar
+                    </button>
+                }
+            >
+                Los pagos con MercadoPago se confirman solos. Las
+                transferencias, revisá que haya entrado la plata y confirmalas:
+                recién ahí se descuenta el stock.
+            </Encabezado>
 
             <div className="flex flex-wrap gap-2">
                 {FILTROS.map((opcion) => (
@@ -302,7 +313,14 @@ export default function PedidosAdmin() {
                 ))}
             </div>
 
-            {status && <p className="text-sm text-black/50">{status}</p>}
+            {status && (
+                <p
+                    role="status"
+                    className="rounded-xl bg-black/5 px-4 py-3 text-sm text-black/70"
+                >
+                    {status}
+                </p>
+            )}
 
             {!status && pedidos.length === 0 && (
                 <p className="text-sm text-black/50">
@@ -380,10 +398,10 @@ function TarjetaPedido({
     }
 
     return (
-        <li className="flex flex-col gap-4 bg-secondary p-5 ring-1 ring-black/10">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                    <p className="text-lg font-semibold text-black">
+        <li className={`${TARJETA} flex flex-col overflow-hidden`}>
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-black/10 px-4 py-4 sm:px-5">
+                <div className="min-w-0">
+                    <p className="truncate text-lg font-semibold text-black">
                         {cliente.nombre}
                     </p>
                     <p className="text-xs text-black/50">
@@ -401,60 +419,87 @@ function TarjetaPedido({
                 </span>
             </div>
 
-            <ul className="flex flex-col gap-1 text-sm text-black">
-                {pedido.items.map((item) => (
-                    <li key={`${item.slug}-${item.talle}`}>
-                        {item.name}
-                        {item.talle
-                            ? ` (Talle ${formatearTalle(item.talle)})`
-                            : ""}{" "}
-                        <span className="font-semibold">x{item.cantidad}</span>
-                    </li>
-                ))}
-            </ul>
+            <div className="grid gap-5 px-4 py-4 sm:px-5 md:grid-cols-2 md:gap-8">
+                <div className="flex flex-col gap-3">
+                    <h3 className={TITULO_BLOQUE}>Productos</h3>
+                    <ul className="flex flex-col gap-1 text-sm text-black">
+                        {pedido.items.map((item) => (
+                            <li
+                                key={`${item.slug}-${item.talle}`}
+                                className="flex justify-between gap-3"
+                            >
+                                <span className="min-w-0">
+                                    {item.name}
+                                    {item.talle
+                                        ? ` (Talle ${formatearTalle(item.talle)})`
+                                        : ""}
+                                </span>
+                                <span className="shrink-0 font-semibold">
+                                    x{item.cantidad}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
 
-            <p className="text-sm text-black">
-                <span className="font-semibold">Total:</span>{" "}
-                {pedido.total_ars
-                    ? `$${Number(pedido.total_ars).toLocaleString("es-AR")} · `
-                    : ""}
-                USD {Number(pedido.total_usd).toLocaleString("es-AR")}
-                {pedido.cotizacion
-                    ? ` (dólar a $${Number(pedido.cotizacion).toLocaleString("es-AR")})`
-                    : ""}
-            </p>
+                    <div className="border-t border-black/10 pt-3">
+                        <p className="text-base font-semibold text-black">
+                            {pedido.total_ars
+                                ? `$${Number(pedido.total_ars).toLocaleString("es-AR")} · `
+                                : ""}
+                            USD{" "}
+                            {Number(pedido.total_usd).toLocaleString("es-AR")}
+                        </p>
+                        {pedido.cotizacion && (
+                            <p className="text-xs text-black/50">
+                                Dólar a $
+                                {Number(pedido.cotizacion).toLocaleString(
+                                    "es-AR"
+                                )}
+                            </p>
+                        )}
+                    </div>
+                </div>
 
-            <dl className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                <Dato titulo="Teléfono" valor={cliente.telefono} />
-                <Dato titulo="Email" valor={cliente.email} />
-                <Dato titulo="Entrega" valor={entrega} />
-                {cliente.entrega === "envio" && (
-                    <>
-                        <Dato titulo="Dirección" valor={cliente.direccion} />
-                        <Dato
-                            titulo="Código postal"
-                            valor={cliente.codigoPostal?.toUpperCase()}
-                        />
-                        <Dato titulo="DNI" valor={cliente.dni} />
-                    </>
-                )}
-                {pedido.mp_payment_id && (
-                    <Dato
-                        titulo="Pago MercadoPago"
-                        valor={`#${pedido.mp_payment_id}`}
-                    />
-                )}
-                {pedido.comprobante_subido && (
-                    <Dato
-                        titulo="Comprobante"
-                        valor={formatearFecha(pedido.comprobante_subido)}
-                    />
-                )}
-            </dl>
+                <div className="flex flex-col gap-3">
+                    <h3 className={TITULO_BLOQUE}>Cliente y entrega</h3>
+                    <dl className="flex flex-col gap-1.5 text-sm">
+                        <Dato titulo="Teléfono" valor={cliente.telefono} />
+                        <Dato titulo="Email" valor={cliente.email} />
+                        <Dato titulo="Entrega" valor={entrega} />
+                        {cliente.entrega === "envio" && (
+                            <>
+                                <Dato
+                                    titulo="Dirección"
+                                    valor={cliente.direccion}
+                                />
+                                <Dato
+                                    titulo="Código postal"
+                                    valor={cliente.codigoPostal?.toUpperCase()}
+                                />
+                                <Dato titulo="DNI" valor={cliente.dni} />
+                            </>
+                        )}
+                        {pedido.mp_payment_id && (
+                            <Dato
+                                titulo="Pago MercadoPago"
+                                valor={`#${pedido.mp_payment_id}`}
+                            />
+                        )}
+                        {pedido.comprobante_subido && (
+                            <Dato
+                                titulo="Comprobante"
+                                valor={formatearFecha(
+                                    pedido.comprobante_subido
+                                )}
+                            />
+                        )}
+                    </dl>
+                </div>
+            </div>
 
             {/* La accion principal primero; descartar queda aparte, a la
                 derecha, para no tocarlo sin querer. */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 border-t border-black/10 bg-black/2 px-4 py-4 sm:px-5">
                 {pendiente && !esMercadoPago && (
                     <button
                         type="button"
@@ -523,7 +568,7 @@ function TarjetaPedido({
                     </button>
                 )}
 
-                <div className="flex flex-wrap gap-2 sm:ml-auto">
+                <div className="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
                     {pendiente && (
                         <button
                             type="button"
@@ -555,8 +600,8 @@ function Dato({ titulo, valor }) {
     if (!valor) return null;
 
     return (
-        <div className="flex gap-2">
-            <dt className="text-black/50">{titulo}:</dt>
+        <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
+            <dt className="text-black/50">{titulo}</dt>
             <dd className="min-w-0 break-words text-black">{valor}</dd>
         </div>
     );

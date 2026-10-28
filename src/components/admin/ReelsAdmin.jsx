@@ -7,6 +7,13 @@ import {
     esListaDeReels,
     linkDeReel,
 } from "@/reels";
+import Encabezado from "@/components/admin/Encabezado.jsx";
+import {
+    BOTON,
+    ETIQUETA,
+    INPUT,
+    TARJETA,
+} from "@/components/admin/lib/estilos.js";
 
 export default function ReelsAdmin() {
     const [reels, setReels] = useState([]);
@@ -98,49 +105,55 @@ export default function ReelsAdmin() {
         );
     }
 
-    const botonFlecha =
-        "h-10 w-10 rounded-xl ring ring-black/10 text-black transition-all duration-300 hover:ring-primary disabled:cursor-not-allowed disabled:text-black/20 disabled:hover:ring-black/10 cursor-pointer";
+    const botonFlecha = `${BOTON.contorno} w-11 px-0`;
 
     return (
         <div className="flex flex-col gap-6">
-            <div>
-                <span className="text-xs uppercase tracking-[0.3em] text-black/50">
-                    Reels de la home
-                </span>
-                <h2 className="mt-2 text-3xl font-semibold text-black">
-                    Reels de Instagram
-                </h2>
-                <p className="mt-2 text-sm text-black/50">
-                    Pega el link de un reel ya publicado. Se muestran en este
-                    orden, hasta {MAXIMO_REELS}.
-                </p>
-            </div>
+            <Encabezado
+                antetitulo="Reels de la home"
+                titulo="Reels de Instagram"
+            >
+                Pega el link de un reel ya publicado. Se muestran en este orden,
+                hasta {MAXIMO_REELS}.
+            </Encabezado>
 
             <form
                 onSubmit={agregar}
-                className="grid gap-3 md:grid-cols-[1fr_180px]"
+                className={`${TARJETA} grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-6`}
             >
-                <input
-                    value={link}
-                    onChange={(event) => setLink(event.target.value)}
-                    className="rounded-2xl ring ring-black/50 px-4 py-3 outline-none transition-all duration-300 focus:ring-primary"
-                    placeholder="https://www.instagram.com/reel/..."
-                    required
-                />
+                <label className="flex flex-col gap-1.5">
+                    <span className={ETIQUETA}>
+                        Link del reel ({reels.length}/{MAXIMO_REELS})
+                    </span>
+                    <input
+                        value={link}
+                        onChange={(event) => setLink(event.target.value)}
+                        className={INPUT}
+                        placeholder="https://www.instagram.com/reel/..."
+                        required
+                    />
+                </label>
                 <button
                     type="submit"
                     disabled={guardando || reels.length >= MAXIMO_REELS}
-                    className="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-secondary transition-all duration-300 hover:bg-primary-accent disabled:cursor-not-allowed disabled:bg-black/50 cursor-pointer"
+                    className={`${BOTON.primario} sm:px-6`}
                 >
                     {guardando ? "Guardando..." : "Agregar reel"}
                 </button>
             </form>
 
-            {status && <p className="text-sm text-black/50">{status}</p>}
+            {status && (
+                <p
+                    role="status"
+                    className="rounded-xl bg-black/5 px-4 py-3 text-sm text-black/70"
+                >
+                    {status}
+                </p>
+            )}
 
-            <ol className="overflow-hidden ring-1 ring-black/10">
+            <ol className={`${TARJETA} overflow-hidden`}>
                 {reels.length === 0 && (
-                    <li className="bg-secondary px-5 py-6 text-sm text-black/50">
+                    <li className="px-5 py-6 text-sm text-black/50">
                         No hay reels cargados. La seccion no se muestra en la
                         tienda.
                     </li>
@@ -148,20 +161,25 @@ export default function ReelsAdmin() {
                 {reels.map((codigo, indice) => (
                     <li
                         key={codigo}
-                        className="flex items-center gap-4 border-t border-black/10 bg-secondary px-4 py-3 first:border-t-0"
+                        className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-black/10 px-4 py-3 first:border-t-0"
                     >
                         <span className="w-6 text-center font-accent text-2xl text-primary">
                             {indice + 1}
                         </span>
-                        <a
-                            href={linkDeReel(codigo)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="min-w-0 flex-1 truncate text-sm font-medium text-black underline-offset-4 hover:text-primary transition-all duration-300"
-                        >
-                            {linkDeReel(codigo)}
-                        </a>
-                        <div className="flex gap-2">
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-black">
+                                {codigo}
+                            </p>
+                            <a
+                                href={linkDeReel(codigo)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="whitespace-nowrap text-xs text-black/50 underline-offset-4 transition-all duration-300 hover:text-primary hover:underline"
+                            >
+                                Ver en Instagram ↗
+                            </a>
+                        </div>
+                        <div className="flex w-full gap-2 pl-10 sm:w-auto sm:pl-0">
                             <button
                                 type="button"
                                 aria-label="Subir"
@@ -188,7 +206,7 @@ export default function ReelsAdmin() {
                                 type="button"
                                 disabled={guardando}
                                 onClick={() => borrar(codigo)}
-                                className="rounded-xl bg-red-50 px-4 py-2 text-sm font-medium text-red-700 ring-1 ring-red-200 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:bg-red-50/50 disabled:text-red-300 cursor-pointer"
+                                className={`${BOTON.peligro} flex-1 sm:flex-none`}
                             >
                                 Borrar
                             </button>

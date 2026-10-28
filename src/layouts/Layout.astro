@@ -15,6 +15,7 @@ interface Props {
     hideFooter?: boolean;
     disableSmoothScroll?: boolean;
     hideCurrencyPopup?: boolean;
+    hideWhatsApp?: boolean;
 }
 
 const {
@@ -26,6 +27,7 @@ const {
     hideFooter = false,
     disableSmoothScroll = false,
     hideCurrencyPopup = false,
+    hideWhatsApp = false,
 } = Astro.props;
 const siteURL = Astro.site ?? new URL("https://www.bybkicks.com");
 const canonicalURL = new URL(Astro.url.pathname, siteURL);
@@ -252,7 +254,7 @@ const pageImage = new URL(
         </main>
         {!hideFooter && <Footer />}
 
-        <BotonWhatsApp />
+        {!hideWhatsApp && <BotonWhatsApp />}
     </body>
     {!disableSmoothScroll && <script>import '@/scripts/lenis.ts';</script>}
 
