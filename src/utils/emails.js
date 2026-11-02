@@ -1,6 +1,6 @@
-// Los mails de los pedidos: al dueño (pago aprobado, comprobante subido) y al
-// cliente (pedido recibido, pago confirmado). Solo arman el contenido; los
-// manda src/lib/email.ts.
+// Los mails de los pedidos: al dueño (pedido nuevo, pago aprobado, comprobante
+// subido) y al cliente (pedido recibido, pago confirmado). Solo arman el
+// contenido; los manda src/lib/email.ts.
 //
 // Van por un servicio de terceros (Resend): sin DNI ni direccion, eso se ve
 // en el admin.
@@ -72,6 +72,38 @@ export function emailPedidoPagado(pedido, origen) {
         pedido,
         filas: [
             ["Medio de pago", "MercadoPago"],
+            ...(entrega ? [["Entrega", entrega]] : []),
+        ],
+        boton: { texto: "Ver en el admin", url: `${origen}/admin` },
+    });
+}
+
+/**
+ * Para el dueño, apenas entra un pedido que no es de MercadoPago (esos avisan
+ * al aprobarse el pago): queda pendiente hasta que lo confirme en el admin.
+ */
+export function emailPedidoNuevo(pedido, origen) {
+    const medio = labelDelMedio(pedido);
+    const entrega = ENTREGAS.find(
+        (e) => e.id === pedido.cliente.entrega
+    )?.label;
+
+    return armarEmail({
+        asunto: `Nuevo pedido por confirmar · ${pedido.cliente.nombre}`,
+        etiqueta: `Pedido #${numeroDePedido(pedido)}`,
+        titulo: "Nuevo pedido",
+        parrafos: DATOS_DE_PAGO[pedido.medio_pago]
+            ? [
+                  `${pedido.cliente.nombre} hizo un pedido y va a pagar con ${medio}.`,
+                  "Te llega otro mail cuando suba el comprobante.",
+              ]
+            : [
+                  `${pedido.cliente.nombre} hizo un pedido (${medio}).`,
+                  "Coordiná el pago y la entrega por WhatsApp, y confirmalo en el admin: ahí se descuenta el stock.",
+              ],
+        pedido,
+        filas: [
+            ["Medio de pago", medio],
             ...(entrega ? [["Entrega", entrega]] : []),
         ],
         boton: { texto: "Ver en el admin", url: `${origen}/admin` },

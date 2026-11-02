@@ -3,7 +3,7 @@ import { respuestaJson } from "@/lib/http";
 import { getCotizacion } from "@/lib/cotizacion";
 import { crearPreferencia, mercadoPagoConfigurado } from "@/lib/mercadopago";
 import { supabaseServidor } from "@/lib/supabase-servidor";
-import { EMAIL_DUEÑO, enviarEmail } from "@/lib/email";
+import { EMAIL_DUEÑO, enviarEmails } from "@/lib/email";
 import { DATOS_DE_PAGO } from "@/config.js";
 import { getProductosAgrupados } from "@/utils/productos.js";
 import { precioDelTalle } from "@/utils/precios.js";
@@ -14,7 +14,7 @@ import {
     validarCheckout,
 } from "@/utils/pedido.js";
 import { itemsDePreferencia, totalDePreferencia } from "@/utils/mercadopago.js";
-import { emailPedidoRecibido } from "@/utils/emails.js";
+import { emailPedidoNuevo, emailPedidoRecibido } from "@/utils/emails.js";
 
 const CAMPOS_DATOS = [
     "nombre",
@@ -47,8 +47,9 @@ class ErrorDePedido extends Error {
  *   datos para pagar y la subida del comprobante.
  * - El resto (efectivo): `{ pedido }`; se sigue por WhatsApp.
  *
- * Fuera de MercadoPago, el pedido lo pasa a "pagado" el admin, y al cliente le
- * llega un mail con el pedido (y el link para pagar, si paga en la web).
+ * Fuera de MercadoPago, el pedido lo pasa a "pagado" el admin: al dueño le
+ * llega un mail del pedido nuevo, y al cliente uno con su pedido (y el link
+ * para pagar, si paga en la web).
  */
 export const POST: APIRoute = async ({ request }) => {
     if (!supabaseServidor) {
@@ -155,11 +156,19 @@ async function crearPedido(request: Request) {
         };
     }
 
-    await enviarEmail({
-        para: cliente.email,
-        ...emailPedidoRecibido(pedido, new URL(request.url).origin),
-        responderA: EMAIL_DUEÑO,
-    });
+    const { origin } = new URL(request.url);
+    await enviarEmails([
+        {
+            para: EMAIL_DUEÑO,
+            ...emailPedidoNuevo(pedido, origin),
+            responderA: cliente.email,
+        },
+        {
+            para: cliente.email,
+            ...emailPedidoRecibido(pedido, origin),
+            responderA: EMAIL_DUEÑO,
+        },
+    ]);
 
     if (medio.id in DATOS_DE_PAGO) return { url: `/pedido/${pedido.id}` };
 

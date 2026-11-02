@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
     emailComprobante,
     emailPagoConfirmado,
+    emailPedidoNuevo,
     emailPedidoPagado,
     emailPedidoRecibido,
     numeroDePedido,
@@ -40,6 +41,32 @@ describe("emails al dueño", () => {
             expect(contenido).not.toContain("30111222");
             expect(contenido).not.toContain("Siempre Viva");
         }
+    });
+
+    it("el de pedido nuevo avisa de cada pedido sin datos sensibles", () => {
+        const email = emailPedidoNuevo(PEDIDO, ORIGEN);
+
+        expect(email.asunto).toContain("Juan Perez");
+        expect(email.texto).toContain("Transferencia ARS");
+        expect(email.texto).toContain("comprobante");
+        expect(email.texto).toContain("- Dunk Low (Talle 10 US) x2");
+        expect(email.texto).toContain("Entrega: Envío");
+        expect(email.texto).toContain("https://x.com/admin");
+        for (const contenido of [email.texto, email.html]) {
+            expect(contenido).not.toContain("30111222");
+            expect(contenido).not.toContain("Siempre Viva");
+        }
+    });
+
+    it("el de pedido nuevo por WhatsApp dice que se coordina por ahi", () => {
+        const email = emailPedidoNuevo(
+            { ...PEDIDO, medio_pago: "whatsapp" },
+            ORIGEN
+        );
+
+        expect(email.texto).toContain("Coordinar por WhatsApp");
+        expect(email.texto).toContain("Coordiná el pago y la entrega");
+        expect(email.texto).not.toContain("comprobante");
     });
 
     it("el de comprobante dice el medio y cuanto tiene que haber entrado", () => {
