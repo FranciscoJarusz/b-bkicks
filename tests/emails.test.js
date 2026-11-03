@@ -69,6 +69,19 @@ describe("emails al dueño", () => {
         expect(email.texto).not.toContain("comprobante");
     });
 
+    it("el de pedido nuevo con MercadoPago aclara que todavia no se pago", () => {
+        const email = emailPedidoNuevo(
+            { ...PEDIDO, medio_pago: "mercadopago" },
+            ORIGEN
+        );
+
+        expect(email.asunto).toContain("todavía sin pagar");
+        expect(email.asunto).toContain("Juan Perez");
+        expect(email.texto).toContain("te llega otro mail con el pago aprobado");
+        expect(email.texto).not.toContain("comprobante");
+        expect(email.texto).toContain("https://x.com/admin");
+    });
+
     it("el de comprobante dice el medio y cuanto tiene que haber entrado", () => {
         const email = emailComprobante(PEDIDO, ORIGEN);
 

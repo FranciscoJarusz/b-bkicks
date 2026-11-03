@@ -47,8 +47,9 @@ class ErrorDePedido extends Error {
  *   datos para pagar y la subida del comprobante.
  * - El resto (efectivo): `{ pedido }`; se sigue por WhatsApp.
  *
- * Fuera de MercadoPago, el pedido lo pasa a "pagado" el admin: al dueño le
- * llega un mail del pedido nuevo, y al cliente uno con su pedido (y el link
+ * Al dueño le llega un mail de cada pedido nuevo, tambien de MercadoPago
+ * aunque todavia no se haya pagado. Fuera de MercadoPago, el pedido lo pasa a
+ * "pagado" el admin, y al cliente le llega un mail con su pedido (y el link
  * para pagar, si paga en la web).
  */
 export const POST: APIRoute = async ({ request }) => {
@@ -150,19 +151,28 @@ async function crearPedido(request: Request) {
         .single();
     if (error || !pedido) throw error ?? new Error("No se guardó el pedido");
 
+    const { origin } = new URL(request.url);
+    const avisoAlDueño = {
+        para: EMAIL_DUEÑO,
+        ...emailPedidoNuevo(pedido, origin),
+        responderA: cliente.email,
+    };
+
     if (itemsMP) {
-        return {
-            url: await preferenciaDePago(request, pedido.id, itemsMP, cliente),
-        };
+        // Despues de crear la preferencia: si falla, el pedido se cancela y
+        // no hay nada que avisar. Al cliente le llega mail recien con el pago.
+        const url = await preferenciaDePago(
+            request,
+            pedido.id,
+            itemsMP,
+            cliente
+        );
+        await enviarEmails([avisoAlDueño]);
+        return { url };
     }
 
-    const { origin } = new URL(request.url);
     await enviarEmails([
-        {
-            para: EMAIL_DUEÑO,
-            ...emailPedidoNuevo(pedido, origin),
-            responderA: cliente.email,
-        },
+        avisoAlDueño,
         {
             para: cliente.email,
             ...emailPedidoRecibido(pedido, origin),

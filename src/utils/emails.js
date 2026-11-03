@@ -79,20 +79,30 @@ export function emailPedidoPagado(pedido, origen) {
 }
 
 /**
- * Para el dueño, apenas entra un pedido que no es de MercadoPago (esos avisan
- * al aprobarse el pago): queda pendiente hasta que lo confirme en el admin.
+ * Para el dueño, apenas entra un pedido. Fuera de MercadoPago queda pendiente
+ * hasta que lo confirme en el admin. Con MercadoPago el cliente recien se fue
+ * a pagar: si paga llega otro mail (emailPedidoPagado), y si no, el dueño ya
+ * sabe a quien escribirle.
  */
 export function emailPedidoNuevo(pedido, origen) {
     const medio = labelDelMedio(pedido);
     const entrega = ENTREGAS.find(
         (e) => e.id === pedido.cliente.entrega
     )?.label;
+    const mercadoPago = pedido.medio_pago === "mercadopago";
 
     return armarEmail({
-        asunto: `Nuevo pedido por confirmar · ${pedido.cliente.nombre}`,
+        asunto: mercadoPago
+            ? `Pedido con MercadoPago, todavía sin pagar · ${pedido.cliente.nombre}`
+            : `Nuevo pedido por confirmar · ${pedido.cliente.nombre}`,
         etiqueta: `Pedido #${numeroDePedido(pedido)}`,
         titulo: "Nuevo pedido",
-        parrafos: DATOS_DE_PAGO[pedido.medio_pago]
+        parrafos: mercadoPago
+            ? [
+                  `${pedido.cliente.nombre} empezó un pedido y se fue a pagar con MercadoPago.`,
+                  "Si paga, te llega otro mail con el pago aprobado. Si no te llega, escribile por WhatsApp desde el admin.",
+              ]
+            : DATOS_DE_PAGO[pedido.medio_pago]
             ? [
                   `${pedido.cliente.nombre} hizo un pedido y va a pagar con ${medio}.`,
                   "Te llega otro mail cuando suba el comprobante.",
